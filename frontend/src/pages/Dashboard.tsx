@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext'
 export default function Dashboard() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
-  const [profile, setProfile] = useState({
+  const [profile] = useState({
     walletBalance: 0,
     totalEarned: 0,
     adsWatched: 0,
