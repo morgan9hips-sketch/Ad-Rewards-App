@@ -1,0 +1,75 @@
+import { useNavigate } from 'react-router-dom'
+import Button from '../components/Button'
+import Card from '../components/Card'
+import Logo from '../components/Logo'
+
+export default function Home() {
+  const navigate = useNavigate()
+
+  return (
+    <div className="min-h-screen bg-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <div className="flex justify-center mb-6">
+            <Logo size="lg" />
+          </div>
+          <h1 className="text-5xl font-bold text-white mb-4">
+            Watch Ads, Earn Real Money
+          </h1>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+            Turn your time into rewards. Watch video ads, complete tasks, and get paid through PayPal.
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto mb-12">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" onClick={() => navigate('/login')}>
+              Get Started
+            </Button>
+            <Button size="lg" variant="secondary" onClick={() => navigate('/login')}>
+              Sign In
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <Card>
+            <div className="text-center">
+              <div className="text-5xl mb-4">📺</div>
+              <h3 className="text-xl font-bold text-white mb-2">Watch Ads</h3>
+              <p className="text-gray-400">
+                Watch engaging video ads from our partners and earn money for every completed view.
+              </p>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="text-center">
+              <div className="text-5xl mb-4">💰</div>
+              <h3 className="text-xl font-bold text-white mb-2">Earn Rewards</h3>
+              <p className="text-gray-400">
+                Build your balance with every ad watched. Track your earnings in real-time.
+              </p>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="text-center">
+              <div className="text-5xl mb-4">🎯</div>
+              <h3 className="text-xl font-bold text-white mb-2">Get Paid</h3>
+              <p className="text-gray-400">
+                Withdraw your earnings via PayPal once you reach the minimum threshold.
+              </p>
+            </div>
+          </Card>
+        </div>
+
+        <div className="mt-12 text-center">
+          <p className="text-gray-500 text-sm">
+            Safe, secure, and transparent. No hidden fees.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}

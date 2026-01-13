@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserProfile {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  email            String   @unique
+  name             String?
+  country          String?
+  paypalEmail      String?
+  walletBalance    Int      @default(0)
+  totalEarned      Int      @default(0)
+  adsWatched       Int      @default(0)
+  tier             String   @default("Bronze")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  adViews          AdView[]
+  withdrawals      Withdrawal[]
+  badges           UserBadge[]
+  
+  @@map("user_profiles")
+}
+
+model Ad {
+  id                Int      @id @default(autoincrement())
+  title             String
+  description       String?
+  videoUrl          String?
+  durationSeconds   Int
+  rewardCents       Int
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  views             AdView[]
+  
+  @@map("ads")
+}
+
+model AdView {
+  id                String   @id @default(uuid())
+  userId            String
+  user              UserProfile @relation(fields: [userId], references: [userId])
+  adId              Int
+  ad                Ad       @relation(fields: [adId], references: [id])
+  watchedSeconds    Int
+  completed         Boolean  @default(false)
+  rewardCents       Int
+  createdAt         DateTime @default(now())
+  
+  @@map("ad_views")
+  @@index([userId])
+  @@index([adId])
+}
+
+model Withdrawal {
+  id           String   @id @default(uuid())
+  userId       String
+  user         UserProfile @relation(fields: [userId], references: [userId])
+  amount       Int
+  method       String
+  status       String
+  paypalEmail  String
+  transactionId String?
+  createdAt    DateTime @default(now())
+  completedAt  DateTime?
+  
+  @@map("withdrawals")
+  @@index([userId])
+}
+
+model Badge {
+  id           String   @id @default(uuid())
+  name         String   @unique
+  description  String
+  icon         String
+  requirement  Json
+  rewardCents  Int
+  
+  userBadges   UserBadge[]
+  
+  @@map("badges")
+}
+
+model UserBadge {
+  id        String   @id @default(uuid())
+  userId    String
+  user      UserProfile @relation(fields: [userId], references: [userId])
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+  earnedAt  DateTime @default(now())
+  
+  @@map("user_badges")
+  @@unique([userId, badgeId])
+}
