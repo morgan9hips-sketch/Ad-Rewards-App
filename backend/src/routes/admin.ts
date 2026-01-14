@@ -9,11 +9,39 @@ const prisma = new PrismaClient()
 
 const USER_REVENUE_SHARE = parseFloat(process.env.USER_REVENUE_SHARE || '0.85')
 
-// Middleware to check admin access (simplified - should be replaced with proper admin auth)
-function requireAdmin(req: AuthRequest, res: any, next: any) {
-  // TODO: Implement proper admin authentication
-  // For now, just pass through - should check if user has admin role
-  next()
+// Middleware to check admin access
+// TODO: Implement proper admin role checking
+// For now, this is a placeholder that should verify:
+// 1. User is authenticated (already done by authenticate middleware)
+// 2. User has admin role in database
+// 3. Consider using a separate admin_users table or role field
+async function requireAdmin(req: AuthRequest, res: any, next: any) {
+  try {
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' })
+    }
+
+    // TODO: Check if user has admin privileges
+    // Example implementation:
+    // const user = await prisma.userProfile.findUnique({
+    //   where: { userId },
+    //   select: { role: true }
+    // })
+    // 
+    // if (user?.role !== 'admin') {
+    //   return res.status(403).json({ error: 'Admin access required' })
+    // }
+
+    // TEMPORARY: Allow all authenticated users
+    // SECURITY: Replace this with proper admin role checking before production
+    console.warn('⚠️  WARNING: Admin routes are not properly secured. Implement role-based access control.')
+    
+    next()
+  } catch (error) {
+    console.error('Error in admin middleware:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
 }
 
 /**

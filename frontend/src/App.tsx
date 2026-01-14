@@ -14,6 +14,7 @@ import Dashboard from './pages/Dashboard'
 import Ads from './pages/Ads'
 import WatchAd from './pages/WatchAd'
 import Settings from './pages/Settings'
+import Withdrawals from './pages/Withdrawals'
 import Leaderboard from './pages/Leaderboard'
 import Badges from './pages/Badges'
 import AdminPanel from './pages/AdminPanel'
@@ -91,7 +92,7 @@ function AppContent() {
           path="/withdrawals"
           element={
             <ProtectedRoute>
-              <Settings />
+              <Withdrawals />
             </ProtectedRoute>
           }
         />

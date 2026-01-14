@@ -210,7 +210,11 @@ export default function Dashboard() {
         <Card className="mb-6">
           <h2 className="text-xl font-bold text-white mb-4">Recent Transactions</h2>
           <div className="space-y-2">
-            {transactions.map((tx) => (
+            {transactions.map((tx) => {
+              const coinsChange = BigInt(tx.coinsChange)
+              const cashChange = parseFloat(tx.cashChangeUsd)
+              
+              return (
               <div key={tx.id} className="flex justify-between items-center py-2 border-b border-gray-800">
                 <div>
                   <p className="text-white text-sm">{tx.description || tx.type}</p>
@@ -219,19 +223,19 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <div className="text-right">
-                  {BigInt(tx.coinsChange) !== BigInt(0) && (
-                    <p className={`text-sm font-semibold ${BigInt(tx.coinsChange) > 0 ? 'text-yellow-500' : 'text-gray-400'}`}>
-                      {BigInt(tx.coinsChange) > 0 ? '+' : ''}{tx.coinsChange} coins
+                  {coinsChange !== BigInt(0) && (
+                    <p className={`text-sm font-semibold ${coinsChange > 0 ? 'text-yellow-500' : 'text-gray-400'}`}>
+                      {coinsChange > 0 ? '+' : ''}{tx.coinsChange} coins
                     </p>
                   )}
-                  {parseFloat(tx.cashChangeUsd) !== 0 && (
-                    <p className={`text-sm font-semibold ${parseFloat(tx.cashChangeUsd) > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {parseFloat(tx.cashChangeUsd) > 0 ? '+' : ''}${parseFloat(tx.cashChangeUsd).toFixed(2)}
+                  {cashChange !== 0 && (
+                    <p className={`text-sm font-semibold ${cashChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {cashChange > 0 ? '+' : ''}${Math.abs(cashChange).toFixed(2)}
                     </p>
                   )}
                 </div>
               </div>
-            ))}
+            )})}
           </div>
           <Button 
             fullWidth 
