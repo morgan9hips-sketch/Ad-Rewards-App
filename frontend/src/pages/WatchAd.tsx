@@ -4,14 +4,18 @@ import Card from '../components/Card'
 import Button from '../components/Button'
 import ProgressBar from '../components/ProgressBar'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function WatchAd() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { session } = useAuth()
   const [loading, setLoading] = useState(true)
   const [watching, setWatching] = useState(false)
   const [progress, setProgress] = useState(0)
   const [completed, setCompleted] = useState(false)
+  const [coinsEarned, setCoinsEarned] = useState(0)
+  const [totalCoins, setTotalCoins] = useState(0)
 
   const ad = {
     id: Number(id),
@@ -31,12 +35,42 @@ export default function WatchAd() {
       setProgress((prev) => {
         if (prev >= ad.durationSeconds) {
           clearInterval(interval)
-          setCompleted(true)
+          completeAdView()
           return ad.durationSeconds
         }
         return prev + 1
       })
     }, 1000)
+  }
+
+  const completeAdView = async () => {
+    try {
+      const token = session?.access_token
+      if (!token) return
+
+      const res = await fetch('http://localhost:4000/api/ads/complete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          adUnitId: 'demo-ad-unit',
+          watchedSeconds: ad.durationSeconds,
+          admobImpressionId: `demo-${Date.now()}`,
+        }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setCoinsEarned(data.coinsEarned)
+        setTotalCoins(parseInt(data.totalCoins))
+      }
+    } catch (error) {
+      console.error('Error completing ad:', error)
+    } finally {
+      setCompleted(true)
+    }
   }
 
   const claimReward = () => {
@@ -91,15 +125,22 @@ export default function WatchAd() {
         <Card>
           <div className="text-center">
             <h2 className="text-2xl font-bold text-white mb-2">
-              Congratulations! 🎉
+              🎉 You earned {coinsEarned} Coins!
             </h2>
-            <p className="text-gray-400 mb-4">
-              You've earned <span className="text-green-500 font-bold">${(ad.rewardCents / 100).toFixed(2)}</span>
+            <div className="bg-gray-800 p-4 rounded-lg my-4">
+              <p className="text-gray-400 text-sm mb-2">Total Coins:</p>
+              <p className="text-4xl font-bold text-yellow-500">
+                {totalCoins.toLocaleString()} 🪙
+              </p>
+            </div>
+            <p className="text-gray-400 text-sm mb-4">
+              💡 Your coins will convert to cash when we receive ad revenue (monthly)
             </p>
-            <Button onClick={claimReward}>Claim Reward</Button>
+            <Button onClick={claimReward}>Continue to Dashboard</Button>
           </div>
         </Card>
       )}
     </div>
   )
 }
+
