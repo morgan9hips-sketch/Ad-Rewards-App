@@ -14,9 +14,12 @@ import Dashboard from './pages/Dashboard'
 import Ads from './pages/Ads'
 import WatchAd from './pages/WatchAd'
 import Settings from './pages/Settings'
+import Withdrawals from './pages/Withdrawals'
 import Leaderboard from './pages/Leaderboard'
 import Badges from './pages/Badges'
 import AdminPanel from './pages/AdminPanel'
+import AdminConversions from './pages/AdminConversions'
+import Transactions from './pages/Transactions'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 
@@ -78,6 +81,22 @@ function AppContent() {
           }
         />
         <Route
+          path="/transactions"
+          element={
+            <ProtectedRoute>
+              <Transactions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/withdrawals"
+          element={
+            <ProtectedRoute>
+              <Withdrawals />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/settings"
           element={
             <ProtectedRoute>
@@ -106,6 +125,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <AdminPanel />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/conversions"
+          element={
+            <ProtectedRoute>
+              <AdminConversions />
             </ProtectedRoute>
           }
         />

@@ -8,22 +8,36 @@ datasource db {
 }
 
 model UserProfile {
-  id               String   @id @default(uuid())
-  userId           String   @unique
-  email            String   @unique
-  name             String?
-  country          String?
-  paypalEmail      String?
-  walletBalance    Int      @default(0)
-  totalEarned      Int      @default(0)
-  adsWatched       Int      @default(0)
-  tier             String   @default("Bronze")
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                     String   @id @default(uuid())
+  userId                 String   @unique
+  email                  String   @unique
+  name                   String?
+  country                String?
+  countryCode            String?  @map("country_code")
+  preferredCurrency      String   @default("USD") @map("preferred_currency")
+  paypalEmail            String?  @map("paypal_email")
   
-  adViews          AdView[]
-  withdrawals      Withdrawal[]
-  badges           UserBadge[]
+  // Legacy fields (kept for backward compatibility)
+  walletBalance          Int      @default(0) @map("wallet_balance")
+  totalEarned            Int      @default(0) @map("total_earned")
+  
+  // New two-wallet system fields
+  coinsBalance           BigInt   @default(0) @map("coins_balance")
+  cashBalanceUsd         Decimal  @default(0.0000) @db.Decimal(12, 4) @map("cash_balance_usd")
+  totalCoinsEarned       BigInt   @default(0) @map("total_coins_earned")
+  totalCashEarnedUsd     Decimal  @default(0.0000) @db.Decimal(12, 4) @map("total_cash_earned_usd")
+  totalWithdrawnUsd      Decimal  @default(0.0000) @db.Decimal(12, 4) @map("total_withdrawn_usd")
+  
+  adsWatched             Int      @default(0) @map("ads_watched")
+  tier                   String   @default("Bronze")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+  
+  adViews                AdView[]
+  withdrawals            Withdrawal[]
+  badges                 UserBadge[]
+  transactions           Transaction[]
+  conversionDetails      ConversionDetail[]
   
   @@map("user_profiles")
 }
@@ -45,35 +59,53 @@ model Ad {
 }
 
 model AdView {
-  id                String   @id @default(uuid())
-  userId            String
-  user              UserProfile @relation(fields: [userId], references: [userId])
-  adId              Int
-  ad                Ad       @relation(fields: [adId], references: [id])
-  watchedSeconds    Int
-  completed         Boolean  @default(false)
-  rewardCents       Int
-  createdAt         DateTime @default(now())
+  id                 String   @id @default(uuid())
+  userId             String   @map("user_id")
+  user               UserProfile @relation(fields: [userId], references: [userId])
+  adId               Int?     @map("ad_id")
+  ad                 Ad?      @relation(fields: [adId], references: [id])
+  adUnitId           String?  @map("ad_unit_id")
+  watchedSeconds     Int      @map("watched_seconds")
+  completed          Boolean  @default(false)
+  rewardCents        Int      @map("reward_cents")
+  coinsEarned        Int      @default(0) @map("coins_earned")
+  countryCode        String?  @map("country_code")
+  ipAddress          String?  @map("ip_address")
+  userAgent          String?  @map("user_agent")
+  admobImpressionId  String?  @map("admob_impression_id")
+  conversionBatchId  Int?     @map("conversion_batch_id")
+  converted          Boolean  @default(false)
+  createdAt          DateTime @default(now()) @map("created_at")
+  viewedAt           DateTime @default(now()) @map("viewed_at")
   
   @@map("ad_views")
   @@index([userId])
   @@index([adId])
+  @@index([converted])
 }
 
 model Withdrawal {
-  id           String   @id @default(uuid())
-  userId       String
-  user         UserProfile @relation(fields: [userId], references: [userId])
-  amount       Int
-  method       String
-  status       String
-  paypalEmail  String
-  transactionId String?
-  createdAt    DateTime @default(now())
-  completedAt  DateTime?
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  user            UserProfile @relation(fields: [userId], references: [userId])
+  amountUsd       Decimal   @db.Decimal(12, 4) @map("amount_usd")
+  amountLocal     Decimal?  @db.Decimal(12, 4) @map("amount_local")
+  currencyCode    String?   @map("currency_code")
+  exchangeRate    Decimal?  @db.Decimal(10, 6) @map("exchange_rate")
+  method          String
+  status          String
+  paypalEmail     String    @map("paypal_email")
+  paypalTransactionId String? @map("paypal_transaction_id")
+  transactionId   String?   @map("transaction_id")
+  requestedAt     DateTime  @default(now()) @map("requested_at")
+  processedAt     DateTime? @map("processed_at")
+  completedAt     DateTime? @map("completed_at")
+  failureReason   String?   @map("failure_reason")
+  createdAt       DateTime  @default(now()) @map("created_at")
   
   @@map("withdrawals")
   @@index([userId])
+  @@index([status])
 }
 
 model Badge {
@@ -91,12 +123,96 @@ model Badge {
 
 model UserBadge {
   id        String   @id @default(uuid())
-  userId    String
+  userId    String   @map("user_id")
   user      UserProfile @relation(fields: [userId], references: [userId])
-  badgeId   String
+  badgeId   String   @map("badge_id")
   badge     Badge    @relation(fields: [badgeId], references: [id])
-  earnedAt  DateTime @default(now())
+  earnedAt  DateTime @default(now()) @map("earned_at")
   
   @@map("user_badges")
   @@unique([userId, badgeId])
+}
+
+model Transaction {
+  id                   Int      @id @default(autoincrement())
+  userId               String   @map("user_id")
+  user                 UserProfile @relation(fields: [userId], references: [userId])
+  type                 String
+  coinsChange          BigInt   @default(0) @map("coins_change")
+  cashChangeUsd        Decimal  @default(0.0000) @db.Decimal(12, 4) @map("cash_change_usd")
+  coinsBalanceAfter    BigInt?  @map("coins_balance_after")
+  cashBalanceAfterUsd  Decimal? @db.Decimal(12, 4) @map("cash_balance_after_usd")
+  description          String?
+  referenceId          Int?     @map("reference_id")
+  referenceType        String?  @map("reference_type")
+  createdAt            DateTime @default(now()) @map("created_at")
+  
+  @@map("transactions")
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model CoinConversion {
+  id                    Int      @id @default(autoincrement())
+  conversionDate        DateTime @map("conversion_date") @db.Date
+  admobRevenueUsd       Decimal  @db.Decimal(12, 4) @map("admob_revenue_usd")
+  userRevenueShare      Decimal  @default(0.8500) @db.Decimal(5, 4) @map("user_revenue_share")
+  totalUserPayoutUsd    Decimal? @db.Decimal(12, 4) @map("total_user_payout_usd")
+  totalCoinsConverted   BigInt?  @map("total_coins_converted")
+  conversionRateUsdPerCoin Decimal? @db.Decimal(12, 8) @map("conversion_rate_usd_per_coin")
+  usersAffected         Int?     @map("users_affected")
+  status                String   @default("pending")
+  processedAt           DateTime? @map("processed_at")
+  notes                 String?
+  createdAt             DateTime @default(now()) @map("created_at")
+  
+  conversionDetails     ConversionDetail[]
+  
+  @@map("coin_conversions")
+  @@index([conversionDate])
+  @@index([status])
+}
+
+model ConversionDetail {
+  id                    Int      @id @default(autoincrement())
+  conversionId          Int      @map("conversion_id")
+  conversion            CoinConversion @relation(fields: [conversionId], references: [id])
+  userId                String   @map("user_id")
+  user                  UserProfile @relation(fields: [userId], references: [userId])
+  coinsConverted        BigInt   @map("coins_converted")
+  cashReceivedUsd       Decimal  @db.Decimal(12, 4) @map("cash_received_usd")
+  conversionRateUsed    Decimal  @db.Decimal(12, 8) @map("conversion_rate_used")
+  createdAt             DateTime @default(now()) @map("created_at")
+  
+  @@map("conversion_details")
+  @@index([conversionId])
+  @@index([userId])
+}
+
+model ExchangeRate {
+  id              Int      @id @default(autoincrement())
+  baseCurrency    String   @default("USD") @map("base_currency")
+  targetCurrency  String   @map("target_currency")
+  rate            Decimal  @db.Decimal(10, 6)
+  date            DateTime @db.Date
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  @@map("exchange_rates")
+  @@unique([targetCurrency, date])
+  @@index([targetCurrency])
+  @@index([date])
+}
+
+model AdminAction {
+  id          Int      @id @default(autoincrement())
+  adminUserId String?  @map("admin_user_id")
+  actionType  String   @map("action_type")
+  details     Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  @@map("admin_actions")
+  @@index([adminUserId])
+  @@index([actionType])
+  @@index([createdAt])
 }

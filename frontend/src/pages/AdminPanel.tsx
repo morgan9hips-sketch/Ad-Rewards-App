@@ -1,6 +1,9 @@
+import { useNavigate } from 'react-router-dom'
 import Card from '../components/Card'
 
 export default function AdminPanel() {
+  const navigate = useNavigate()
+
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
       <h1 className="text-3xl font-bold text-white mb-6">Admin Panel 🔐</h1>
@@ -44,6 +47,12 @@ export default function AdminPanel() {
       <Card>
         <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
         <div className="space-y-2">
+          <button 
+            onClick={() => navigate('/admin/conversions')}
+            className="w-full text-left px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-white transition-colors"
+          >
+            💰 Process Coin Conversions
+          </button>
           <button className="w-full text-left px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-white transition-colors">
             📝 Create New Ad
           </button>

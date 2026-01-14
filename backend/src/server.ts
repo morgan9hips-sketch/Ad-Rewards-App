@@ -9,6 +9,7 @@ import adsRoutes from './routes/ads.js'
 import withdrawalRoutes from './routes/withdrawals.js'
 import leaderboardRoutes from './routes/leaderboard.js'
 import badgesRoutes from './routes/badges.js'
+import adminRoutes from './routes/admin.js'
 
 dotenv.config()
 
@@ -35,6 +36,7 @@ app.use('/api/user', authenticate, userRoutes)
 app.use('/api/ads', authenticate, adsRoutes)
 app.use('/api/withdrawals', authenticate, withdrawalRoutes)
 app.use('/api/badges', authenticate, badgesRoutes)
+app.use('/api/admin', authenticate, adminRoutes)
 
 // Error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
