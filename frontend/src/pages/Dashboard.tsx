@@ -5,6 +5,7 @@ import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 import EarningsChart from '../components/EarningsChart'
 import TierProgress from '../components/TierProgress'
+import CurrencyDisplay from '../components/CurrencyDisplay'
 import { useAuth } from '../contexts/AuthContext'
 
 interface UserBalance {
@@ -147,12 +148,12 @@ export default function Dashboard() {
         <Card>
           <div className="p-4">
             <h2 className="text-xl font-bold text-white mb-3">💵 Cash Wallet</h2>
-            <p className="text-4xl font-bold text-green-500 mb-1">
-              {balance ? formatCurrency(balance.cashLocal, balance.currency) : '$0.00'}
-            </p>
-            <p className="text-sm text-gray-400 mb-3">
-              ({balance ? `$${parseFloat(balance.cashUSD).toFixed(2)} USD` : '$0.00 USD'})
-            </p>
+            <CurrencyDisplay 
+              amountUsd={balance ? parseFloat(balance.cashUsd) : 0}
+              showBoth={true}
+              size="lg"
+              className="mb-3"
+            />
             
             <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
               <p className="text-xs text-gray-300 mb-1">Available to withdraw</p>
@@ -162,7 +163,7 @@ export default function Dashboard() {
             <Button 
               fullWidth 
               onClick={() => navigate('/withdrawals')}
-              disabled={balance ? parseFloat(balance.cashUSD) < 10 : true}
+              disabled={balance ? parseFloat(balance.cashUsd) < 10 : true}
             >
               Withdraw via PayPal →
             </Button>
