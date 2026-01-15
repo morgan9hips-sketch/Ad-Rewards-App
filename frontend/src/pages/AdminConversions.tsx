@@ -67,6 +67,17 @@ export default function AdminConversions() {
     notes: '',
   })
 
+  // Helper to calculate user share (85%)
+  const calculateUserShare = (revenue: string | number): string => {
+    const amount = typeof revenue === 'string' ? parseFloat(revenue) : revenue
+    return (amount * 0.85).toFixed(2)
+  }
+
+  // Helper to calculate total revenue
+  const calculateTotalRevenue = (): string => {
+    return revenues.reduce((sum, r) => sum + (parseFloat(r.admobRevenueUsd) || 0), 0).toFixed(2)
+  }
+
   useEffect(() => {
     fetchData()
   }, [])
@@ -381,7 +392,7 @@ export default function AdminConversions() {
                       />
                       {rev.admobRevenueUsd && (
                         <p className="text-xs text-gray-400 mt-1">
-                          User share (85%): ${(parseFloat(rev.admobRevenueUsd) * 0.85).toFixed(2)}
+                          User share (85%): ${calculateUserShare(rev.admobRevenueUsd)}
                         </p>
                       )}
                     </div>
@@ -399,7 +410,7 @@ export default function AdminConversions() {
               </div>
 
               <div className="mt-2 text-sm text-gray-400">
-                Total Revenue: ${revenues.reduce((sum, r) => sum + (parseFloat(r.admobRevenueUsd) || 0), 0).toFixed(2)}
+                Total Revenue: ${calculateTotalRevenue()}
               </div>
             </div>
 
@@ -443,7 +454,7 @@ export default function AdminConversions() {
             />
             {formData.admobRevenue && (
               <p className="text-sm text-gray-400 mt-1">
-                User payout (85%): ${(parseFloat(formData.admobRevenue) * 0.85).toFixed(2)}
+                User payout (85%): ${calculateUserShare(formData.admobRevenue)}
               </p>
             )}
           </div>

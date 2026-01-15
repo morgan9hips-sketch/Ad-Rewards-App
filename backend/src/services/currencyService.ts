@@ -19,6 +19,10 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
   PT: 'EUR', SK: 'EUR', SI: 'EUR', ES: 'EUR',
 }
 
+// Supported currencies with their full names
+// USD - US Dollar, ZAR - South African Rand, EUR - Euro, 
+// GBP - British Pound, CAD - Canadian Dollar, AUD - Australian Dollar,
+// INR - Indian Rupee, NGN - Nigerian Naira, BRL - Brazilian Real, MXN - Mexican Peso
 export const SUPPORTED_CURRENCIES = ['USD', 'ZAR', 'EUR', 'GBP', 'CAD', 'AUD', 'INR', 'NGN', 'BRL', 'MXN']
 
 // Currency formatting configuration

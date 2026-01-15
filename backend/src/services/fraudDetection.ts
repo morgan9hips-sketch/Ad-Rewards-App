@@ -190,22 +190,28 @@ export async function getFraudStats(): Promise<{
   highVpnSuspicionUsers: number
   multiCountryUsers: number
 }> {
-  const [suspicious, highVpn, multiCountry] = await Promise.all([
+  const [suspicious, highVpn] = await Promise.all([
     prisma.userProfile.count({
       where: { suspiciousActivity: true }
     }),
     prisma.userProfile.count({
       where: { vpnSuspicionScore: { gte: VPN_SUSPICION_THRESHOLD } }
-    }),
-    prisma.userProfile.count({
-      where: {
-        revenueCountries: {
-          // Has more than 3 countries
-          isEmpty: false
-        }
-      }
     })
   ])
+
+  // Count users with multiple countries (3 or more)
+  const allUsers = await prisma.userProfile.findMany({
+    where: {
+      revenueCountries: {
+        isEmpty: false
+      }
+    },
+    select: {
+      revenueCountries: true
+    }
+  })
+
+  const multiCountry = allUsers.filter(u => u.revenueCountries.length >= 3).length
 
   return {
     totalSuspiciousUsers: suspicious,
@@ -220,45 +226,42 @@ export async function getFraudStats(): Promise<{
 export async function getSuspiciousUsers(page: number = 1, perPage: number = 50) {
   const skip = (page - 1) * perPage
 
-  const [users, total] = await Promise.all([
-    prisma.userProfile.findMany({
-      where: {
-        OR: [
-          { suspiciousActivity: true },
-          { vpnSuspicionScore: { gte: 5 } },
-          { revenueCountries: { isEmpty: false } }
-        ]
-      },
-      select: {
-        userId: true,
-        email: true,
-        name: true,
-        revenueCountry: true,
-        revenueCountries: true,
-        vpnSuspicionScore: true,
-        suspiciousActivity: true,
-        lastIpAddress: true,
-        lastDetectedCountry: true,
-        adsWatched: true,
-        createdAt: true
-      },
-      orderBy: [
-        { suspiciousActivity: 'desc' },
-        { vpnSuspicionScore: 'desc' }
-      ],
-      skip,
-      take: perPage
-    }),
-    prisma.userProfile.count({
-      where: {
-        OR: [
-          { suspiciousActivity: true },
-          { vpnSuspicionScore: { gte: 5 } },
-          { revenueCountries: { isEmpty: false } }
-        ]
-      }
-    })
-  ])
+  // Find users with multiple countries or high suspicion
+  const allUsers = await prisma.userProfile.findMany({
+    where: {
+      OR: [
+        { suspiciousActivity: true },
+        { vpnSuspicionScore: { gte: 5 } }
+      ]
+    },
+    select: {
+      userId: true,
+      email: true,
+      name: true,
+      revenueCountry: true,
+      revenueCountries: true,
+      vpnSuspicionScore: true,
+      suspiciousActivity: true,
+      lastIpAddress: true,
+      lastDetectedCountry: true,
+      adsWatched: true,
+      createdAt: true
+    },
+    orderBy: [
+      { suspiciousActivity: 'desc' },
+      { vpnSuspicionScore: 'desc' }
+    ]
+  })
+
+  // Filter for users with 3+ countries or already flagged
+  const filtered = allUsers.filter(u => 
+    u.suspiciousActivity || 
+    u.vpnSuspicionScore >= 5 || 
+    u.revenueCountries.length >= 3
+  )
+
+  const total = filtered.length
+  const users = filtered.slice(skip, skip + perPage)
 
   return {
     users,

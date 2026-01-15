@@ -52,7 +52,7 @@ export default function Settings() {
         body: JSON.stringify({
           paypalEmail,
           country,
-          preferredCurrency: autoDetectCurrency ? preferredCurrency : preferredCurrency,
+          preferredCurrency,
           autoDetectCurrency
         })
       })
