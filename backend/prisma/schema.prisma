@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
 model UserProfile {
   id                     String   @id @default(uuid())
   userId                 String   @unique
@@ -30,6 +36,7 @@ model UserProfile {
   
   adsWatched             Int      @default(0) @map("ads_watched")
   tier                   String   @default("Bronze")
+  role                   UserRole @default(USER)
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
   
@@ -38,6 +45,7 @@ model UserProfile {
   badges                 UserBadge[]
   transactions           Transaction[]
   conversionDetails      ConversionDetail[]
+  adminActions           AdminAction[] @relation("AdminActions")
   
   @@map("user_profiles")
 }
@@ -206,13 +214,17 @@ model ExchangeRate {
 
 model AdminAction {
   id          Int      @id @default(autoincrement())
-  adminUserId String?  @map("admin_user_id")
-  actionType  String   @map("action_type")
-  details     Json?
+  adminId     String   @map("admin_id")
+  admin       UserProfile @relation("AdminActions", fields: [adminId], references: [userId])
+  action      String   // "PROCESS_CONVERSION", "APPROVE_WITHDRAWAL", etc.
+  targetType  String?  @map("target_type")  // "USER", "CONVERSION", "WITHDRAWAL"
+  targetId    Int?     @map("target_id")
+  metadata    Json?    // Additional data about the action
+  ipAddress   String?  @map("ip_address")
   createdAt   DateTime @default(now()) @map("created_at")
   
   @@map("admin_actions")
-  @@index([adminUserId])
-  @@index([actionType])
+  @@index([adminId])
+  @@index([action])
   @@index([createdAt])
 }
