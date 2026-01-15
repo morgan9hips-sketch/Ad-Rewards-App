@@ -53,6 +53,12 @@ export default function AdminPanel() {
           >
             💰 Process Coin Conversions
           </button>
+          <button 
+            onClick={() => navigate('/admin/logs')}
+            className="w-full text-left px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-white transition-colors"
+          >
+            📋 View Admin Logs
+          </button>
           <button className="w-full text-left px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-white transition-colors">
             📝 Create New Ad
           </button>

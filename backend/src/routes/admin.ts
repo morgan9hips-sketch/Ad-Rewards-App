@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import { PrismaClient, Prisma } from '@prisma/client'
 import { AuthRequest } from '../middleware/auth.js'
+import { requireAdmin } from '../middleware/requireAdmin.js'
+import { logAdminAction } from '../middleware/logAdminAction.js'
 import { convertCoinsToUSD } from '../services/transactionService.js'
 import { updateExchangeRates, getExchangeRate } from '../services/currencyService.js'
 
@@ -9,46 +11,14 @@ const prisma = new PrismaClient()
 
 const USER_REVENUE_SHARE = parseFloat(process.env.USER_REVENUE_SHARE || '0.85')
 
-// Middleware to check admin access
-// TODO: Implement proper admin role checking
-// For now, this is a placeholder that should verify:
-// 1. User is authenticated (already done by authenticate middleware)
-// 2. User has admin role in database
-// 3. Consider using a separate admin_users table or role field
-async function requireAdmin(req: AuthRequest, res: any, next: any) {
-  try {
-    const userId = req.user?.id
-    if (!userId) {
-      return res.status(401).json({ error: 'Authentication required' })
-    }
-
-    // TODO: Check if user has admin privileges
-    // Example implementation:
-    // const user = await prisma.userProfile.findUnique({
-    //   where: { userId },
-    //   select: { role: true }
-    // })
-    // 
-    // if (user?.role !== 'admin') {
-    //   return res.status(403).json({ error: 'Admin access required' })
-    // }
-
-    // TEMPORARY: Allow all authenticated users
-    // SECURITY: Replace this with proper admin role checking before production
-    console.warn('⚠️  WARNING: Admin routes are not properly secured. Implement role-based access control.')
-    
-    next()
-  } catch (error) {
-    console.error('Error in admin middleware:', error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
-}
+// Apply admin middleware to ALL admin routes
+router.use(requireAdmin)
 
 /**
  * Process monthly coin-to-cash conversion
  * This is the critical conversion endpoint that must be transactional
  */
-router.post('/process-conversion', requireAdmin, async (req: AuthRequest, res) => {
+router.post('/process-conversion', logAdminAction('PROCESS_CONVERSION'), async (req: AuthRequest, res) => {
   try {
     const { admobRevenue, month, notes } = req.body
     const adminUserId = req.user!.id
@@ -157,9 +127,11 @@ router.post('/process-conversion', requireAdmin, async (req: AuthRequest, res) =
       // Log admin action
       await tx.adminAction.create({
         data: {
-          adminUserId,
-          actionType: 'coin_conversion',
-          details: {
+          adminId: adminUserId,
+          action: 'coin_conversion',
+          targetType: 'CONVERSION',
+          targetId: conversion.id,
+          metadata: {
             conversionId: conversion.id,
             admobRevenue: admobRevenueUsd,
             totalCoins: totalCoins.toString(),
@@ -198,7 +170,7 @@ router.post('/process-conversion', requireAdmin, async (req: AuthRequest, res) =
 /**
  * Get conversion history
  */
-router.get('/conversions', requireAdmin, async (req: AuthRequest, res) => {
+router.get('/conversions', logAdminAction('VIEW_CONVERSION_HISTORY'), async (req: AuthRequest, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1
     const perPage = parseInt(req.query.perPage as string) || 20
@@ -233,7 +205,7 @@ router.get('/conversions', requireAdmin, async (req: AuthRequest, res) => {
 /**
  * Get conversion details for a specific conversion
  */
-router.get('/conversions/:id', requireAdmin, async (req: AuthRequest, res) => {
+router.get('/conversions/:id', logAdminAction('VIEW_CONVERSION_DETAILS'), async (req: AuthRequest, res) => {
   try {
     const conversionId = parseInt(req.params.id)
 
@@ -267,7 +239,7 @@ router.get('/conversions/:id', requireAdmin, async (req: AuthRequest, res) => {
 /**
  * Get platform statistics
  */
-router.get('/stats', requireAdmin, async (req: AuthRequest, res) => {
+router.get('/stats', logAdminAction('VIEW_STATS'), async (req: AuthRequest, res) => {
   try {
     // Get pending coins across all users
     const pendingCoinsResult = await prisma.userProfile.aggregate({
@@ -316,22 +288,11 @@ router.get('/stats', requireAdmin, async (req: AuthRequest, res) => {
 /**
  * Update exchange rates manually
  */
-router.post('/update-exchange-rates', requireAdmin, async (req: AuthRequest, res) => {
+router.post('/update-exchange-rates', logAdminAction('UPDATE_EXCHANGE_RATES'), async (req: AuthRequest, res) => {
   try {
     const adminUserId = req.user!.id
 
     await updateExchangeRates()
-
-    // Log admin action
-    await prisma.adminAction.create({
-      data: {
-        adminUserId,
-        actionType: 'update_exchange_rates',
-        details: {
-          timestamp: new Date().toISOString(),
-        },
-      },
-    })
 
     res.json({
       success: true,
@@ -362,6 +323,50 @@ router.get('/exchange-rates/:currency', async (req: AuthRequest, res) => {
   } catch (error) {
     console.error('Error fetching exchange rate:', error)
     res.status(500).json({ error: 'Failed to fetch exchange rate' })
+  }
+})
+
+/**
+ * Get admin action logs
+ */
+router.get('/logs', async (req: AuthRequest, res) => {
+  try {
+    const { page = 1, limit = 50, action, adminId } = req.query
+
+    const where: any = {}
+    if (action) where.action = action
+    if (adminId) where.adminId = adminId as string
+
+    const logs = await prisma.adminAction.findMany({
+      where,
+      include: {
+        admin: {
+          select: {
+            userId: true,
+            email: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (parseInt(page as string) - 1) * parseInt(limit as string),
+      take: parseInt(limit as string),
+    })
+
+    const total = await prisma.adminAction.count({ where })
+
+    res.json({
+      logs,
+      pagination: {
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        total,
+        pages: Math.ceil(total / parseInt(limit as string)),
+      },
+    })
+  } catch (error) {
+    console.error('Error fetching admin logs:', error)
+    res.status(500).json({ error: 'Failed to fetch admin logs' })
   }
 })
 
