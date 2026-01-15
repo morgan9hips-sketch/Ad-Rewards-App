@@ -90,20 +90,6 @@ export default function Dashboard() {
     { date: 'Sun', amount: 3.9 },
   ]
 
-  const formatCurrency = (amount: string, currency: string) => {
-    const symbols: Record<string, string> = {
-      USD: '$',
-      EUR: '€',
-      GBP: '£',
-      ZAR: 'R',
-      CAD: 'C$',
-      AUD: 'A$',
-      INR: '₹',
-      NGN: '₦',
-    }
-    return `${symbols[currency] || currency} ${parseFloat(amount).toFixed(2)}`
-  }
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -149,7 +135,7 @@ export default function Dashboard() {
           <div className="p-4">
             <h2 className="text-xl font-bold text-white mb-3">💵 Cash Wallet</h2>
             <CurrencyDisplay 
-              amountUsd={balance ? parseFloat(balance.cashUsd) : 0}
+              amountUsd={balance ? parseFloat(balance.cashUSD) : 0}
               showBoth={true}
               size="lg"
               className="mb-3"
@@ -163,7 +149,7 @@ export default function Dashboard() {
             <Button 
               fullWidth 
               onClick={() => navigate('/withdrawals')}
-              disabled={balance ? parseFloat(balance.cashUsd) < 10 : true}
+              disabled={balance ? parseFloat(balance.cashUSD) < 10 : true}
             >
               Withdraw via PayPal →
             </Button>

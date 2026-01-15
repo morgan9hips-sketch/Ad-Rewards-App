@@ -476,13 +476,6 @@ export default function AdminConversions() {
         </form>
         )}
       </Card>
-          </div>
-
-          <Button type="submit" fullWidth disabled={processing}>
-            {processing ? 'Processing...' : 'Process Conversion'}
-          </Button>
-        </form>
-      </Card>
 
       {/* Conversion History */}
       <Card>

@@ -12,7 +12,6 @@ export default function Settings() {
   const [preferredCurrency, setPreferredCurrency] = useState('USD')
   const [autoDetectCurrency, setAutoDetectCurrency] = useState(true)
   const [saved, setSaved] = useState(false)
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchProfile()
@@ -36,8 +35,6 @@ export default function Settings() {
       }
     } catch (error) {
       console.error('Error fetching profile:', error)
-    } finally {
-      setLoading(false)
     }
   }
 
