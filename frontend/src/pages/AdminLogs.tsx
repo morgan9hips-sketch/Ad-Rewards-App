@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import Card from '../components/Card'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { API_BASE_URL } from '../config/api'
 
 interface AdminLog {
   id: number
@@ -29,6 +30,7 @@ export default function AdminLogs() {
   const { session } = useAuth()
   const [logs, setLogs] = useState<AdminLog[]>([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
     limit: 50,
@@ -38,7 +40,7 @@ export default function AdminLogs() {
 
   useEffect(() => {
     fetchLogs()
-  }, [pagination.page])
+  }, [page])
 
   async function fetchLogs() {
     try {
@@ -47,7 +49,7 @@ export default function AdminLogs() {
       if (!token) return
 
       const response = await fetch(
-        `http://localhost:4000/api/admin/logs?page=${pagination.page}&limit=${pagination.limit}`,
+        `${API_BASE_URL}/api/admin/logs?page=${page}&limit=50`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -71,7 +73,7 @@ export default function AdminLogs() {
   }
 
   const handlePageChange = (newPage: number) => {
-    setPagination((prev) => ({ ...prev, page: newPage }))
+    setPage(newPage)
   }
 
   if (loading && logs.length === 0) {

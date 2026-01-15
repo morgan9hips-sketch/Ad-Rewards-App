@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import { API_BASE_URL } from '../config/api'
 
 type UserRole = 'USER' | 'ADMIN' | 'SUPER_ADMIN'
 
@@ -23,9 +24,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const fetchUserRole = async (userId: string, token: string) => {
+  const fetchUserRole = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:4000/api/user/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -44,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
       if (session?.user) {
-        const role = await fetchUserRole(session.user.id, session.access_token)
+        const role = await fetchUserRole(session.access_token)
         setUser({ ...session.user, role })
       } else {
         setUser(null)
@@ -57,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session)
       if (session?.user) {
-        const role = await fetchUserRole(session.user.id, session.access_token)
+        const role = await fetchUserRole(session.access_token)
         setUser({ ...session.user, role })
       } else {
         setUser(null)
