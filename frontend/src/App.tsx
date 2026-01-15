@@ -19,12 +19,13 @@ import Leaderboard from './pages/Leaderboard'
 import Badges from './pages/Badges'
 import AdminPanel from './pages/AdminPanel'
 import AdminConversions from './pages/AdminConversions'
+import AdminLogs from './pages/AdminLogs'
 import Transactions from './pages/Transactions'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth()
+function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode; requireAdmin?: boolean }) {
+  const { isAuthenticated, loading, user } = useAuth()
 
   if (loading) {
     return (
@@ -36,6 +37,25 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
+  }
+
+  if (requireAdmin && user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN') {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-black p-8 text-center">
+        <div className="max-w-md">
+          <h1 className="text-3xl font-bold text-red-600 mb-4">⛔ Access Denied</h1>
+          <p className="text-gray-300 mb-6">
+            You do not have permission to access this page. Admin privileges are required.
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            ← Go Back
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return <>{children}</>
@@ -123,7 +143,7 @@ function AppContent() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireAdmin>
               <AdminPanel />
             </ProtectedRoute>
           }
@@ -131,8 +151,16 @@ function AppContent() {
         <Route
           path="/admin/conversions"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireAdmin>
               <AdminConversions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/logs"
+          element={
+            <ProtectedRoute requireAdmin>
+              <AdminLogs />
             </ProtectedRoute>
           }
         />
