@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/Button'
 import Card from '../components/Card'
-import Logo from '../components/Logo'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -11,11 +10,20 @@ export default function Home() {
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
-            <Logo size="lg" />
+            <img 
+              src="/images/branding/logo-full.png" 
+              alt="Adify - Watch Ads, Earn Real Money" 
+              className="hero-logo"
+              style={{
+                width: '600px',
+                maxWidth: '90vw',
+                height: 'auto'
+              }}
+            />
           </div>
-          <h1 className="text-5xl font-bold text-white mb-4">
-            Watch Ads, Earn Real Money
-          </h1>
+          <p className="text-2xl text-gray-300 mb-2 font-semibold">
+            Press Play to Earn Real Money
+          </p>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Turn your time into rewards. Watch video ads, complete tasks, and get paid through PayPal.
           </p>
