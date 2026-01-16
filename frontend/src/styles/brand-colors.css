@@ -1,0 +1,92 @@
+/**
+ * Adify Brand Colors - Neon Arcade Aesthetic
+ * 
+ * These colors are extracted from the neon arcade logo assets.
+ * Use these CSS variables throughout the application for consistent branding.
+ */
+
+:root {
+  /* Neon Green/Yellow Gradient (from logo circles) */
+  --neon-yellow: #D4E800;
+  --neon-lime: #B8E800;
+  --neon-green: #88E800;
+  --neon-green-light: #6FE89A;
+  
+  /* Play Button Gradient (pink/purple) */
+  --play-purple: #8B00FF;
+  --play-magenta: #E600FF;
+  --play-pink: #FF00B8;
+  
+  /* Glow effects */
+  --glow-white: #FFFFFF;
+  --glow-green: rgba(136, 232, 0, 0.6);
+  --glow-pink: rgba(230, 0, 255, 0.6);
+  
+  /* Backgrounds */
+  --bg-black: #000000;
+  --bg-dark: #0a0a0a;
+  --bg-card: #1a1a1a;
+}
+
+/* Neon Glow Effects */
+.neon-glow-green {
+  filter: drop-shadow(0 0 20px var(--glow-green));
+  transition: filter 0.3s ease;
+}
+
+.neon-glow-green:hover {
+  filter: drop-shadow(0 0 30px var(--glow-green));
+}
+
+.neon-glow-pink {
+  filter: drop-shadow(0 0 20px var(--glow-pink));
+  transition: filter 0.3s ease;
+}
+
+.neon-glow-pink:hover {
+  filter: drop-shadow(0 0 30px var(--glow-pink));
+}
+
+/* Hero Logo Styling */
+.hero-logo {
+  filter: drop-shadow(0 0 20px rgba(136, 232, 0, 0.3));
+  transition: filter 0.3s ease;
+  width: 600px;
+  max-width: 90vw;
+  height: auto;
+}
+
+.hero-logo:hover {
+  filter: drop-shadow(0 0 30px rgba(136, 232, 0, 0.5));
+}
+
+/* Loading Logo Animation */
+.loading-logo {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 15px rgba(136, 232, 0, 0.4));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 25px rgba(136, 232, 0, 0.7));
+    transform: scale(1.05);
+  }
+}
+
+/* Gradient Text Effects */
+.text-neon-gradient {
+  background: linear-gradient(90deg, var(--neon-yellow), var(--neon-green));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-play-gradient {
+  background: linear-gradient(135deg, var(--play-purple), var(--play-magenta), var(--play-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

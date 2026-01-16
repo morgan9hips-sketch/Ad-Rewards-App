@@ -197,6 +197,56 @@ See [FEATURES.md](./FEATURES.md) for current features and upcoming plans.
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for deployment instructions.
 
+## 🎨 Branding
+
+### Logo Assets
+
+The Adify logo features a neon arcade aesthetic with vibrant colors designed to convey fun, energy, and gaming rewards.
+
+**Logo Files Location:** `frontend/public/images/branding/`
+
+- **logo-full.png** (1200x400px) - Full logo with "Adify" text for headers and hero sections
+- **logo-icon.png** (512x512px) - Play button icon for app icons and loading states
+- **favicon.png** (192x192px) - Play button icon for browser favicons
+
+### Brand Colors
+
+The color palette is extracted from the neon arcade logo:
+
+**Neon Green/Yellow Gradient** (Logo circles)
+- `--neon-yellow: #D4E800`
+- `--neon-lime: #B8E800`
+- `--neon-green: #88E800`
+- `--neon-green-light: #6FE89A`
+
+**Play Button Gradient** (Pink/Purple)
+- `--play-purple: #8B00FF`
+- `--play-magenta: #E600FF`
+- `--play-pink: #FF00B8`
+
+**Backgrounds**
+- `--bg-black: #000000`
+- `--bg-dark: #0a0a0a`
+- `--bg-card: #1a1a1a`
+
+All brand colors are defined in `frontend/src/styles/brand-colors.css`.
+
+### Usage Guidelines
+
+- Use **logo-full.png** for desktop headers, hero sections, and marketing materials
+- Use **logo-icon.png** for mobile headers (< 640px width), app icons, and loading states
+- Always maintain aspect ratio when scaling
+- Logo has transparent background and looks best on dark backgrounds
+- Apply subtle neon glow effects using the `.hero-logo` and `.loading-logo` CSS classes
+
+### Design Philosophy
+
+The neon arcade aesthetic conveys:
+- **Fun and engaging** - Not a boring finance app
+- **Gaming/rewards** - Arcade = play to win
+- **Modern retro** - Appeals to 18-35 demographic
+- **Energy and action** - Bright colors, play button iconography
+
 ---
 
 Built with ❤️ by morgan9hips-sketch
