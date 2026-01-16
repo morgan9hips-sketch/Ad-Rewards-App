@@ -51,6 +51,9 @@
 .hero-logo {
   filter: drop-shadow(0 0 20px rgba(136, 232, 0, 0.3));
   transition: filter 0.3s ease;
+  width: 600px;
+  max-width: 90vw;
+  height: auto;
 }
 
 .hero-logo:hover {

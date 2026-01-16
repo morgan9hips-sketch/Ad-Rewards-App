@@ -11,10 +11,10 @@ export default function LoadingSpinner({ size = 'medium', color = 'border-blue-6
     large: 'w-16 h-16 border-4',
   }
 
-  const logoSizes = {
-    small: '40px',
-    medium: '80px',
-    large: '120px',
+  const logoSizeClasses = {
+    small: 'w-10 h-10',
+    medium: 'w-20 h-20',
+    large: 'w-32 h-32',
   }
 
   if (withLogo) {
@@ -23,8 +23,7 @@ export default function LoadingSpinner({ size = 'medium', color = 'border-blue-6
         <img 
           src="/images/branding/logo-icon.png" 
           alt="Loading..." 
-          className="loading-logo"
-          style={{ width: logoSizes[size], height: 'auto' }}
+          className={`loading-logo ${logoSizeClasses[size]}`}
         />
         <p className="text-gray-400 text-sm">Loading...</p>
       </div>

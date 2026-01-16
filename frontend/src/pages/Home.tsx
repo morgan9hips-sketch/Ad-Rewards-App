@@ -14,11 +14,6 @@ export default function Home() {
               src="/images/branding/logo-full.png" 
               alt="Adify - Watch Ads, Earn Real Money" 
               className="hero-logo"
-              style={{
-                width: '600px',
-                maxWidth: '90vw',
-                height: 'auto'
-              }}
             />
           </div>
           <p className="text-2xl text-gray-300 mb-2 font-semibold">

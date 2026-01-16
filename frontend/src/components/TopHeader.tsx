@@ -15,7 +15,8 @@ export default function TopHeader() {
   return (
     <header className="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        {/* Desktop: Full logo, Mobile: Icon only */}
+        {/* Responsive logo display: Full logo for desktop (≥640px), Icon for mobile (<640px) */}
+        {/* Using separate instances for cleaner code than internal media queries */}
         <div className="hidden sm:block">
           <Logo size="md" variant="full" />
         </div>
