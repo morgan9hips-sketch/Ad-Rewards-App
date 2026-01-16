@@ -19,7 +19,41 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
   PT: 'EUR', SK: 'EUR', SI: 'EUR', ES: 'EUR',
 }
 
-export const SUPPORTED_CURRENCIES = ['USD', 'ZAR', 'EUR', 'GBP', 'CAD', 'AUD', 'INR', 'NGN']
+// Supported currencies with their full names
+// USD - US Dollar, ZAR - South African Rand, EUR - Euro, 
+// GBP - British Pound, CAD - Canadian Dollar, AUD - Australian Dollar,
+// INR - Indian Rupee, NGN - Nigerian Naira, BRL - Brazilian Real, MXN - Mexican Peso
+export const SUPPORTED_CURRENCIES = ['USD', 'ZAR', 'EUR', 'GBP', 'CAD', 'AUD', 'INR', 'NGN', 'BRL', 'MXN']
+
+// Currency formatting configuration
+export const CURRENCY_FORMATS: Record<string, {
+  symbol: string
+  decimals: number
+  position: 'before' | 'after'
+}> = {
+  'USD': { symbol: '$', decimals: 2, position: 'before' },
+  'ZAR': { symbol: 'R', decimals: 2, position: 'before' },
+  'EUR': { symbol: '€', decimals: 2, position: 'before' },
+  'GBP': { symbol: '£', decimals: 2, position: 'before' },
+  'CAD': { symbol: 'C$', decimals: 2, position: 'before' },
+  'AUD': { symbol: 'A$', decimals: 2, position: 'before' },
+  'INR': { symbol: '₹', decimals: 2, position: 'before' },
+  'NGN': { symbol: '₦', decimals: 2, position: 'before' },
+  'BRL': { symbol: 'R$', decimals: 2, position: 'before' },
+  'MXN': { symbol: 'MX$', decimals: 2, position: 'before' }
+}
+
+export interface UserCurrencyInfo {
+  displayCurrency: string      // ZAR, USD, GBP
+  revenueCountry: string | null // Where they earn (AdMob)
+  displayCountry: string | null // Display preference
+  exchangeRate: number
+  formatting: {
+    symbol: string
+    decimals: number
+    position: 'before' | 'after'
+  }
+}
 
 /**
  * Get currency code for a country
@@ -147,4 +181,73 @@ export async function convertToUSD(amount: number, sourceCurrency: string): Prom
 
   const rate = await getExchangeRate(sourceCurrency)
   return amount / rate
+}
+
+/**
+ * Get comprehensive currency info for a user
+ * Includes display currency, revenue country, exchange rate, and formatting
+ */
+export async function getUserCurrencyInfo(userId: string, ipAddress?: string): Promise<UserCurrencyInfo> {
+  const profile = await prisma.userProfile.findUnique({
+    where: { userId },
+    select: {
+      preferredCurrency: true,
+      autoDetectCurrency: true,
+      revenueCountry: true,
+      displayCountry: true,
+      lastDetectedCountry: true
+    }
+  })
+
+  if (!profile) {
+    throw new Error('User profile not found')
+  }
+
+  let displayCurrency: string
+
+  if (profile.autoDetectCurrency) {
+    // Auto-detect from IP (for display only)
+    let detectedCountry = profile.lastDetectedCountry
+    
+    // If IP provided, detect country from it
+    if (ipAddress) {
+      const { detectCountryFromIP } = await import('./geoService.js')
+      const ipCountry = detectCountryFromIP(ipAddress)
+      if (ipCountry) {
+        detectedCountry = ipCountry
+      }
+    }
+
+    displayCurrency = detectedCountry ? getCurrencyForCountry(detectedCountry) : 'USD'
+  } else {
+    // User manually selected
+    displayCurrency = profile.preferredCurrency || 'USD'
+  }
+
+  const exchangeRate = await getExchangeRate(displayCurrency)
+  const formatting = CURRENCY_FORMATS[displayCurrency] || CURRENCY_FORMATS['USD']
+
+  return {
+    displayCurrency,
+    revenueCountry: profile.revenueCountry,
+    displayCountry: profile.displayCountry,
+    exchangeRate,
+    formatting
+  }
+}
+
+/**
+ * Format amount in user's display currency
+ */
+export function formatCurrency(amountUsd: number, currencyInfo: UserCurrencyInfo): string {
+  const localAmount = amountUsd * currencyInfo.exchangeRate
+  const formatted = localAmount.toFixed(currencyInfo.formatting.decimals)
+  const withCommas = parseFloat(formatted).toLocaleString('en-US', {
+    minimumFractionDigits: currencyInfo.formatting.decimals,
+    maximumFractionDigits: currencyInfo.formatting.decimals
+  })
+
+  return currencyInfo.formatting.position === 'before'
+    ? `${currencyInfo.formatting.symbol}${withCommas}`
+    : `${withCommas}${currencyInfo.formatting.symbol}`
 }

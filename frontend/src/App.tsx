@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { CurrencyProvider } from './contexts/CurrencyContext'
 import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
 import CookieConsent from './components/CookieConsent'
@@ -176,7 +177,9 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppContent />
+        <CurrencyProvider>
+          <AppContent />
+        </CurrencyProvider>
       </AuthProvider>
     </Router>
   )

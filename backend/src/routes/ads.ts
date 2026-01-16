@@ -1,8 +1,16 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { AuthRequest } from '../middleware/auth.js'
-import { getClientIP, getUserLocationInfo } from '../services/geoService.js'
+import { getClientIP, detectCountryFromIP } from '../services/geoService.js'
 import { awardCoins } from '../services/transactionService.js'
+import {
+  checkDailyAdLimit,
+  checkRapidAdViewing,
+  checkDuplicateImpression,
+  detectVPNMismatch,
+  trackUserRevenueCountry,
+  updateUserLocation
+} from '../services/fraudDetection.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -92,18 +100,70 @@ router.post('/:id/watch', async (req: AuthRequest, res) => {
   }
 })
 
-// Complete ad view - NEW endpoint for coin-based system
+// Complete ad view - NEW endpoint for coin-based system with VPN-proof location tracking
 router.post('/complete', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
-    const { adUnitId, watchedSeconds, admobImpressionId } = req.body
+    const {
+      adUnitId,
+      watchedSeconds,
+      admobImpressionId,
+      countryCode,  // From AdMob SDK (VPN-proof!)
+      estimatedEarnings,  // AdMob's CPM estimate
+      currency  // AdMob currency
+    } = req.body
 
-    // Get client IP and detect country
+    // Validate required fields
+    if (!countryCode) {
+      return res.status(400).json({
+        success: false,
+        error: 'Country code from AdMob is required'
+      })
+    }
+
+    // Get client IP for fraud detection
     const ipAddress = getClientIP(req)
     const userAgent = req.headers['user-agent'] || ''
-    const locationInfo = getUserLocationInfo(ipAddress)
+    const ipCountry = detectCountryFromIP(ipAddress)
 
-    // Create ad view record with coin earnings
+    // 1. Check daily ad limit
+    const dailyLimit = await checkDailyAdLimit(userId)
+    if (!dailyLimit.allowed) {
+      return res.status(429).json({
+        success: false,
+        error: 'Daily ad limit reached',
+        remaining: 0
+      })
+    }
+
+    // 2. Check for rapid ad viewing (bot detection)
+    const rapidCheck = await checkRapidAdViewing(userId)
+    if (!rapidCheck.allowed) {
+      return res.status(429).json({
+        success: false,
+        error: rapidCheck.reason || 'Too many ads watched too quickly'
+      })
+    }
+
+    // 3. Check for duplicate impression
+    if (admobImpressionId) {
+      const duplicateCheck = await checkDuplicateImpression(admobImpressionId)
+      if (duplicateCheck.duplicate) {
+        return res.status(409).json({
+          success: false,
+          error: 'Duplicate ad impression detected'
+        })
+      }
+    }
+
+    // 4. Detect VPN usage (IP location vs AdMob location)
+    const vpnCheck = await detectVPNMismatch(userId, ipAddress, countryCode)
+    if (vpnCheck.vpnSuspected) {
+      console.log(`🚨 VPN detected: User ${userId}, IP=${vpnCheck.ipCountry}, AdMob=${vpnCheck.admobCountry}`)
+      // We still allow the ad, but log the mismatch for monitoring
+    }
+
+    // 5. Create ad view record with AdMob location data (SOURCE OF TRUTH)
     const adView = await prisma.adView.create({
       data: {
         userId,
@@ -112,15 +172,23 @@ router.post('/complete', async (req: AuthRequest, res) => {
         completed: true,
         rewardCents: 0, // Legacy field, not used in coin system
         coinsEarned: COINS_PER_AD,
-        countryCode: locationInfo.countryCode,
+        
+        // AdMob data (TRUSTED - VPN-proof)
+        admobImpressionId: admobImpressionId || undefined,
+        countryCode: countryCode,  // SOURCE OF TRUTH for revenue pool
+        estimatedEarningsUsd: estimatedEarnings ? parseFloat(estimatedEarnings) : undefined,
+        admobCurrency: currency || 'USD',
+        
+        // Audit trail (for fraud detection, NOT for location)
         ipAddress,
+        ipCountry: ipCountry || undefined,
         userAgent,
-        admobImpressionId,
+        
         converted: false,
       },
     })
 
-    // Award coins to user (this also creates a transaction record)
+    // 6. Award coins to user (creates transaction record)
     await awardCoins(
       userId,
       COINS_PER_AD,
@@ -129,13 +197,19 @@ router.post('/complete', async (req: AuthRequest, res) => {
       'ad_view'
     )
 
-    // Update user's ad watch count
+    // 7. Update user's ad watch count
     await prisma.userProfile.update({
       where: { userId },
       data: {
         adsWatched: { increment: 1 },
       },
     })
+
+    // 8. Track user's revenue country
+    await trackUserRevenueCountry(userId, countryCode)
+
+    // 9. Update user's last known IP location
+    await updateUserLocation(userId, ipAddress)
 
     // Get updated user profile to return current balance
     const userProfile = await prisma.userProfile.findUnique({
@@ -148,12 +222,14 @@ router.post('/complete', async (req: AuthRequest, res) => {
       coinsEarned: COINS_PER_AD,
       totalCoins: userProfile?.coinsBalance.toString() || '0',
       message: `You earned ${COINS_PER_AD} coins!`,
+      remaining: dailyLimit.remaining - 1,
+      vpnDetected: vpnCheck.vpnSuspected,
     })
   } catch (error) {
     console.error('Error completing ad view:', error)
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: 'Failed to complete ad view' 
+      error: 'Failed to complete ad view'
     })
   }
 })

@@ -15,7 +15,197 @@ const USER_REVENUE_SHARE = parseFloat(process.env.USER_REVENUE_SHARE || '0.85')
 router.use(requireAdmin)
 
 /**
- * Process monthly coin-to-cash conversion
+ * Process monthly coin-to-cash conversion with LOCATION-BASED pools
+ * New endpoint that processes revenue separately per country
+ */
+router.post('/process-location-conversion', logAdminAction('PROCESS_LOCATION_CONVERSION'), async (req: AuthRequest, res) => {
+  try {
+    const { revenues, month, notes } = req.body
+    const adminUserId = req.user!.id
+
+    // Validate input
+    if (!revenues || !Array.isArray(revenues) || revenues.length === 0) {
+      return res.status(400).json({ error: 'Invalid revenues array' })
+    }
+
+    // Validate each revenue entry
+    for (const rev of revenues) {
+      if (!rev.countryCode || !rev.admobRevenueUsd || rev.admobRevenueUsd <= 0) {
+        return res.status(400).json({ error: 'Each revenue must have countryCode and valid admobRevenueUsd' })
+      }
+    }
+
+    const conversionDate = month ? new Date(month) : new Date()
+    conversionDate.setDate(1) // Set to first day of month
+
+    // Process each location separately in a transaction
+    const results = await prisma.$transaction(async (tx) => {
+      const locationResults = []
+
+      for (const revenue of revenues) {
+        const { countryCode, admobRevenueUsd } = revenue
+        const admobRevenueUsdNum = parseFloat(admobRevenueUsd)
+
+        // Get users with coins from THIS location only
+        const usersInLocation = await tx.adView.groupBy({
+          by: ['userId'],
+          where: {
+            countryCode: countryCode,
+            converted: false,
+            completed: true
+          },
+          _sum: {
+            coinsEarned: true
+          }
+        })
+
+        if (usersInLocation.length === 0) {
+          console.log(`⚠️  No users with unconverted coins in ${countryCode}, skipping...`)
+          continue
+        }
+
+        // Calculate total coins for THIS location
+        const totalCoins = usersInLocation.reduce(
+          (sum, user) => sum + BigInt(user._sum.coinsEarned || 0),
+          BigInt(0)
+        )
+
+        if (totalCoins === BigInt(0)) {
+          console.log(`⚠️  Total coins is zero for ${countryCode}, skipping...`)
+          continue
+        }
+
+        // Calculate THIS location's conversion rate
+        const userShareUsd = admobRevenueUsdNum * USER_REVENUE_SHARE
+        const conversionRate = userShareUsd / Number(totalCoins)
+
+        // Count total videos watched
+        const totalVideos = await tx.adView.count({
+          where: {
+            countryCode: countryCode,
+            converted: false,
+            completed: true
+          }
+        })
+
+        // Create location revenue pool
+        const pool = await tx.locationRevenuePool.create({
+          data: {
+            countryCode,
+            month: conversionDate,
+            admobRevenueUsd: admobRevenueUsdNum,
+            totalVideosWatched: totalVideos,
+            totalCoinsIssued: totalCoins,
+            userShareUsd,
+            conversionRate,
+            status: 'processing',
+          }
+        })
+
+        // Convert coins for users in THIS location only
+        let totalCashDistributed = 0
+        const userIds = []
+
+        for (const user of usersInLocation) {
+          const coins = BigInt(user._sum.coinsEarned || 0)
+          const cashUsd = Number(coins) * conversionRate
+
+          // Get user profile
+          const profile = await tx.userProfile.findUnique({
+            where: { userId: user.userId }
+          })
+
+          if (!profile) continue
+
+          userIds.push(user.userId)
+
+          // Convert user's coins to cash
+          await convertCoinsToUSD(user.userId, coins, cashUsd, pool.id, tx)
+
+          // Create location conversion detail record
+          await tx.locationConversion.create({
+            data: {
+              poolId: pool.id,
+              userId: user.userId,
+              coinsConverted: coins,
+              cashReceivedUsd: cashUsd,
+              conversionRate,
+            }
+          })
+
+          totalCashDistributed += cashUsd
+        }
+
+        // Mark ad views from THIS location as converted and link to pool
+        await tx.adView.updateMany({
+          where: {
+            countryCode: countryCode,
+            converted: false,
+            userId: { in: userIds }
+          },
+          data: {
+            converted: true,
+            poolId: pool.id
+          }
+        })
+
+        // Update pool status
+        await tx.locationRevenuePool.update({
+          where: { id: pool.id },
+          data: {
+            status: 'completed',
+            processedAt: new Date()
+          }
+        })
+
+        locationResults.push({
+          countryCode,
+          poolId: pool.id,
+          admobRevenue: admobRevenueUsdNum,
+          totalCoins: totalCoins.toString(),
+          conversionRate,
+          usersAffected: usersInLocation.length,
+          totalCashDistributed
+        })
+
+        console.log(`✅ Processed ${countryCode}: ${usersInLocation.length} users, ${totalCoins} coins, rate $${conversionRate.toFixed(8)}/coin`)
+      }
+
+      // Log admin action
+      await tx.adminAction.create({
+        data: {
+          adminId: adminUserId,
+          action: 'location_conversion',
+          targetType: 'LOCATION_POOL',
+          metadata: {
+            month: month,
+            locationResults,
+            notes
+          }
+        }
+      })
+
+      return locationResults
+    }, {
+      timeout: 120000, // 2 minute timeout for large conversions
+    })
+
+    res.json({
+      success: true,
+      message: 'Location-based conversion completed successfully',
+      results
+    })
+  } catch (error) {
+    console.error('Error processing location conversion:', error)
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to process location conversion'
+    })
+  }
+})
+
+/**
+ * Process monthly coin-to-cash conversion (LEGACY - global pool)
  * This is the critical conversion endpoint that must be transactional
  */
 router.post('/process-conversion', logAdminAction('PROCESS_CONVERSION'), async (req: AuthRequest, res) => {
@@ -282,6 +472,160 @@ router.get('/stats', logAdminAction('VIEW_STATS'), async (req: AuthRequest, res)
   } catch (error) {
     console.error('Error fetching stats:', error)
     res.status(500).json({ error: 'Failed to fetch statistics' })
+  }
+})
+
+/**
+ * Get location-based statistics (per-country breakdown)
+ */
+router.get('/stats/by-location', logAdminAction('VIEW_LOCATION_STATS'), async (req: AuthRequest, res) => {
+  try {
+    // Get all countries with ad views
+    const countries = await prisma.adView.groupBy({
+      by: ['countryCode'],
+      where: {
+        countryCode: { not: null }
+      },
+      _count: true
+    })
+
+    const locationStats = []
+
+    for (const country of countries) {
+      if (!country.countryCode) continue
+
+      // Pending coins for this location
+      const pendingCoins = await prisma.adView.groupBy({
+        by: ['userId'],
+        where: {
+          countryCode: country.countryCode,
+          converted: false,
+          completed: true
+        },
+        _sum: {
+          coinsEarned: true
+        }
+      })
+
+      const totalPendingCoins = pendingCoins.reduce(
+        (sum, user) => sum + BigInt(user._sum.coinsEarned || 0),
+        BigInt(0)
+      )
+
+      // Converted coins for this location
+      const convertedViews = await prisma.adView.groupBy({
+        by: ['userId'],
+        where: {
+          countryCode: country.countryCode,
+          converted: true
+        },
+        _sum: {
+          coinsEarned: true
+        }
+      })
+
+      const totalConvertedCoins = convertedViews.reduce(
+        (sum, user) => sum + BigInt(user._sum.coinsEarned || 0),
+        BigInt(0)
+      )
+
+      // Revenue from location pools
+      const poolStats = await prisma.locationRevenuePool.aggregate({
+        where: {
+          countryCode: country.countryCode
+        },
+        _sum: {
+          admobRevenueUsd: true,
+          userShareUsd: true
+        },
+        _avg: {
+          conversionRate: true
+        }
+      })
+
+      // Active users in this location
+      const activeUsers = await prisma.adView.groupBy({
+        by: ['userId'],
+        where: {
+          countryCode: country.countryCode
+        }
+      })
+
+      locationStats.push({
+        country: country.countryCode,
+        pendingCoins: totalPendingCoins.toString(),
+        convertedCoins: totalConvertedCoins.toString(),
+        totalRevenue: poolStats._sum.admobRevenueUsd?.toString() || '0',
+        totalUserPayout: poolStats._sum.userShareUsd?.toString() || '0',
+        averageConversionRate: poolStats._avg.conversionRate?.toString() || '0',
+        usersActive: activeUsers.length
+      })
+    }
+
+    // Sort by revenue descending
+    locationStats.sort((a, b) => parseFloat(b.totalRevenue) - parseFloat(a.totalRevenue))
+
+    // Global totals
+    const globalPending = locationStats.reduce(
+      (sum, loc) => sum + BigInt(loc.pendingCoins),
+      BigInt(0)
+    )
+    const globalRevenue = locationStats.reduce(
+      (sum, loc) => sum + parseFloat(loc.totalRevenue),
+      0
+    )
+
+    res.json({
+      global: {
+        totalPendingCoins: globalPending.toString(),
+        totalRevenue: globalRevenue.toFixed(2)
+      },
+      byLocation: locationStats
+    })
+  } catch (error) {
+    console.error('Error fetching location stats:', error)
+    res.status(500).json({ error: 'Failed to fetch location statistics' })
+  }
+})
+
+/**
+ * Get fraud detection stats and suspicious users
+ */
+router.get('/fraud-stats', logAdminAction('VIEW_FRAUD_STATS'), async (req: AuthRequest, res) => {
+  try {
+    const { getFraudStats, getSuspiciousUsers, getVPNDetections } = await import('../services/fraudDetection.js')
+
+    const stats = await getFraudStats()
+    const suspiciousUsers = await getSuspiciousUsers(1, 20)
+
+    res.json({
+      stats,
+      suspiciousUsers: suspiciousUsers.users,
+      total: suspiciousUsers.total
+    })
+  } catch (error) {
+    console.error('Error fetching fraud stats:', error)
+    res.status(500).json({ error: 'Failed to fetch fraud statistics' })
+  }
+})
+
+/**
+ * Get VPN detections for a specific user
+ */
+router.get('/fraud/user/:userId', logAdminAction('VIEW_USER_FRAUD'), async (req: AuthRequest, res) => {
+  try {
+    const { userId } = req.params
+    const { getVPNDetections } = await import('../services/fraudDetection.js')
+
+    const detections = await getVPNDetections(userId)
+
+    res.json({
+      userId,
+      detections
+    })
+  } catch (error) {
+    console.error('Error fetching user fraud data:', error)
+    res.status(500).json({ error: 'Failed to fetch user fraud data' })
   }
 })
 

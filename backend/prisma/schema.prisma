@@ -34,6 +34,20 @@ model UserProfile {
   totalCashEarnedUsd     Decimal  @default(0.0000) @db.Decimal(12, 4) @map("total_cash_earned_usd")
   totalWithdrawnUsd      Decimal  @default(0.0000) @db.Decimal(12, 4) @map("total_withdrawn_usd")
   
+  // Revenue location tracking (from AdMob - VPN-proof)
+  revenueCountry         String?  @map("revenue_country")  // Primary earning country
+  revenueCountries       String[] @default([]) @map("revenue_countries")  // All countries earned from
+  
+  // Display preferences (user-friendly)
+  displayCountry         String?  @map("display_country")
+  autoDetectCurrency     Boolean  @default(true) @map("auto_detect_currency")
+  
+  // Fraud detection
+  lastIpAddress          String?  @map("last_ip_address")
+  lastDetectedCountry    String?  @map("last_detected_country")
+  vpnSuspicionScore      Int      @default(0) @map("vpn_suspicion_score")
+  suspiciousActivity     Boolean  @default(false) @map("suspicious_activity")
+  
   adsWatched             Int      @default(0) @map("ads_watched")
   tier                   String   @default("Bronze")
   role                   UserRole @default(USER)
@@ -45,6 +59,7 @@ model UserProfile {
   badges                 UserBadge[]
   transactions           Transaction[]
   conversionDetails      ConversionDetail[]
+  locationConversions    LocationConversion[]
   adminActions           AdminAction[] @relation("AdminActions")
   
   @@map("user_profiles")
@@ -67,29 +82,47 @@ model Ad {
 }
 
 model AdView {
-  id                 String   @id @default(uuid())
-  userId             String   @map("user_id")
-  user               UserProfile @relation(fields: [userId], references: [userId])
-  adId               Int?     @map("ad_id")
-  ad                 Ad?      @relation(fields: [adId], references: [id])
-  adUnitId           String?  @map("ad_unit_id")
-  watchedSeconds     Int      @map("watched_seconds")
-  completed          Boolean  @default(false)
-  rewardCents        Int      @map("reward_cents")
-  coinsEarned        Int      @default(0) @map("coins_earned")
-  countryCode        String?  @map("country_code")
-  ipAddress          String?  @map("ip_address")
-  userAgent          String?  @map("user_agent")
-  admobImpressionId  String?  @map("admob_impression_id")
-  conversionBatchId  Int?     @map("conversion_batch_id")
-  converted          Boolean  @default(false)
-  createdAt          DateTime @default(now()) @map("created_at")
-  viewedAt           DateTime @default(now()) @map("viewed_at")
+  id                    String   @id @default(uuid())
+  userId                String   @map("user_id")
+  user                  UserProfile @relation(fields: [userId], references: [userId])
+  adId                  Int?     @map("ad_id")
+  ad                    Ad?      @relation(fields: [adId], references: [id])
+  adUnitId              String?  @map("ad_unit_id")
+  watchedSeconds        Int      @map("watched_seconds")
+  completed             Boolean  @default(false)
+  rewardCents           Int      @map("reward_cents")
+  coinsEarned           Int      @default(0) @map("coins_earned")
+  
+  // AdMob impression ID - UNIQUE to prevent duplicate claims
+  admobImpressionId     String?  @unique @map("admob_impression_id")
+  
+  // AdMob's REAL data (trusted - VPN-proof!)
+  countryCode           String?  @map("country_code")  // From AdMob SDK
+  estimatedEarningsUsd  Decimal? @db.Decimal(12, 6) @map("estimated_earnings_usd")  // AdMob's estimate
+  admobCurrency         String?  @map("admob_currency")
+  
+  // Audit trail (NOT used for location - for comparison/fraud detection)
+  ipAddress             String?  @map("ip_address")
+  ipCountry             String?  @map("ip_country")  // Detected from IP
+  userAgent             String?  @map("user_agent")
+  
+  // Location-based conversion tracking
+  poolId                Int?     @map("pool_id")
+  pool                  LocationRevenuePool? @relation(fields: [poolId], references: [id])
+  
+  // Legacy conversion tracking
+  conversionBatchId     Int?     @map("conversion_batch_id")
+  converted             Boolean  @default(false)
+  
+  createdAt             DateTime @default(now()) @map("created_at")
+  viewedAt              DateTime @default(now()) @map("viewed_at")
   
   @@map("ad_views")
   @@index([userId])
   @@index([adId])
   @@index([converted])
+  @@index([countryCode])
+  @@index([poolId])
 }
 
 model Withdrawal {
@@ -227,4 +260,43 @@ model AdminAction {
   @@index([adminId])
   @@index([action])
   @@index([createdAt])
+}
+
+model LocationRevenuePool {
+  id                  Int      @id @default(autoincrement())
+  countryCode         String   @map("country_code")  // 'US', 'ZA', 'GB', etc.
+  month               DateTime @db.Date
+  admobRevenueUsd     Decimal  @db.Decimal(12, 4) @map("admob_revenue_usd")  // From AdMob dashboard (truth)
+  totalVideosWatched  Int      @default(0) @map("total_videos_watched")
+  totalCoinsIssued    BigInt   @default(0) @map("total_coins_issued")
+  userShareUsd        Decimal  @db.Decimal(12, 4) @map("user_share_usd")  // 85% of admobRevenueUsd
+  conversionRate      Decimal  @db.Decimal(12, 8) @map("conversion_rate")  // userShareUsd / totalCoinsIssued
+  status              String   @default("pending")  // 'pending', 'processing', 'completed'
+  processedAt         DateTime? @map("processed_at")
+  createdAt           DateTime @default(now()) @map("created_at")
+  
+  conversions         LocationConversion[]
+  adViews             AdView[]
+  
+  @@map("location_revenue_pools")
+  @@unique([countryCode, month])
+  @@index([countryCode])
+  @@index([month])
+  @@index([status])
+}
+
+model LocationConversion {
+  id                Int      @id @default(autoincrement())
+  poolId            Int      @map("pool_id")
+  pool              LocationRevenuePool @relation(fields: [poolId], references: [id])
+  userId            String   @map("user_id")
+  user              UserProfile @relation(fields: [userId], references: [userId])
+  coinsConverted    BigInt   @map("coins_converted")
+  cashReceivedUsd   Decimal  @db.Decimal(12, 4) @map("cash_received_usd")
+  conversionRate    Decimal  @db.Decimal(12, 8) @map("conversion_rate")
+  createdAt         DateTime @default(now()) @map("created_at")
+  
+  @@map("location_conversions")
+  @@index([poolId])
+  @@index([userId])
 }
