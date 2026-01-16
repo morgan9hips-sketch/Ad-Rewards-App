@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { auth } from '../lib/supabase'
 import Button from '../components/Button'
 import Card from '../components/Card'
@@ -6,8 +7,14 @@ import Card from '../components/Card'
 export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const handleGoogleLogin = async () => {
+    if (!termsAccepted) {
+      setError('Please accept the Terms of Service to continue')
+      return
+    }
+    
     setLoading(true)
     setError('')
     try {
@@ -20,6 +27,11 @@ export default function Login() {
   }
 
   const handleFacebookLogin = async () => {
+    if (!termsAccepted) {
+      setError('Please accept the Terms of Service to continue')
+      return
+    }
+    
     setLoading(true)
     setError('')
     try {
@@ -48,6 +60,31 @@ export default function Login() {
             📘 Continue with Facebook
           </Button>
         </div>
+        
+        <div className="mt-6 pt-6 border-t border-gray-700">
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-900"
+            />
+            <span className="text-sm text-gray-300 group-hover:text-gray-200 transition-colors">
+              I agree to the{' '}
+              <Link to="/terms" className="text-blue-400 hover:text-blue-300 underline" target="_blank">
+                Terms of Service
+              </Link>
+              {' '}and{' '}
+              <Link to="/privacy" className="text-blue-400 hover:text-blue-300 underline" target="_blank">
+                Privacy Policy
+              </Link>
+            </span>
+          </label>
+        </div>
+        
+        <p className="text-xs text-gray-500 mt-4 text-center">
+          By signing in, you acknowledge that you are at least 18 years old or have parental consent.
+        </p>
       </Card>
     </div>
   )
