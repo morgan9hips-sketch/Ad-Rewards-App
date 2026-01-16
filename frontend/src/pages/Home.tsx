@@ -65,9 +65,31 @@ export default function Home() {
         </div>
 
         <div className="mt-12 text-center">
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 text-sm mb-4">
             Safe, secure, and transparent. No hidden fees.
           </p>
+          <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-500">
+            <button 
+              onClick={() => navigate('/terms')}
+              className="hover:text-gray-400 transition-colors underline"
+            >
+              Terms of Service
+            </button>
+            <span>•</span>
+            <button 
+              onClick={() => navigate('/privacy')}
+              className="hover:text-gray-400 transition-colors underline"
+            >
+              Privacy Policy
+            </button>
+            <span>•</span>
+            <a 
+              href="mailto:support@adrevtech.co.za"
+              className="hover:text-gray-400 transition-colors underline"
+            >
+              Contact Support
+            </a>
+          </div>
         </div>
       </div>
     </div>
