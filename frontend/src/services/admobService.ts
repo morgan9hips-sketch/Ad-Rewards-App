@@ -151,8 +151,13 @@ class AdMobService {
     currency: string
   } {
     // In a real app, this data would come from AdMob SDK
+    // Using crypto.randomUUID() for more robust ID generation
+    const uuid = typeof crypto !== 'undefined' && crypto.randomUUID 
+      ? crypto.randomUUID() 
+      : `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`
+    
     return {
-      admobImpressionId: `mock_${adType}_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      admobImpressionId: `mock_${adType}_${uuid}`,
       countryCode: this.detectCountryCode(),
       estimatedEarnings: this.generateMockRevenue(adType),
       currency: 'USD',

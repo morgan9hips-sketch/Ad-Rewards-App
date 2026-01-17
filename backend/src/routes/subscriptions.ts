@@ -294,10 +294,26 @@ async function handleSubscriptionSuspended(resource: any) {
 async function handlePaymentFailed(resource: any) {
   const subscriptionId = resource.id
 
-  // TODO: Send notification to user
-  // TODO: Implement grace period before downgrading
+  // Mark subscription as suspended with grace period
+  await prisma.userProfile.updateMany({
+    where: { subscriptionId },
+    data: {
+      subscriptionStatus: 'SUSPENDED',
+    },
+  })
+
+  // TODO: Implement user notification system
+  // - Send email notification about payment failure
+  // - Provide link to update payment method
+  // - Inform about 3-day grace period before downgrade
+  
+  // TODO: Implement grace period logic
+  // - Set grace period end date (3 days from now)
+  // - Create scheduled job to check grace period expiration
+  // - Downgrade to Bronze tier if payment not resolved within grace period
 
   console.log(`💳 Payment failed for subscription: ${subscriptionId}`)
+  console.warn('⚠️ Grace period and notification system not yet implemented')
 }
 
 export default router

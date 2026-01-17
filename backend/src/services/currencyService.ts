@@ -26,6 +26,9 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
 export const SUPPORTED_CURRENCIES = ['USD', 'ZAR', 'EUR', 'GBP', 'CAD', 'AUD', 'INR', 'NGN', 'BRL', 'MXN']
 
 // Currency formatting configuration with subscription pricing
+// Note: Subscription prices are defined here per currency for easy management
+// Update these values to change subscription pricing globally
+// For more dynamic pricing, consider moving to environment variables or database
 export const CURRENCY_FORMATS: Record<string, {
   symbol: string
   decimals: number
