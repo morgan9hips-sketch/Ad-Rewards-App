@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import Card from '../components/Card'
 import Button from '../components/Button'
+import AvatarSelector from '../components/AvatarSelector'
+import CountrySelector from '../components/CountrySelector'
 import { useAuth } from '../contexts/AuthContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 
@@ -11,7 +13,16 @@ export default function Settings() {
   const [country, setCountry] = useState('US')
   const [preferredCurrency, setPreferredCurrency] = useState('USD')
   const [autoDetectCurrency, setAutoDetectCurrency] = useState(true)
+  
+  // Profile fields
+  const [displayName, setDisplayName] = useState('')
+  const [avatarEmoji, setAvatarEmoji] = useState<string | null>(null)
+  const [countryBadge, setCountryBadge] = useState<string | null>(null)
+  const [hideCountry, setHideCountry] = useState(false)
+  const [showOnLeaderboard, setShowOnLeaderboard] = useState(true)
+  
   const [saved, setSaved] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchProfile()
@@ -32,13 +43,37 @@ export default function Settings() {
         setCountry(data.country || 'US')
         setPreferredCurrency(data.preferredCurrency || 'USD')
         setAutoDetectCurrency(data.autoDetectCurrency !== false)
+        setDisplayName(data.displayName || '')
+        setAvatarEmoji(data.avatarEmoji || null)
+        setCountryBadge(data.countryBadge || null)
+        setHideCountry(data.hideCountry || false)
+        setShowOnLeaderboard(data.showOnLeaderboard !== false)
       }
     } catch (error) {
       console.error('Error fetching profile:', error)
     }
   }
 
+  const validateDisplayName = (name: string): string | null => {
+    if (!name) return null // Allow empty
+    if (name.length < 3) return 'Display name must be at least 3 characters'
+    if (name.length > 20) return 'Display name must be at most 20 characters'
+    if (!/^[a-zA-Z0-9_]+$/.test(name)) {
+      return 'Display name can only contain letters, numbers, and underscores'
+    }
+    return null
+  }
+
   const handleSave = async () => {
+    setError(null)
+    
+    // Validate display name
+    const nameError = validateDisplayName(displayName)
+    if (nameError) {
+      setError(nameError)
+      return
+    }
+
     try {
       const token = session?.access_token
       if (!token) return
@@ -53,7 +88,12 @@ export default function Settings() {
           paypalEmail,
           country,
           preferredCurrency,
-          autoDetectCurrency
+          autoDetectCurrency,
+          displayName: displayName || null,
+          avatarEmoji,
+          countryBadge,
+          hideCountry,
+          showOnLeaderboard,
         })
       })
 
@@ -61,15 +101,88 @@ export default function Settings() {
         setSaved(true)
         await refreshCurrencyInfo() // Refresh currency context
         setTimeout(() => setSaved(false), 3000)
+      } else {
+        const data = await res.json()
+        setError(data.error || 'Failed to save settings')
       }
     } catch (error) {
       console.error('Error saving settings:', error)
+      setError('An error occurred while saving settings')
     }
   }
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
       <h1 className="text-3xl font-bold text-white mb-6">Settings ⚙️</h1>
+
+      <Card className="mb-6">
+        <h2 className="text-xl font-bold text-white mb-4">👤 Profile</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Display Name
+            </label>
+            <input
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="Enter your display name"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+              maxLength={20}
+            />
+            <p className="text-gray-500 text-xs mt-1">
+              3-20 characters, letters, numbers, and underscores only
+            </p>
+          </div>
+
+          <div className="pt-4">
+            <AvatarSelector selected={avatarEmoji} onSelect={setAvatarEmoji} />
+          </div>
+
+          <div className="pt-4">
+            <CountrySelector
+              selected={countryBadge}
+              onSelect={setCountryBadge}
+            />
+          </div>
+
+          <div className="border-t border-gray-800 pt-4">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hideCountry}
+                onChange={(e) => setHideCountry(e.target.checked)}
+                className="w-5 h-5 mt-1"
+              />
+              <div>
+                <span className="text-gray-300 block font-medium">Hide my country</span>
+                <span className="text-sm text-gray-500">
+                  Show 🌍 instead of your country flag for privacy
+                </span>
+              </div>
+            </label>
+          </div>
+
+          <div className="border-t border-gray-800 pt-4">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showOnLeaderboard}
+                onChange={(e) => setShowOnLeaderboard(e.target.checked)}
+                className="w-5 h-5 mt-1"
+              />
+              <div>
+                <span className="text-gray-300 block font-medium">
+                  Show me on the leaderboard
+                </span>
+                <span className="text-sm text-gray-500">
+                  Compete with other users and show your earnings
+                </span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </Card>
 
       <Card className="mb-6">
         <h2 className="text-xl font-bold text-white mb-4">Account Information</h2>
@@ -193,6 +306,12 @@ export default function Settings() {
           </label>
         </div>
       </Card>
+
+      {error && (
+        <div className="mb-6 p-3 bg-red-900/20 border border-red-500/50 rounded-lg">
+          <p className="text-red-400 text-sm">{error}</p>
+        </div>
+      )}
 
       {saved && (
         <div className="bg-green-600 text-white p-3 rounded-lg mb-6">

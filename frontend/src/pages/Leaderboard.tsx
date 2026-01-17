@@ -1,31 +1,58 @@
 import { useState, useEffect } from 'react'
 import Card from '../components/Card'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { useAuth } from '../contexts/AuthContext'
 
 interface LeaderboardEntry {
   rank: number
-  name: string
-  earnings: number
-  adsWatched: number
+  userId: string
+  displayName: string
+  avatarEmoji: string
+  countryBadge: string | null
+  coins: string
+}
+
+interface CurrentUser {
+  rank: number
+  coins: string
+}
+
+interface LeaderboardResponse {
+  leaderboard: LeaderboardEntry[]
+  currentUser: CurrentUser | null
 }
 
 export default function Leaderboard() {
+  const { session } = useAuth()
   const [loading, setLoading] = useState(true)
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([])
-  const [timeframe, setTimeframe] = useState<'week' | 'month' | 'alltime'>('week')
+  const [data, setData] = useState<LeaderboardResponse>({ leaderboard: [], currentUser: null })
 
   useEffect(() => {
-    setTimeout(() => {
-      setEntries([
-        { rank: 1, name: 'User123', earnings: 4520, adsWatched: 452 },
-        { rank: 2, name: 'ProWatcher', earnings: 3980, adsWatched: 398 },
-        { rank: 3, name: 'EarnMore', earnings: 3540, adsWatched: 354 },
-        { rank: 4, name: 'AdKing', earnings: 3210, adsWatched: 321 },
-        { rank: 5, name: 'RewardSeeker', earnings: 2890, adsWatched: 289 },
-      ])
+    fetchLeaderboard()
+  }, [])
+
+  const fetchLeaderboard = async () => {
+    try {
+      const token = session?.access_token
+      if (!token) {
+        setLoading(false)
+        return
+      }
+
+      const res = await fetch('http://localhost:4000/api/leaderboard', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (res.ok) {
+        const leaderboardData = await res.json()
+        setData(leaderboardData)
+      }
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error)
+    } finally {
       setLoading(false)
-    }, 1000)
-  }, [timeframe])
+    }
+  }
 
   const getRankEmoji = (rank: number) => {
     switch (rank) {
@@ -34,6 +61,10 @@ export default function Leaderboard() {
       case 3: return '🥉'
       default: return `${rank}.`
     }
+  }
+
+  const formatCoins = (coins: string) => {
+    return parseInt(coins).toLocaleString()
   }
 
   if (loading) {
@@ -46,63 +77,61 @@ export default function Leaderboard() {
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
-      <h1 className="text-3xl font-bold text-white mb-6">Leaderboard 🏆</h1>
+      <h1 className="text-3xl font-bold text-white mb-6">🏆 TOP EARNERS</h1>
 
-      <Card className="mb-6">
-        <div className="flex gap-2 mb-4">
-          <button
-            onClick={() => setTimeframe('week')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              timeframe === 'week'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-            }`}
-          >
-            This Week
-          </button>
-          <button
-            onClick={() => setTimeframe('month')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              timeframe === 'month'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-            }`}
-          >
-            This Month
-          </button>
-          <button
-            onClick={() => setTimeframe('alltime')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              timeframe === 'alltime'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-            }`}
-          >
-            All Time
-          </button>
-        </div>
-      </Card>
-
-      <div className="space-y-3">
-        {entries.map((entry) => (
-          <Card key={entry.rank}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <span className="text-2xl font-bold">{getRankEmoji(entry.rank)}</span>
-                <div>
-                  <p className="text-white font-semibold">{entry.name}</p>
-                  <p className="text-gray-400 text-sm">{entry.adsWatched} ads watched</p>
+      {data.leaderboard.length === 0 ? (
+        <Card>
+          <div className="text-center py-12">
+            <p className="text-4xl mb-4">🏆</p>
+            <p className="text-xl text-white mb-2">Be the first to earn coins!</p>
+            <p className="text-gray-400">Start watching ads to appear on the leaderboard</p>
+          </div>
+        </Card>
+      ) : (
+        <>
+          <div className="space-y-3 mb-6">
+            {data.leaderboard.map((entry) => (
+              <Card key={entry.userId}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <span className="text-2xl font-bold min-w-[60px]">
+                      {getRankEmoji(entry.rank)}
+                    </span>
+                    <span className="text-2xl">{entry.avatarEmoji}</span>
+                    <div>
+                      <p className="text-white font-semibold">
+                        {entry.displayName} {entry.countryBadge && entry.countryBadge}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-yellow-500 font-bold text-lg">
+                      {formatCoins(entry.coins)} coins
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <p className="text-green-500 font-bold text-lg">
-                  ${(entry.earnings / 100).toFixed(2)}
+              </Card>
+            ))}
+          </div>
+
+          {data.currentUser && (
+            <Card className="border-2 border-blue-500">
+              <div className="text-center py-4">
+                <p className="text-gray-400 text-sm mb-1">Your Rank</p>
+                <p className="text-white text-2xl font-bold">
+                  #{data.currentUser.rank}
+                </p>
+                <p className="text-yellow-500 text-lg mt-2">
+                  {formatCoins(data.currentUser.coins)} coins
+                </p>
+                <p className="text-green-400 text-sm mt-2">
+                  Keep going! 💪
                 </p>
               </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          )}
+        </>
+      )}
     </div>
   )
 }

@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import EarningsChart from '../components/EarningsChart'
 import TierProgress from '../components/TierProgress'
 import CurrencyDisplay from '../components/CurrencyDisplay'
+import ProfileSetup from '../components/ProfileSetup'
 import { useAuth } from '../contexts/AuthContext'
 
 interface UserBalance {
@@ -25,18 +26,24 @@ interface Transaction {
   createdAt: string
 }
 
+interface UserProfile {
+  walletBalance: number
+  totalEarned: number
+  adsWatched: number
+  tier: string
+  displayName: string | null
+  profileSetupCompleted: boolean
+  createdAt: string
+}
+
 export default function Dashboard() {
   const { user, session } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [balance, setBalance] = useState<UserBalance | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [profile, setProfile] = useState({
-    walletBalance: 0,
-    totalEarned: 0,
-    adsWatched: 0,
-    tier: 'Bronze',
-  })
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [showProfileSetup, setShowProfileSetup] = useState(false)
 
   useEffect(() => {
     fetchDashboardData()
@@ -63,6 +70,11 @@ export default function Dashboard() {
       if (profileRes.ok) {
         const profileData = await profileRes.json()
         setProfile(profileData)
+        
+        // Show profile setup if not completed
+        if (!profileData.profileSetupCompleted) {
+          setShowProfileSetup(true)
+        }
       }
 
       // Fetch recent transactions
@@ -78,6 +90,28 @@ export default function Dashboard() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const getGreeting = () => {
+    if (!profile) return 'Welcome!'
+    
+    const displayName = profile.displayName || user?.email?.split('@')[0] || 'User'
+    const daysSinceCreation = Math.floor(
+      (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+    )
+    
+    // New user (less than 7 days)
+    if (daysSinceCreation < 7) {
+      return `Welcome, ${displayName}! Let's get started 🎉`
+    }
+    
+    return `Welcome back, ${displayName}! 👋`
+  }
+
+  const handleProfileSetupComplete = () => {
+    setShowProfileSetup(false)
+    // Refresh profile data
+    fetchDashboardData()
   }
 
   const earningsData = [
@@ -100,8 +134,11 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
+      {/* Profile Setup Modal */}
+      {showProfileSetup && <ProfileSetup onComplete={handleProfileSetupComplete} />}
+      
       <h1 className="text-3xl font-bold text-white mb-6">
-        Welcome back, {user?.email?.split('@')[0] || 'User'}! 👋
+        {getGreeting()}
       </h1>
 
       {/* Two Wallet System */}
@@ -162,7 +199,7 @@ export default function Dashboard() {
         <Card>
           <div className="text-center">
             <p className="text-gray-400 text-sm mb-2">Ads Watched</p>
-            <p className="text-3xl font-bold text-purple-500">{profile.adsWatched}</p>
+            <p className="text-3xl font-bold text-purple-500">{profile?.adsWatched || 0}</p>
           </div>
         </Card>
 
@@ -178,15 +215,15 @@ export default function Dashboard() {
         <Card>
           <div className="text-center">
             <p className="text-gray-400 text-sm mb-2">Current Tier</p>
-            <p className="text-3xl font-bold text-blue-500">{profile.tier}</p>
+            <p className="text-3xl font-bold text-blue-500">{profile?.tier || 'Bronze'}</p>
           </div>
         </Card>
       </div>
 
       <div className="mb-6">
         <TierProgress
-          currentTier={profile.tier}
-          adsWatched={profile.adsWatched}
+          currentTier={profile?.tier || 'Bronze'}
+          adsWatched={profile?.adsWatched || 0}
           nextTierRequirement={50}
           nextTier="Silver"
         />
