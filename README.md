@@ -6,21 +6,39 @@ Watch video ads, earn real money. Simple, transparent, and rewarding.
 
 ## 🚀 Features
 
+### Core Features
 - **Supabase Authentication** - OAuth integration with Google and Facebook
-- **Ad Viewing System** - Watch ads, earn rewards in real-time
+- **AdMob Integration** - Real AdMob SDK integration for rewarded, interstitial, and banner ads
+- **Video Cap System** - Tier-based daily video limits with forced interstitial logic
+- **Two-Wallet System** - Coins (immediate) + Cash (after conversion)
+- **Multi-Currency Support** - Display in local currency (USD, ZAR, EUR, GBP, NGN, etc.)
+- **PayPal Subscriptions** - Silver ($4.99/month) and Gold ($9.99/month) tiers
+- **PayPal Payouts** - Automated withdrawals in user's local currency
 - **User Dashboard** - Track earnings, stats, and progress
-- **Tier System** - Progress through Bronze, Silver, Gold, Platinum, and Diamond tiers
+- **Tier System** - Bronze (Free), Silver, and Gold tiers
 - **Badges & Achievements** - Unlock badges for milestones
 - **Leaderboard** - Compete with other users
 - **Withdrawal System** - Cash out via PayPal
-- **Admin Panel** - Manage ads, users, and withdrawals
+- **Admin Panel** - Manage ads, users, conversions, and withdrawals
+
+### AdMob Integration
+- **Rewarded Video Ads** - Users earn 85% of ad revenue in coins
+- **Interstitial Ads** - Forced ads for Free tier users (company keeps 100%)
+- **Banner Ads** - Persistent banner at bottom of screen (company keeps 100%)
+
+### Video Cap System
+- **Bronze (Free):** 30 videos/day with forced interstitials every 20 videos
+- **Silver:** 30 videos/day with no forced interstitials
+- **Gold:** 40 videos/day with no forced interstitials
+- **Daily Reset:** Caps reset at midnight in user's timezone
 
 ## 📋 Prerequisites
 
 - Node.js 18+ and npm
 - PostgreSQL database
 - Supabase account ([supabase.com](https://supabase.com))
-- PayPal Developer account (optional, for withdrawals)
+- AdMob account ([admob.google.com](https://admob.google.com)) - for production ad serving
+- PayPal Developer account ([developer.paypal.com](https://developer.paypal.com)) - for subscriptions and payouts
 
 ## 🛠️ Installation
 

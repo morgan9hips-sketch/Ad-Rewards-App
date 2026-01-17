@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import Card from '../components/Card'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -15,7 +14,6 @@ interface SubscriptionStatus {
 }
 
 export default function Subscriptions() {
-  const navigate = useNavigate()
   const { session } = useAuth()
   const [loading, setLoading] = useState(true)
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null)
