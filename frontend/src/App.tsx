@@ -5,6 +5,7 @@ import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
 import CookieConsent from './components/CookieConsent'
 import BetaBanner from './components/BetaBanner'
+import AdBanner from './components/AdBanner'
 import LoadingSpinner from './components/LoadingSpinner'
 
 // Pages
@@ -18,6 +19,7 @@ import Settings from './pages/Settings'
 import Withdrawals from './pages/Withdrawals'
 import Leaderboard from './pages/Leaderboard'
 import Badges from './pages/Badges'
+import Subscriptions from './pages/Subscriptions'
 import AdminPanel from './pages/AdminPanel'
 import AdminConversions from './pages/AdminConversions'
 import AdminLogs from './pages/AdminLogs'
@@ -142,6 +144,14 @@ function AppContent() {
           }
         />
         <Route
+          path="/subscriptions"
+          element={
+            <ProtectedRoute>
+              <Subscriptions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admin"
           element={
             <ProtectedRoute requireAdmin>
@@ -167,7 +177,12 @@ function AppContent() {
         />
       </Routes>
 
-      {isAuthenticated && <BottomNavigation />}
+      {isAuthenticated && (
+        <>
+          <AdBanner />
+          <BottomNavigation />
+        </>
+      )}
       <CookieConsent />
     </div>
   )

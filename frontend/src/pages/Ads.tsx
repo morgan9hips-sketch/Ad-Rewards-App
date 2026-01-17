@@ -3,50 +3,199 @@ import { useNavigate } from 'react-router-dom'
 import Card from '../components/Card'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
-import EmptyState from '../components/EmptyState'
+import VideoCapProgress from '../components/VideoCapProgress'
+import InterstitialPrompt from '../components/InterstitialPrompt'
+import { useAuth } from '../contexts/AuthContext'
+import admobService from '../services/admobService'
 
-interface Ad {
-  id: number
-  title: string
-  description: string
-  durationSeconds: number
-  rewardCents: number
+interface VideoCapStatus {
+  tier: string
+  dailyLimit: number
+  videosWatched: number
+  forcedAdsWatched: number
+  remaining: number
+  canWatchVideo: boolean
+  needsInterstitial: boolean
+  display: {
+    currentProgress: string
+    nextMilestone: string
+    resetTime: string
+  }
 }
 
 export default function Ads() {
   const navigate = useNavigate()
+  const { session } = useAuth()
   const [loading, setLoading] = useState(true)
-  const [ads, setAds] = useState<Ad[]>([])
+  const [videoCapStatus, setVideoCapStatus] = useState<VideoCapStatus | null>(null)
+  const [watching, setWatching] = useState(false)
+  const [showingInterstitial, setShowingInterstitial] = useState(false)
 
   useEffect(() => {
-    // Simulate loading ads
-    setTimeout(() => {
-      setAds([
-        {
-          id: 1,
-          title: 'Product Demo - New Tech Gadget',
-          description: 'Watch our latest product demonstration',
-          durationSeconds: 30,
-          rewardCents: 5,
-        },
-        {
-          id: 2,
-          title: 'Brand Story - Fashion Collection',
-          description: 'Discover our new fashion line',
-          durationSeconds: 45,
-          rewardCents: 8,
-        },
-        {
-          id: 3,
-          title: 'App Tutorial - Productivity Tools',
-          description: 'Learn how to use our app',
-          durationSeconds: 60,
-          rewardCents: 10,
-        },
-      ])
-      setLoading(false)
-    }, 1000)
+    initializeAdMob()
+    fetchVideoCapStatus()
   }, [])
+
+  const initializeAdMob = async () => {
+    try {
+      await admobService.initialize()
+    } catch (error) {
+      console.error('Failed to initialize AdMob:', error)
+    }
+  }
+
+  const fetchVideoCapStatus = async () => {
+    try {
+      const token = session?.access_token
+      if (!token) return
+
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+      const res = await fetch(`${API_URL}/api/videos/daily-cap`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setVideoCapStatus(data)
+      }
+    } catch (error) {
+      console.error('Error fetching video cap status:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleWatchRewardedVideo = async () => {
+    if (!videoCapStatus?.canWatchVideo) return
+
+    setWatching(true)
+    try {
+      // Load and show rewarded ad
+      await admobService.loadRewardedAd()
+      
+      await admobService.showRewardedAd(
+        async (reward) => {
+          console.log('Rewarded:', reward)
+          // Send impression data to backend
+          await trackAdCompletion('rewarded')
+        },
+        () => {
+          console.log('Ad closed')
+          setWatching(false)
+          // Refresh video cap status
+          fetchVideoCapStatus()
+        },
+        (error) => {
+          console.error('Ad failed:', error)
+          setWatching(false)
+        }
+      )
+    } catch (error) {
+      console.error('Error showing rewarded video:', error)
+      setWatching(false)
+    }
+  }
+
+  const handleWatchInterstitial = async () => {
+    setShowingInterstitial(true)
+    try {
+      // Load and show interstitial ad
+      await admobService.loadInterstitialAd()
+      
+      await admobService.showInterstitialAd(
+        async () => {
+          console.log('Interstitial closed')
+          // Record interstitial watch
+          await recordInterstitialWatch()
+          setShowingInterstitial(false)
+          // Refresh video cap status
+          fetchVideoCapStatus()
+        },
+        (error) => {
+          console.error('Interstitial failed:', error)
+          setShowingInterstitial(false)
+        }
+      )
+    } catch (error) {
+      console.error('Error showing interstitial:', error)
+      setShowingInterstitial(false)
+    }
+  }
+
+  const trackAdCompletion = async (adType: 'rewarded' | 'interstitial') => {
+    try {
+      const token = session?.access_token
+      if (!token) return
+
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+      const impressionData = admobService.generateImpressionData(adType)
+
+      // Track ad completion
+      await fetch(`${API_URL}/api/ads/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          adUnitId: adType === 'rewarded' 
+            ? import.meta.env.VITE_ADMOB_REWARDED_ID 
+            : import.meta.env.VITE_ADMOB_INTERSTITIAL_ID,
+          watchedSeconds: adType === 'rewarded' ? 30 : 15,
+          ...impressionData,
+        }),
+      })
+
+      // Track impression for revenue tracking
+      await fetch(`${API_URL}/api/ads/track-impression`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          adType,
+          adUnitId: adType === 'rewarded' 
+            ? import.meta.env.VITE_ADMOB_REWARDED_ID 
+            : import.meta.env.VITE_ADMOB_INTERSTITIAL_ID,
+          revenueUsd: impressionData.estimatedEarnings,
+          country: impressionData.countryCode,
+          currency: impressionData.currency,
+        }),
+      })
+
+      // Record video watch
+      await fetch(`${API_URL}/api/videos/watch-complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ adType }),
+      })
+    } catch (error) {
+      console.error('Error tracking ad completion:', error)
+    }
+  }
+
+  const recordInterstitialWatch = async () => {
+    try {
+      const token = session?.access_token
+      if (!token) return
+
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+      await fetch(`${API_URL}/api/videos/watch-complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ adType: 'interstitial' }),
+      })
+    } catch (error) {
+      console.error('Error recording interstitial watch:', error)
+    }
+  }
 
   if (loading) {
     return (
@@ -56,44 +205,132 @@ export default function Ads() {
     )
   }
 
-  if (ads.length === 0) {
+  if (!videoCapStatus) {
     return (
       <div className="container mx-auto px-4 py-6 pb-24">
-        <h1 className="text-3xl font-bold text-white mb-6">Available Ads 📺</h1>
+        <h1 className="text-3xl font-bold text-white mb-6">Watch Ads 📺</h1>
         <Card>
-          <EmptyState
-            icon="📭"
-            title="No Ads Available"
-            description="Check back later for new ads to watch and earn rewards."
-          />
+          <p className="text-gray-400">Unable to load video status. Please try again.</p>
         </Card>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 pb-24">
-      <h1 className="text-3xl font-bold text-white mb-6">Available Ads 📺</h1>
+    <div className="container mx-auto px-4 py-6 pb-32">
+      <h1 className="text-3xl font-bold text-white mb-6">Watch Ads & Earn 💰</h1>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {ads.map((ad) => (
-          <Card key={ad.id}>
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-semibold text-white">{ad.title}</h3>
-              <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                +${(ad.rewardCents / 100).toFixed(2)}
-              </span>
+      {/* Video cap progress */}
+      <VideoCapProgress
+        videosWatched={videoCapStatus.videosWatched}
+        dailyLimit={videoCapStatus.dailyLimit}
+        tier={videoCapStatus.tier}
+        resetTime={videoCapStatus.display.resetTime}
+        needsInterstitial={videoCapStatus.needsInterstitial}
+      />
+
+      {/* Interstitial prompt for Free tier */}
+      {videoCapStatus.needsInterstitial && (
+        <div className="mb-4">
+          <InterstitialPrompt
+            onWatchAd={handleWatchInterstitial}
+            loading={showingInterstitial}
+          />
+        </div>
+      )}
+
+      {/* Rewarded video card */}
+      <Card>
+        <div className="text-center py-8">
+          <div className="text-6xl mb-4">🎬</div>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            Rewarded Video Ad
+          </h2>
+          <p className="text-gray-400 mb-6">
+            Watch a video ad and earn 100 coins!
+          </p>
+
+          <div className="bg-gray-800 rounded-lg p-4 mb-6 max-w-md mx-auto">
+            <div className="flex items-center justify-center space-x-4">
+              <div className="text-center">
+                <div className="text-yellow-400 font-bold text-2xl">100</div>
+                <div className="text-gray-400 text-sm">Coins</div>
+              </div>
+              <div className="text-gray-500 text-xl">+</div>
+              <div className="text-center">
+                <div className="text-green-400 font-bold text-2xl">85%</div>
+                <div className="text-gray-400 text-sm">Revenue Share</div>
+              </div>
             </div>
-            <p className="text-gray-400 text-sm mb-4">{ad.description}</p>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-500 text-sm">⏱️ {ad.durationSeconds}s</span>
-              <Button size="sm" onClick={() => navigate(`/watch/${ad.id}`)}>
-                Watch Now
-              </Button>
+          </div>
+
+          {videoCapStatus.remaining === 0 ? (
+            <div className="bg-red-900/30 border border-red-600/50 rounded-lg p-4">
+              <p className="text-red-400">
+                🚫 Daily limit reached. Come back tomorrow!
+              </p>
             </div>
-          </Card>
-        ))}
-      </div>
+          ) : videoCapStatus.needsInterstitial ? (
+            <div className="bg-yellow-900/30 border border-yellow-600/50 rounded-lg p-4">
+              <p className="text-yellow-400">
+                ⚠️ Watch the interstitial ad above first
+              </p>
+            </div>
+          ) : (
+            <Button
+              onClick={handleWatchRewardedVideo}
+              disabled={watching || !videoCapStatus.canWatchVideo}
+              className="w-full max-w-md mx-auto bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+            >
+              {watching ? 'Loading Ad...' : 'Watch Video Ad'}
+            </Button>
+          )}
+        </div>
+      </Card>
+
+      {/* Info card */}
+      <Card className="mt-4">
+        <h3 className="text-lg font-semibold text-white mb-3">How it works</h3>
+        <ul className="space-y-2 text-gray-400 text-sm">
+          <li className="flex items-start">
+            <span className="text-green-500 mr-2">1.</span>
+            <span>Click "Watch Video Ad" to load an advertisement</span>
+          </li>
+          <li className="flex items-start">
+            <span className="text-green-500 mr-2">2.</span>
+            <span>Watch the full video (usually 15-30 seconds)</span>
+          </li>
+          <li className="flex items-start">
+            <span className="text-green-500 mr-2">3.</span>
+            <span>Earn 100 coins immediately (85% of ad revenue)</span>
+          </li>
+          <li className="flex items-start">
+            <span className="text-green-500 mr-2">4.</span>
+            <span>Coins convert to cash monthly based on AdMob revenue</span>
+          </li>
+        </ul>
+      </Card>
+
+      {/* Upgrade prompt for Bronze users */}
+      {videoCapStatus.tier === 'Bronze' && (
+        <Card className="mt-4 bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-2 border-purple-600/50">
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-white mb-2">
+              ⭐ Upgrade to Premium
+            </h3>
+            <p className="text-gray-300 mb-4">
+              Remove forced interstitial ads and watch more videos per day!
+            </p>
+            <Button
+              onClick={() => navigate('/subscriptions')}
+              className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+            >
+              View Plans
+            </Button>
+          </div>
+        </Card>
+      )}
     </div>
   )
 }
+
