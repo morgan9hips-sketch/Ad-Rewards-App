@@ -5,6 +5,7 @@ import AvatarSelector from '../components/AvatarSelector'
 import CountrySelector from '../components/CountrySelector'
 import { useAuth } from '../contexts/AuthContext'
 import { useCurrency } from '../contexts/CurrencyContext'
+import { API_BASE_URL } from '../config/api'
 
 export default function Settings() {
   const { user, session } = useAuth()
@@ -33,7 +34,7 @@ export default function Settings() {
       const token = session?.access_token
       if (!token) return
 
-      const res = await fetch('http://localhost:4000/api/user/profile', {
+      const res = await fetch(`${API_BASE_URL}/api/user/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       })
 
@@ -78,7 +79,7 @@ export default function Settings() {
       const token = session?.access_token
       if (!token) return
 
-      const res = await fetch('http://localhost:4000/api/user/profile', {
+      const res = await fetch(`${API_BASE_URL}/api/user/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

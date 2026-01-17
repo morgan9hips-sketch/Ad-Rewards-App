@@ -8,6 +8,7 @@ import TierProgress from '../components/TierProgress'
 import CurrencyDisplay from '../components/CurrencyDisplay'
 import ProfileSetup from '../components/ProfileSetup'
 import { useAuth } from '../contexts/AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 interface UserBalance {
   coins: string
@@ -55,7 +56,7 @@ export default function Dashboard() {
       if (!token) return
 
       // Fetch balance
-      const balanceRes = await fetch('http://localhost:4000/api/user/balance', {
+      const balanceRes = await fetch(`${API_BASE_URL}/api/user/balance`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (balanceRes.ok) {
@@ -64,7 +65,7 @@ export default function Dashboard() {
       }
 
       // Fetch profile
-      const profileRes = await fetch('http://localhost:4000/api/user/profile', {
+      const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (profileRes.ok) {
@@ -78,7 +79,7 @@ export default function Dashboard() {
       }
 
       // Fetch recent transactions
-      const txRes = await fetch('http://localhost:4000/api/user/transactions?perPage=5', {
+      const txRes = await fetch(`${API_BASE_URL}/api/user/transactions?perPage=5`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (txRes.ok) {

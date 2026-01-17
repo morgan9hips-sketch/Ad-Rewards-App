@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { API_BASE_URL } from '../config/api'
 import Card from './Card'
 import Button from './Button'
 import AvatarSelector from './AvatarSelector'
@@ -38,7 +39,7 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
       const token = session?.access_token
       if (!token) return
 
-      const res = await fetch('http://localhost:4000/api/user/detect-country', {
+      const res = await fetch(`${API_BASE_URL}/api/user/detect-country`, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
@@ -103,7 +104,7 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
         return
       }
 
-      const res = await fetch('http://localhost:4000/api/user/setup-profile', {
+      const res = await fetch(`${API_BASE_URL}/api/user/setup-profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

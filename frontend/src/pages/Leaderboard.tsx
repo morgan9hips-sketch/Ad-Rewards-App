@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Card from '../components/Card'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { useAuth } from '../contexts/AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 interface LeaderboardEntry {
   rank: number
@@ -39,7 +40,7 @@ export default function Leaderboard() {
         return
       }
 
-      const res = await fetch('http://localhost:4000/api/leaderboard', {
+      const res = await fetch(`${API_BASE_URL}/api/leaderboard`, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
