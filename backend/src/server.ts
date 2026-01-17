@@ -10,6 +10,9 @@ import withdrawalRoutes from './routes/withdrawals.js'
 import leaderboardRoutes from './routes/leaderboard.js'
 import badgesRoutes from './routes/badges.js'
 import adminRoutes from './routes/admin.js'
+import videosRoutes from './routes/videos.js'
+import subscriptionsRoutes from './routes/subscriptions.js'
+import payoutsRoutes from './routes/payouts.js'
 
 dotenv.config()
 
@@ -30,6 +33,7 @@ app.get('/health', (req, res) => {
 
 // Public routes
 app.use('/api/leaderboard', leaderboardRoutes)
+app.use('/api/subscriptions/webhook', subscriptionsRoutes) // Webhook should be public
 
 // Protected routes
 app.use('/api/user', authenticate, userRoutes)
@@ -37,6 +41,9 @@ app.use('/api/ads', authenticate, adsRoutes)
 app.use('/api/withdrawals', authenticate, withdrawalRoutes)
 app.use('/api/badges', authenticate, badgesRoutes)
 app.use('/api/admin', authenticate, adminRoutes)
+app.use('/api/videos', authenticate, videosRoutes)
+app.use('/api/subscriptions', authenticate, subscriptionsRoutes)
+app.use('/api/payouts', authenticate, payoutsRoutes)
 
 // Error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
