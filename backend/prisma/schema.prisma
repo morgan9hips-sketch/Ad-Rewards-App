@@ -51,6 +51,19 @@ model UserProfile {
   adsWatched             Int      @default(0) @map("ads_watched")
   tier                   String   @default("Bronze")
   role                   UserRole @default(USER)
+  
+  // Video cap tracking
+  dailyVideosWatched     Int      @default(0) @map("daily_videos_watched")
+  lastVideoResetAt       DateTime @default(now()) @map("last_video_reset_at")
+  forcedAdsWatched       Int      @default(0) @map("forced_ads_watched")
+  
+  // Subscription tracking
+  subscriptionId         String?  @map("subscription_id")
+  subscriptionStatus     String?  @map("subscription_status")
+  subscriptionPlanId     String?  @map("subscription_plan_id")
+  subscriptionStartDate  DateTime? @map("subscription_start_date")
+  subscriptionEndDate    DateTime? @map("subscription_end_date")
+  
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
   
@@ -61,6 +74,7 @@ model UserProfile {
   conversionDetails      ConversionDetail[]
   locationConversions    LocationConversion[]
   adminActions           AdminAction[] @relation("AdminActions")
+  adImpressions          AdImpression[]
   
   @@map("user_profiles")
 }
@@ -299,4 +313,23 @@ model LocationConversion {
   @@map("location_conversions")
   @@index([poolId])
   @@index([userId])
+}
+
+model AdImpression {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  user              UserProfile @relation(fields: [userId], references: [userId])
+  adType            String   @map("ad_type")  // 'rewarded', 'interstitial', 'banner'
+  adUnitId          String   @map("ad_unit_id")
+  revenueUsd        Decimal  @default(0) @db.Decimal(12, 4) @map("revenue_usd")
+  userEarningsUsd   Decimal  @default(0) @db.Decimal(12, 4) @map("user_earnings_usd")
+  companyRevenueUsd Decimal  @default(0) @db.Decimal(12, 4) @map("company_revenue_usd")
+  country           String
+  currency          String
+  impressionDate    DateTime @default(now()) @map("impression_date")
+  
+  @@map("ad_impressions")
+  @@index([userId])
+  @@index([adType])
+  @@index([impressionDate])
 }

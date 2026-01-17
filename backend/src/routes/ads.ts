@@ -234,4 +234,65 @@ router.post('/complete', async (req: AuthRequest, res) => {
   }
 })
 
+// Track ad impression with revenue data
+router.post('/track-impression', async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id
+    const {
+      adType,  // 'rewarded', 'interstitial', 'banner'
+      adUnitId,
+      revenueUsd,
+      country,
+      currency,
+    } = req.body
+
+    // Validate required fields
+    if (!adType || !adUnitId || !country) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: adType, adUnitId, country',
+      })
+    }
+
+    // Calculate revenue split based on ad type
+    let userEarningsUsd = 0
+    let companyRevenueUsd = parseFloat(revenueUsd || '0')
+
+    if (adType === 'rewarded') {
+      // 85/15 split for rewarded ads
+      const userShare = parseFloat(process.env.USER_REVENUE_SHARE || '0.85')
+      userEarningsUsd = companyRevenueUsd * userShare
+      companyRevenueUsd = companyRevenueUsd * (1 - userShare)
+    }
+    // For interstitial and banner: user gets 0%, company gets 100%
+
+    // Create ad impression record
+    const impression = await prisma.adImpression.create({
+      data: {
+        userId,
+        adType,
+        adUnitId,
+        revenueUsd: parseFloat(revenueUsd || '0'),
+        userEarningsUsd,
+        companyRevenueUsd,
+        country,
+        currency: currency || 'USD',
+      },
+    })
+
+    res.json({
+      success: true,
+      impressionId: impression.id,
+      userEarningsUsd,
+      companyRevenueUsd,
+    })
+  } catch (error) {
+    console.error('Error tracking ad impression:', error)
+    res.status(500).json({
+      success: false,
+      error: 'Failed to track ad impression',
+    })
+  }
+})
+
 export default router

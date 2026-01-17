@@ -25,22 +25,25 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
 // INR - Indian Rupee, NGN - Nigerian Naira, BRL - Brazilian Real, MXN - Mexican Peso
 export const SUPPORTED_CURRENCIES = ['USD', 'ZAR', 'EUR', 'GBP', 'CAD', 'AUD', 'INR', 'NGN', 'BRL', 'MXN']
 
-// Currency formatting configuration
+// Currency formatting configuration with subscription pricing
 export const CURRENCY_FORMATS: Record<string, {
   symbol: string
   decimals: number
   position: 'before' | 'after'
+  silverPrice: number
+  goldPrice: number
+  minWithdrawal: number
 }> = {
-  'USD': { symbol: '$', decimals: 2, position: 'before' },
-  'ZAR': { symbol: 'R', decimals: 2, position: 'before' },
-  'EUR': { symbol: '€', decimals: 2, position: 'before' },
-  'GBP': { symbol: '£', decimals: 2, position: 'before' },
-  'CAD': { symbol: 'C$', decimals: 2, position: 'before' },
-  'AUD': { symbol: 'A$', decimals: 2, position: 'before' },
-  'INR': { symbol: '₹', decimals: 2, position: 'before' },
-  'NGN': { symbol: '₦', decimals: 2, position: 'before' },
-  'BRL': { symbol: 'R$', decimals: 2, position: 'before' },
-  'MXN': { symbol: 'MX$', decimals: 2, position: 'before' }
+  'USD': { symbol: '$', decimals: 2, position: 'before', silverPrice: 4.99, goldPrice: 9.99, minWithdrawal: 10 },
+  'ZAR': { symbol: 'R', decimals: 2, position: 'before', silverPrice: 89, goldPrice: 179, minWithdrawal: 180 },
+  'EUR': { symbol: '€', decimals: 2, position: 'before', silverPrice: 4.99, goldPrice: 9.99, minWithdrawal: 10 },
+  'GBP': { symbol: '£', decimals: 2, position: 'before', silverPrice: 4.49, goldPrice: 8.99, minWithdrawal: 8 },
+  'NGN': { symbol: '₦', decimals: 2, position: 'before', silverPrice: 3500, goldPrice: 7000, minWithdrawal: 7000 },
+  'CAD': { symbol: 'C$', decimals: 2, position: 'before', silverPrice: 6.99, goldPrice: 13.99, minWithdrawal: 15 },
+  'AUD': { symbol: 'A$', decimals: 2, position: 'before', silverPrice: 7.99, goldPrice: 15.99, minWithdrawal: 15 },
+  'INR': { symbol: '₹', decimals: 2, position: 'before', silverPrice: 399, goldPrice: 799, minWithdrawal: 800 },
+  'BRL': { symbol: 'R$', decimals: 2, position: 'before', silverPrice: 24.99, goldPrice: 49.99, minWithdrawal: 50 },
+  'MXN': { symbol: 'MX$', decimals: 2, position: 'before', silverPrice: 89.99, goldPrice: 179.99, minWithdrawal: 180 }
 }
 
 export interface UserCurrencyInfo {
