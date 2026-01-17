@@ -86,6 +86,7 @@ model UserProfile {
   adImpressions          AdImpression[]
   
   @@map("user_profiles")
+  @@index([totalCoinsEarned(sort: Desc), showOnLeaderboard])
 }
 
 model Ad {
