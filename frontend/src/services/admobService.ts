@@ -1,6 +1,5 @@
-// AdMob Service for Web
-// Note: For production mobile apps, use native AdMob SDKs
-// This is a mock implementation for web testing
+import { AdMob, RewardedAdPluginEvents, InterstitialAdPluginEvents, BannerAdPluginEvents, AdMobBannerSize } from '@capacitor-community/admob';
+import { Capacitor } from '@capacitor/core';
 
 interface AdMobConfig {
   appId: string
@@ -12,6 +11,7 @@ interface AdMobConfig {
 class AdMobService {
   private config: AdMobConfig
   private initialized: boolean = false
+  private isNative: boolean = false
 
   constructor() {
     this.config = {
@@ -20,20 +20,37 @@ class AdMobService {
       interstitialAdUnitId: import.meta.env.VITE_ADMOB_INTERSTITIAL_ID || '',
       bannerAdUnitId: import.meta.env.VITE_ADMOB_BANNER_ID || '',
     }
+    
+    // Check if running in native Capacitor app
+    this.isNative = Capacitor.isNativePlatform()
   }
 
   async initialize(): Promise<void> {
     if (this.initialized) return
 
     console.log('🎬 Initializing AdMob SDK...')
+    console.log('Platform:', this.isNative ? 'Native (Android/iOS)' : 'Web')
     console.log('App ID:', this.config.appId)
     
-    // In a real mobile app, you would initialize the AdMob SDK here
-    // For web, we'll simulate the initialization
-    await this.simulateDelay(500)
+    if (this.isNative) {
+      // Real AdMob initialization for native app
+      try {
+        await AdMob.initialize({
+          testingDevices: ['YOUR_TEST_DEVICE_ID'], // Add your test device ID
+          initializeForTesting: import.meta.env.DEV, // Use test ads in development
+        })
+        console.log('✅ Real AdMob SDK initialized')
+      } catch (error) {
+        console.error('❌ AdMob initialization failed:', error)
+        throw error
+      }
+    } else {
+      // Mock for web browser testing
+      await this.simulateDelay(500)
+      console.log('✅ Mock AdMob initialized (web browser)')
+    }
     
     this.initialized = true
-    console.log('✅ AdMob SDK initialized')
   }
 
   async loadRewardedAd(): Promise<void> {
@@ -42,7 +59,17 @@ class AdMobService {
     }
 
     console.log('📥 Loading rewarded ad...')
-    await this.simulateDelay(1000)
+    
+    if (this.isNative) {
+      // Real AdMob: Prepare rewarded ad
+      await AdMob.prepareRewardedVideoAd({
+        adId: this.config.rewardedAdUnitId,
+      })
+    } else {
+      // Mock: Simulate loading
+      await this.simulateDelay(1000)
+    }
+    
     console.log('✅ Rewarded ad loaded')
   }
 
@@ -54,18 +81,45 @@ class AdMobService {
     try {
       console.log('🎥 Showing rewarded ad...')
       
-      // Simulate ad display
-      await this.simulateDelay(2000)
-      
-      // Simulate ad completion and reward
-      const reward = { amount: 100, type: 'coins' }
-      onRewarded(reward)
-      console.log('💰 User earned reward:', reward)
-      
-      // Simulate ad closed
-      await this.simulateDelay(500)
-      onAdClosed()
-      console.log('✅ Rewarded ad closed')
+      if (this.isNative) {
+        // Real AdMob: Show rewarded video ad
+        
+        // Set up reward listener
+        AdMob.addListener(RewardedAdPluginEvents.Rewarded, (reward) => {
+          console.log('💰 User earned reward:', reward)
+          onRewarded({ amount: 100, type: 'coins' })
+        })
+        
+        // Set up dismissed listener
+        AdMob.addListener(RewardedAdPluginEvents.Dismissed, () => {
+          console.log('✅ Rewarded ad closed')
+          onAdClosed()
+          // Clean up listeners
+          AdMob.removeAllListeners()
+        })
+        
+        // Set up failed listener
+        AdMob.addListener(RewardedAdPluginEvents.FailedToShow, (error) => {
+          console.error('❌ Failed to show rewarded ad:', error)
+          onAdFailedToShow(error.message || 'Unknown error')
+          AdMob.removeAllListeners()
+        })
+        
+        // Show the ad
+        await AdMob.showRewardedVideoAd()
+        
+      } else {
+        // Mock: Simulate ad display
+        await this.simulateDelay(2000)
+        
+        const reward = { amount: 100, type: 'coins' }
+        onRewarded(reward)
+        console.log('💰 User earned reward (mock):', reward)
+        
+        await this.simulateDelay(500)
+        onAdClosed()
+        console.log('✅ Rewarded ad closed (mock)')
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       onAdFailedToShow(errorMessage)
@@ -79,7 +133,15 @@ class AdMobService {
     }
 
     console.log('📥 Loading interstitial ad...')
-    await this.simulateDelay(1000)
+    
+    if (this.isNative) {
+      await AdMob.prepareInterstitial({
+        adId: this.config.interstitialAdUnitId,
+      })
+    } else {
+      await this.simulateDelay(1000)
+    }
+    
     console.log('✅ Interstitial ad loaded')
   }
 
@@ -90,12 +152,25 @@ class AdMobService {
     try {
       console.log('🎥 Showing interstitial ad...')
       
-      // Simulate ad display
-      await this.simulateDelay(3000)
-      
-      // Simulate ad closed
-      onAdClosed()
-      console.log('✅ Interstitial ad closed')
+      if (this.isNative) {
+        AdMob.addListener(InterstitialAdPluginEvents.Dismissed, () => {
+          console.log('✅ Interstitial ad closed')
+          onAdClosed()
+          AdMob.removeAllListeners()
+        })
+        
+        AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (error) => {
+          console.error('❌ Failed to show interstitial ad:', error)
+          onAdFailedToShow(error.message || 'Unknown error')
+          AdMob.removeAllListeners()
+        })
+        
+        await AdMob.showInterstitial()
+      } else {
+        await this.simulateDelay(3000)
+        onAdClosed()
+        console.log('✅ Interstitial ad closed (mock)')
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       onAdFailedToShow(errorMessage)
@@ -103,40 +178,30 @@ class AdMobService {
     }
   }
 
-  loadBannerAd(containerId: string): void {
+  async showBannerAd(): Promise<void> {
     if (!this.initialized) {
       throw new Error('AdMob not initialized. Call initialize() first.')
     }
 
-    console.log('📥 Loading banner ad in container:', containerId)
-    
-    // In a real app, you would load the banner ad here
-    // For web simulation, we'll create a placeholder banner
-    const container = document.getElementById(containerId)
-    if (container) {
-      container.innerHTML = `
-        <div style="
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          padding: 10px;
-          text-align: center;
-          font-size: 12px;
-          border-radius: 4px;
-        ">
-          📱 AdMob Banner (${this.config.bannerAdUnitId.substring(0, 20)}...)
-        </div>
-      `
+    if (this.isNative) {
+      console.log('📺 Showing banner ad...')
+      await AdMob.showBanner({
+        adId: this.config.bannerAdUnitId,
+        adSize: AdMobBannerSize.BANNER,
+        position: 'BOTTOM_CENTER',
+        margin: 0,
+      })
+      console.log('✅ Banner ad shown')
+    } else {
+      console.log('⚠️ Banner ads only work in native app')
     }
-    
-    console.log('✅ Banner ad loaded')
   }
 
-  hideBannerAd(containerId: string): void {
-    const container = document.getElementById(containerId)
-    if (container) {
-      container.innerHTML = ''
+  async hideBannerAd(): Promise<void> {
+    if (this.isNative) {
+      await AdMob.hideBanner()
+      console.log('✅ Banner ad hidden')
     }
-    console.log('👻 Banner ad hidden')
   }
 
   private simulateDelay(ms: number): Promise<void> {
@@ -180,6 +245,52 @@ class AdMobService {
     
     // Calculate revenue (CPM / 1000)
     return cpmRates[adType] / 1000
+  }
+
+  // Legacy methods for backward compatibility with existing code
+  loadBannerAd(containerId: string): void {
+    if (!this.initialized) {
+      throw new Error('AdMob not initialized. Call initialize() first.')
+    }
+
+    console.log('📥 Loading banner ad in container:', containerId)
+    
+    if (this.isNative) {
+      // For native, use showBannerAd() instead
+      this.showBannerAd()
+    } else {
+      // In a real app, you would load the banner ad here
+      // For web simulation, we'll create a placeholder banner
+      const container = document.getElementById(containerId)
+      if (container) {
+        container.innerHTML = `
+          <div style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            border-radius: 4px;
+          ">
+            📱 AdMob Banner (${this.config.bannerAdUnitId.substring(0, 20)}...)
+          </div>
+        `
+      }
+    }
+    
+    console.log('✅ Banner ad loaded')
+  }
+
+  hideBannerAdLegacy(containerId: string): void {
+    if (this.isNative) {
+      this.hideBannerAd()
+    } else {
+      const container = document.getElementById(containerId)
+      if (container) {
+        container.innerHTML = ''
+      }
+      console.log('👻 Banner ad hidden')
+    }
   }
 }
 

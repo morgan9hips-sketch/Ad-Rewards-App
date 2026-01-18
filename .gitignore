@@ -1,6 +1,7 @@
 node_modules/
 .env
 .env.local
+.env.development
 .env.production
 dist/
 build/
@@ -13,8 +14,20 @@ coverage/
 # Frontend
 frontend/dist/
 frontend/node_modules/
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
 
 # Backend
 backend/dist/
 backend/node_modules/
 backend/.env
+backend/.env.local
+backend/.env.development
+backend/.env.production
+
+# Capacitor
+frontend/android/
+frontend/ios/
+frontend/.capacitor/
