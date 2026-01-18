@@ -3,6 +3,12 @@ import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 import Card from './Card'
 
+// Expiry configuration constants (must match backend)
+const COIN_EXPIRY_DAYS = 30
+const COIN_WARNING_THRESHOLD_DAYS = 7
+const CASH_EXPIRY_DAYS = 90
+const CASH_WARNING_THRESHOLD_DAYS = 14
+
 interface ExpiryStatus {
   coinsExpiring: boolean
   coinsDaysLeft: number
@@ -41,13 +47,13 @@ export default function ExpiryWarning() {
         const coinsBalance = Number(profile.coinsBalance || 0)
         const cashBalance = Number(profile.cashBalanceUsd || 0)
 
-        // Check coin expiry (30 days)
-        const coinsDaysLeft = 30 - daysSinceLogin
-        const coinsExpiring = coinsDaysLeft <= 7 && coinsDaysLeft > 0 && coinsBalance > 0
+        // Check coin expiry
+        const coinsDaysLeft = COIN_EXPIRY_DAYS - daysSinceLogin
+        const coinsExpiring = coinsDaysLeft <= COIN_WARNING_THRESHOLD_DAYS && coinsDaysLeft > 0 && coinsBalance > 0
 
-        // Check cash expiry (90 days)
-        const cashDaysLeft = 90 - daysSinceLogin
-        const cashExpiring = cashDaysLeft <= 14 && cashDaysLeft > 0 && cashBalance > 0
+        // Check cash expiry
+        const cashDaysLeft = CASH_EXPIRY_DAYS - daysSinceLogin
+        const cashExpiring = cashDaysLeft <= CASH_WARNING_THRESHOLD_DAYS && cashDaysLeft > 0 && cashBalance > 0
 
         if (coinsExpiring || cashExpiring) {
           setExpiryStatus({

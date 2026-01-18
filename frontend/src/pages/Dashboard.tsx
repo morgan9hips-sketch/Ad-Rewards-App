@@ -11,6 +11,10 @@ import ExpiryWarning from '../components/ExpiryWarning'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 
+// UI configuration constants
+const NEW_USER_THRESHOLD_HOURS = 24
+const CONVERSION_THRESHOLD_COINS = 150000
+
 interface UserBalance {
   coins: string
   cashUSD: string
@@ -102,8 +106,8 @@ export default function Dashboard() {
       (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60)
     )
     
-    // New user (less than 24 hours)
-    if (hoursSinceCreation < 24) {
+    // New user check
+    if (hoursSinceCreation < NEW_USER_THRESHOLD_HOURS) {
       return `Welcome, ${displayName}! 🎉`
     }
     
@@ -117,8 +121,8 @@ export default function Dashboard() {
       (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60)
     )
     
-    // New user (less than 24 hours)
-    if (hoursSinceCreation < 24) {
+    // New user sub-greeting
+    if (hoursSinceCreation < NEW_USER_THRESHOLD_HOURS) {
       return 'Ready to start earning? Watch your first ad below!'
     }
     
@@ -177,8 +181,8 @@ export default function Dashboard() {
             </p>
             <p className="text-sm text-gray-400 mb-2">(Pending Conversion)</p>
             
-            {/* Progress to 150k threshold info */}
-            {balance && parseInt(balance.coins) < 150000 && (
+            {/* Progress to conversion threshold */}
+            {balance && parseInt(balance.coins) < CONVERSION_THRESHOLD_COINS && (
               <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
                 <p className="text-xs text-gray-300 mb-2">
                   📊 Progress to monthly conversion
@@ -186,11 +190,11 @@ export default function Dashboard() {
                 <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                   <div
                     className="bg-green-500 h-2 rounded-full transition-all"
-                    style={{ width: `${Math.min(100, (parseInt(balance.coins) / 150000) * 100)}%` }}
+                    style={{ width: `${Math.min(100, (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) * 100)}%` }}
                   />
                 </div>
                 <p className="text-xs text-gray-400">
-                  {parseInt(balance.coins).toLocaleString()} / 150,000 coins ({Math.floor((parseInt(balance.coins) / 150000) * 100)}%)
+                  {parseInt(balance.coins).toLocaleString()} / {CONVERSION_THRESHOLD_COINS.toLocaleString()} coins ({Math.floor((parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) * 100)}%)
                 </p>
               </div>
             )}

@@ -3,19 +3,24 @@ import cron from 'node-cron'
 
 const prisma = new PrismaClient()
 
+// Expiry configuration constants
+const COIN_EXPIRY_DAYS = 30
+const CASH_EXPIRY_DAYS = 90
+const COINS_TO_ZAR_RATE = 1000 // 1000 coins = R1 ZAR
+
 /**
  * Expire coin balances after 30 days of inactivity
  */
 async function expireCoins() {
-  const thirtyDaysAgo = new Date()
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+  const expiryDate = new Date()
+  expiryDate.setDate(expiryDate.getDate() - COIN_EXPIRY_DAYS)
 
   try {
     // Find users with coins and inactive for 30+ days
     const inactiveUsers = await prisma.userProfile.findMany({
       where: {
         lastLogin: {
-          lt: thirtyDaysAgo,
+          lt: expiryDate,
         },
         coinsBalance: {
           gt: 0,
@@ -33,8 +38,8 @@ async function expireCoins() {
 
     for (const user of inactiveUsers) {
       const coins = Number(user.coinsBalance)
-      // Using 1000 coins = R1 (ZAR) conversion rate
-      const cashValue = coins / 1000
+      // Using configured coins to ZAR conversion rate
+      const cashValue = coins / COINS_TO_ZAR_RATE
 
       // Log expiry
       await prisma.expiredBalance.create({
@@ -80,15 +85,15 @@ async function expireCoins() {
  * Expire cash balances after 90 days of inactivity
  */
 async function expireCash() {
-  const ninetyDaysAgo = new Date()
-  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+  const expiryDate = new Date()
+  expiryDate.setDate(expiryDate.getDate() - CASH_EXPIRY_DAYS)
 
   try {
     // Find users with cash and inactive for 90+ days
     const inactiveUsers = await prisma.userProfile.findMany({
       where: {
         lastLogin: {
-          lt: ninetyDaysAgo,
+          lt: expiryDate,
         },
         cashBalanceUsd: {
           gt: 0,
