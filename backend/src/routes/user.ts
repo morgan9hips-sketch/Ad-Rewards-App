@@ -3,10 +3,55 @@ import { PrismaClient } from '@prisma/client'
 import { AuthRequest } from '../middleware/auth.js'
 import { getExchangeRate, convertFromUSD, getUserCurrencyInfo } from '../services/currencyService.js'
 import { getUserTransactions } from '../services/transactionService.js'
-import { getClientIP } from '../services/geoService.js'
+import { getClientIP, detectCountryFromIP } from '../services/geoService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
+
+// Setup user profile (first-time setup)
+router.post('/setup-profile', async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id
+    const { displayName, avatarEmoji, avatarUrl, countryBadge, hideCountry, showOnLeaderboard } = req.body
+
+    // Validate display name
+    if (displayName) {
+      if (displayName.length < 3 || displayName.length > 20) {
+        return res.status(400).json({ error: 'Display name must be between 3 and 20 characters' })
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(displayName)) {
+        return res.status(400).json({ error: 'Display name can only contain letters, numbers, and underscores' })
+      }
+
+      // Check if display name is already taken
+      const existingUser = await prisma.userProfile.findUnique({
+        where: { displayName },
+      })
+      if (existingUser && existingUser.userId !== userId) {
+        return res.status(400).json({ error: 'Display name is already taken' })
+      }
+    }
+
+    // Update profile
+    const profile = await prisma.userProfile.update({
+      where: { userId },
+      data: {
+        displayName: displayName || undefined,
+        avatarEmoji: avatarEmoji || undefined,
+        avatarUrl: avatarUrl || undefined,
+        countryBadge: countryBadge || undefined,
+        hideCountry: hideCountry !== undefined ? hideCountry : false,
+        showOnLeaderboard: showOnLeaderboard !== undefined ? showOnLeaderboard : true,
+        profileSetupCompleted: true,
+      },
+    })
+
+    res.json(profile)
+  } catch (error) {
+    console.error('Error setting up profile:', error)
+    res.status(500).json({ error: 'Failed to setup profile' })
+  }
+})
 
 // Get user profile
 router.get('/profile', async (req: AuthRequest, res) => {
@@ -38,7 +83,19 @@ router.get('/profile', async (req: AuthRequest, res) => {
 router.put('/profile', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
-    const { name, country, paypalEmail, preferredCurrency, autoDetectCurrency } = req.body
+    const { 
+      name, 
+      country, 
+      paypalEmail, 
+      preferredCurrency, 
+      autoDetectCurrency,
+      displayName,
+      avatarEmoji,
+      avatarUrl,
+      countryBadge,
+      hideCountry,
+      showOnLeaderboard
+    } = req.body
 
     const updateData: any = {}
     if (name !== undefined) updateData.name = name
@@ -46,6 +103,34 @@ router.put('/profile', async (req: AuthRequest, res) => {
     if (paypalEmail !== undefined) updateData.paypalEmail = paypalEmail
     if (preferredCurrency !== undefined) updateData.preferredCurrency = preferredCurrency
     if (autoDetectCurrency !== undefined) updateData.autoDetectCurrency = autoDetectCurrency
+    
+    // Validate and update display name
+    if (displayName !== undefined) {
+      if (displayName && (displayName.length < 3 || displayName.length > 20)) {
+        return res.status(400).json({ error: 'Display name must be between 3 and 20 characters' })
+      }
+      if (displayName && !/^[a-zA-Z0-9_]+$/.test(displayName)) {
+        return res.status(400).json({ error: 'Display name can only contain letters, numbers, and underscores' })
+      }
+
+      // Check if display name is already taken
+      if (displayName) {
+        const existingUser = await prisma.userProfile.findUnique({
+          where: { displayName },
+        })
+        if (existingUser && existingUser.userId !== userId) {
+          return res.status(400).json({ error: 'Display name is already taken' })
+        }
+      }
+      
+      updateData.displayName = displayName || null
+    }
+    
+    if (avatarEmoji !== undefined) updateData.avatarEmoji = avatarEmoji
+    if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl
+    if (countryBadge !== undefined) updateData.countryBadge = countryBadge
+    if (hideCountry !== undefined) updateData.hideCountry = hideCountry
+    if (showOnLeaderboard !== undefined) updateData.showOnLeaderboard = showOnLeaderboard
 
     const profile = await prisma.userProfile.update({
       where: { userId },
@@ -134,6 +219,22 @@ router.get('/transactions', async (req: AuthRequest, res) => {
   } catch (error) {
     console.error('Error fetching transactions:', error)
     res.status(500).json({ error: 'Failed to fetch transactions' })
+  }
+})
+
+// Detect country from IP
+router.get('/detect-country', async (req: AuthRequest, res) => {
+  try {
+    const ipAddress = getClientIP(req)
+    const countryCode = detectCountryFromIP(ipAddress)
+    
+    res.json({ 
+      countryCode,
+      ipAddress: ipAddress !== 'unknown' ? ipAddress : null
+    })
+  } catch (error) {
+    console.error('Error detecting country:', error)
+    res.status(500).json({ error: 'Failed to detect country' })
   }
 })
 

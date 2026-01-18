@@ -64,6 +64,15 @@ model UserProfile {
   subscriptionStartDate  DateTime? @map("subscription_start_date")
   subscriptionEndDate    DateTime? @map("subscription_end_date")
   
+  // Profile setup and personalization
+  displayName            String?  @unique @map("display_name")
+  avatarUrl              String?  @map("avatar_url")
+  avatarEmoji            String?  @map("avatar_emoji")
+  showOnLeaderboard      Boolean  @default(true) @map("show_on_leaderboard")
+  profileSetupCompleted  Boolean  @default(false) @map("profile_setup_completed")
+  countryBadge           String?  @map("country_badge")  // ISO country code (ZA, US, GB)
+  hideCountry            Boolean  @default(false) @map("hide_country")
+  
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
   
@@ -77,6 +86,7 @@ model UserProfile {
   adImpressions          AdImpression[]
   
   @@map("user_profiles")
+  @@index([totalCoinsEarned(sort: Desc), showOnLeaderboard])
 }
 
 model Ad {
