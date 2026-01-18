@@ -714,4 +714,121 @@ router.get('/logs', async (req: AuthRequest, res) => {
   }
 })
 
+/**
+ * Get expiry income report
+ */
+router.get('/expiry-report', logAdminAction('VIEW_EXPIRY_REPORT'), async (req: AuthRequest, res) => {
+  try {
+    // Get this month's date range
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+
+    // Get this month's expired balances
+    const thisMonthExpired = await prisma.expiredBalance.findMany({
+      where: {
+        expiredAt: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      },
+    })
+
+    // Calculate this month's stats
+    const thisMonthCoins = thisMonthExpired.filter(e => e.expiryType === 'coins')
+    const thisMonthCash = thisMonthExpired.filter(e => e.expiryType === 'cash')
+
+    const thisMonthStats = {
+      expiredCoins: {
+        amount: thisMonthCoins.reduce((sum, e) => sum + Number(e.amount), 0),
+        value: thisMonthCoins.reduce((sum, e) => sum + Number(e.cashValue), 0),
+        count: thisMonthCoins.length,
+      },
+      expiredCash: {
+        amount: thisMonthCash.reduce((sum, e) => sum + Number(e.amount), 0),
+        value: thisMonthCash.reduce((sum, e) => sum + Number(e.cashValue), 0),
+        count: thisMonthCash.length,
+      },
+      total: 0,
+    }
+
+    thisMonthStats.total = thisMonthStats.expiredCoins.value + thisMonthStats.expiredCash.value
+
+    // Get all-time stats
+    const allTimeExpired = await prisma.expiredBalance.findMany()
+
+    const allTimeTotal = allTimeExpired.reduce((sum, e) => sum + Number(e.cashValue), 0)
+
+    // Get unique users affected this month
+    const uniqueUsers = new Set(thisMonthExpired.map(e => e.userId))
+
+    res.json({
+      thisMonth: {
+        ...thisMonthStats,
+        usersAffected: uniqueUsers.size,
+      },
+      allTime: {
+        total: allTimeTotal,
+        recordCount: allTimeExpired.length,
+      },
+    })
+  } catch (error) {
+    console.error('Error fetching expiry report:', error)
+    res.status(500).json({ error: 'Failed to fetch expiry report' })
+  }
+})
+
+/**
+ * Get paginated list of expired balances
+ */
+router.get('/expired-balances', logAdminAction('VIEW_EXPIRED_BALANCES'), async (req: AuthRequest, res) => {
+  try {
+    const { page = 1, limit = 50, type, userId } = req.query
+
+    const where: any = {}
+    if (type) where.expiryType = type
+    if (userId) where.userId = userId as string
+
+    const expiredBalances = await prisma.expiredBalance.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            email: true,
+            displayName: true,
+          },
+        },
+      },
+      orderBy: { expiredAt: 'desc' },
+      skip: (parseInt(page as string) - 1) * parseInt(limit as string),
+      take: parseInt(limit as string),
+    })
+
+    const total = await prisma.expiredBalance.count({ where })
+
+    res.json({
+      balances: expiredBalances.map(b => ({
+        id: b.id,
+        userId: b.userId,
+        userEmail: b.user.email,
+        displayName: b.user.displayName || 'N/A',
+        type: b.expiryType,
+        amount: Number(b.amount).toFixed(2),
+        cashValue: Number(b.cashValue).toFixed(2),
+        reason: b.reason,
+        expiredAt: b.expiredAt,
+      })),
+      pagination: {
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        total,
+        pages: Math.ceil(total / parseInt(limit as string)),
+      },
+    })
+  } catch (error) {
+    console.error('Error fetching expired balances:', error)
+    res.status(500).json({ error: 'Failed to fetch expired balances' })
+  }
+})
+
 export default router
