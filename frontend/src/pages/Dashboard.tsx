@@ -175,7 +175,25 @@ export default function Dashboard() {
             <p className="text-4xl font-bold text-yellow-500 mb-3">
               {balance ? parseInt(balance.coins).toLocaleString() : '0'} Coins
             </p>
-            <p className="text-sm text-gray-400 mb-2">(Pending)</p>
+            <p className="text-sm text-gray-400 mb-2">(Pending Conversion)</p>
+            
+            {/* Progress to 150k threshold info */}
+            {balance && parseInt(balance.coins) < 150000 && (
+              <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
+                <p className="text-xs text-gray-300 mb-2">
+                  📊 Progress to monthly conversion
+                </p>
+                <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                  <div
+                    className="bg-green-500 h-2 rounded-full transition-all"
+                    style={{ width: `${Math.min(100, (parseInt(balance.coins) / 150000) * 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400">
+                  {parseInt(balance.coins).toLocaleString()} / 150,000 coins ({Math.floor((parseInt(balance.coins) / 150000) * 100)}%)
+                </p>
+              </div>
+            )}
             
             <div className="bg-gray-800 p-3 rounded-lg mt-4">
               <p className="text-xs text-gray-300 mb-2">
