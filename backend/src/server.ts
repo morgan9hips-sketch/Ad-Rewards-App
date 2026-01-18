@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import { authenticate } from './middleware/auth.js'
+import { scheduleExpiryJob } from './jobs/expireBalances.js'
 
 // Import routes
 import userRoutes from './routes/user.js'
@@ -56,4 +57,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`)
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
+  
+  // Start balance expiry cron job
+  scheduleExpiryJob()
 })

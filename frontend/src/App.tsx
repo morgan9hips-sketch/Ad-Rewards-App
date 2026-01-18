@@ -23,6 +23,7 @@ import Subscriptions from './pages/Subscriptions'
 import AdminPanel from './pages/AdminPanel'
 import AdminConversions from './pages/AdminConversions'
 import AdminLogs from './pages/AdminLogs'
+import AdminExpiryIncome from './pages/AdminExpiryIncome'
 import Transactions from './pages/Transactions'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
@@ -172,6 +173,14 @@ function AppContent() {
           element={
             <ProtectedRoute requireAdmin>
               <AdminLogs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/expiry-income"
+          element={
+            <ProtectedRoute requireAdmin>
+              <AdminExpiryIncome />
             </ProtectedRoute>
           }
         />

@@ -312,8 +312,8 @@ export default function PrivacyPolicy() {
             If you have questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact us:
           </p>
           <ul className="list-none text-gray-300 mb-6 space-y-2">
-            <li><strong>Privacy Officer Email:</strong> <a href="mailto:privacy@adrevtech.co.za" className="text-blue-400 hover:text-blue-300 underline">privacy@adrevtech.co.za</a></li>
-            <li><strong>General Support:</strong> <a href="mailto:support@adrevtech.co.za" className="text-blue-400 hover:text-blue-300 underline">support@adrevtech.co.za</a></li>
+            <li><strong>Privacy Officer Email:</strong> <a href="mailto:admin@adrevtechnologies.com" className="text-blue-400 hover:text-blue-300 underline">admin@adrevtechnologies.com</a></li>
+            <li><strong>General Support:</strong> <a href="mailto:admin@adrevtechnologies.com" className="text-blue-400 hover:text-blue-300 underline">admin@adrevtechnologies.com</a></li>
             <li><strong>Business Address:</strong> [To be provided by legal counsel]</li>
           </ul>
 

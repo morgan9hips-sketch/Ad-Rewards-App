@@ -73,6 +73,9 @@ model UserProfile {
   countryBadge           String?  @map("country_badge")  // ISO country code (ZA, US, GB)
   hideCountry            Boolean  @default(false) @map("hide_country")
   
+  // Activity tracking for balance expiry
+  lastLogin              DateTime @default(now()) @map("last_login")
+  
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
   
@@ -84,9 +87,11 @@ model UserProfile {
   locationConversions    LocationConversion[]
   adminActions           AdminAction[] @relation("AdminActions")
   adImpressions          AdImpression[]
+  expiredBalances        ExpiredBalance[]
   
   @@map("user_profiles")
   @@index([totalCoinsEarned(sort: Desc), showOnLeaderboard])
+  @@index([lastLogin])
 }
 
 model Ad {
@@ -342,4 +347,20 @@ model AdImpression {
   @@index([userId])
   @@index([adType])
   @@index([impressionDate])
+}
+
+model ExpiredBalance {
+  id              Int      @id @default(autoincrement())
+  userId          String   @map("user_id")
+  user            UserProfile @relation(fields: [userId], references: [userId])
+  expiryType      String   @map("expiry_type")  // 'coins' or 'cash'
+  amount          Decimal  @db.Decimal(12, 4)   // Amount expired (coins or cash)
+  cashValue       Decimal  @db.Decimal(12, 4) @map("cash_value")  // Equivalent ZAR/USD value
+  reason          String   // 'coin_inactivity', 'cash_inactivity'
+  expiredAt       DateTime @default(now()) @map("expired_at")
+  
+  @@map("expired_balances")
+  @@index([userId])
+  @@index([expiredAt])
+  @@index([expiryType])
 }

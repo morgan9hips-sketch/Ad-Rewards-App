@@ -70,6 +70,12 @@ router.get('/profile', async (req: AuthRequest, res) => {
           email: req.user!.email,
         },
       })
+    } else {
+      // Update lastLogin
+      await prisma.userProfile.update({
+        where: { userId },
+        data: { lastLogin: new Date() },
+      })
     }
 
     res.json(profile)

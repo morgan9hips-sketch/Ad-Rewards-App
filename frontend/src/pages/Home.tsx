@@ -87,7 +87,7 @@ export default function Home() {
             </button>
             <span>•</span>
             <a 
-              href="mailto:support@adrevtech.co.za"
+              href="mailto:admin@adrevtechnologies.com"
               className="hover:text-gray-400 transition-colors underline"
             >
               Contact Support

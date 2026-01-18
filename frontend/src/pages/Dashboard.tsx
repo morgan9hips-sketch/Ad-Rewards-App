@@ -7,8 +7,13 @@ import EarningsChart from '../components/EarningsChart'
 import TierProgress from '../components/TierProgress'
 import CurrencyDisplay from '../components/CurrencyDisplay'
 import ProfileSetup from '../components/ProfileSetup'
+import ExpiryWarning from '../components/ExpiryWarning'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
+
+// UI configuration constants
+const NEW_USER_THRESHOLD_HOURS = 24
+const CONVERSION_THRESHOLD_COINS = 150000
 
 interface UserBalance {
   coins: string
@@ -97,16 +102,31 @@ export default function Dashboard() {
     if (!profile) return 'Welcome!'
     
     const displayName = profile.displayName || user?.email?.split('@')[0] || 'User'
-    const daysSinceCreation = Math.floor(
-      (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+    const hoursSinceCreation = Math.floor(
+      (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60)
     )
     
-    // New user (less than 7 days)
-    if (daysSinceCreation < 7) {
-      return `Welcome, ${displayName}! Let's get started 🎉`
+    // New user check
+    if (hoursSinceCreation < NEW_USER_THRESHOLD_HOURS) {
+      return `Welcome, ${displayName}! 🎉`
     }
     
     return `Welcome back, ${displayName}! 👋`
+  }
+
+  const getSubGreeting = () => {
+    if (!profile) return ''
+    
+    const hoursSinceCreation = Math.floor(
+      (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60)
+    )
+    
+    // New user sub-greeting
+    if (hoursSinceCreation < NEW_USER_THRESHOLD_HOURS) {
+      return 'Ready to start earning? Watch your first ad below!'
+    }
+    
+    return ''
   }
 
   const handleProfileSetupComplete = () => {
@@ -138,9 +158,17 @@ export default function Dashboard() {
       {/* Profile Setup Modal */}
       {showProfileSetup && <ProfileSetup onComplete={handleProfileSetupComplete} />}
       
-      <h1 className="text-3xl font-bold text-white mb-6">
-        {getGreeting()}
-      </h1>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-white">
+          {getGreeting()}
+        </h1>
+        {getSubGreeting() && (
+          <p className="text-gray-400 mt-2">{getSubGreeting()}</p>
+        )}
+      </div>
+
+      {/* Expiry Warnings */}
+      <ExpiryWarning />
 
       {/* Two Wallet System */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
@@ -151,7 +179,25 @@ export default function Dashboard() {
             <p className="text-4xl font-bold text-yellow-500 mb-3">
               {balance ? parseInt(balance.coins).toLocaleString() : '0'} Coins
             </p>
-            <p className="text-sm text-gray-400 mb-2">(Pending)</p>
+            <p className="text-sm text-gray-400 mb-2">(Pending Conversion)</p>
+            
+            {/* Progress to conversion threshold */}
+            {balance && parseInt(balance.coins) < CONVERSION_THRESHOLD_COINS && (
+              <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
+                <p className="text-xs text-gray-300 mb-2">
+                  📊 Progress to monthly conversion
+                </p>
+                <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                  <div
+                    className="bg-green-500 h-2 rounded-full transition-all"
+                    style={{ width: `${Math.min(100, (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) * 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400">
+                  {parseInt(balance.coins).toLocaleString()} / {CONVERSION_THRESHOLD_COINS.toLocaleString()} coins ({Math.floor((parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) * 100)}%)
+                </p>
+              </div>
+            )}
             
             <div className="bg-gray-800 p-3 rounded-lg mt-4">
               <p className="text-xs text-gray-300 mb-2">
