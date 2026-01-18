@@ -1,7 +1,6 @@
 node_modules/
 .env
 .env.local
-.env.production
 dist/
 build/
 *.log
@@ -13,8 +12,16 @@ coverage/
 # Frontend
 frontend/dist/
 frontend/node_modules/
+frontend/.env
+frontend/.env.local
 
 # Backend
 backend/dist/
 backend/node_modules/
 backend/.env
+backend/.env.local
+
+# Capacitor
+frontend/android/
+frontend/ios/
+frontend/.capacitor/
