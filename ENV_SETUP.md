@@ -5,24 +5,44 @@
 ```
 Ad-Rewards-App/
 ├── backend/
-│   ├── .env.development    # Local testing (TEST AdMob IDs)
-│   └── .env.production     # Production deployment (REAL AdMob IDs)
+│   ├── .env                    # Active environment (gitignored, copy from .env.development)
+│   ├── .env.development        # Local testing template (TEST AdMob IDs)
+│   └── .env.production         # Production deployment template (REAL AdMob IDs)
 └── frontend/
-    ├── .env.development    # Browser testing (TEST AdMob IDs)
-    └── .env.production     # Play Store build (REAL AdMob IDs)
+    ├── .env.development        # Browser testing (TEST AdMob IDs) - auto-loaded in dev mode
+    └── .env.production         # Play Store build (REAL AdMob IDs) - auto-loaded in build mode
 ```
 
 ## How They're Used
 
+### Backend Environment Files
+
+The backend uses a single `.env` file (gitignored). For development:
+
+```bash
+cd backend
+cp .env.development .env
+npm run dev
+```
+
+For production deployment, copy `.env.production` to `.env` on your server.
+
+### Frontend Environment Files
+
+Vite automatically loads the correct file based on the mode:
+- `npm run dev` → uses `.env.development`
+- `npm run build` → uses `.env.production`
+
 ### Development (Local Testing)
 ```bash
-# Backend
+# Backend (first time only)
 cd backend
-npm run dev  # Uses .env.development
+cp .env.development .env
+npm run dev
 
 # Frontend
 cd frontend
-npm run dev  # Uses .env.development
+npm run dev
 ```
 - Shows Google's TEST AdMob ads (safe, no revenue)
 - Connects to localhost:4000
@@ -128,22 +148,23 @@ This allows seamless development and testing across platforms without code chang
    ```bash
    cd frontend
    npm install
+   
+   cd ../backend
+   npm install
    ```
 
-2. **Copy environment files** (if not present):
+2. **Setup backend environment**:
    ```bash
-   # Backend
    cd backend
-   cp .env.example .env.development
-   # Edit .env.development with your values
-
-   # Frontend  
-   cd ../frontend
-   cp .env.example .env.development
-   # Edit .env.development with your values
+   cp .env.development .env
+   # The .env file is gitignored and ready for local development
    ```
 
-3. **Initialize Capacitor** (for mobile development):
+3. **Frontend environment** (automatic):
+   - Vite automatically loads `.env.development` in dev mode
+   - No manual setup needed!
+
+4. **Initialize Capacitor** (for mobile development):
    ```bash
    cd frontend
    npx cap add android
@@ -216,6 +237,8 @@ npm run build
 
 - ✅ `.env` files are gitignored
 - ✅ Never commit credentials to version control
+- ✅ `.env.development` and `.env.production` are templates committed to repo (safe, documented credentials)
+- ✅ For backend, copy the appropriate template to `.env` for actual use
 - ✅ Use test credentials in development
 - ✅ Only use production credentials in production builds
 - ✅ Keep `SUPABASE_SERVICE_KEY` secret (backend only)
