@@ -7,6 +7,7 @@ import EarningsChart from '../components/EarningsChart'
 import TierProgress from '../components/TierProgress'
 import CurrencyDisplay from '../components/CurrencyDisplay'
 import ProfileSetup from '../components/ProfileSetup'
+import ExpiryWarning from '../components/ExpiryWarning'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 
@@ -97,16 +98,31 @@ export default function Dashboard() {
     if (!profile) return 'Welcome!'
     
     const displayName = profile.displayName || user?.email?.split('@')[0] || 'User'
-    const daysSinceCreation = Math.floor(
-      (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+    const hoursSinceCreation = Math.floor(
+      (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60)
     )
     
-    // New user (less than 7 days)
-    if (daysSinceCreation < 7) {
-      return `Welcome, ${displayName}! Let's get started 🎉`
+    // New user (less than 24 hours)
+    if (hoursSinceCreation < 24) {
+      return `Welcome, ${displayName}! 🎉`
     }
     
     return `Welcome back, ${displayName}! 👋`
+  }
+
+  const getSubGreeting = () => {
+    if (!profile) return ''
+    
+    const hoursSinceCreation = Math.floor(
+      (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60)
+    )
+    
+    // New user (less than 24 hours)
+    if (hoursSinceCreation < 24) {
+      return 'Ready to start earning? Watch your first ad below!'
+    }
+    
+    return ''
   }
 
   const handleProfileSetupComplete = () => {
@@ -138,9 +154,17 @@ export default function Dashboard() {
       {/* Profile Setup Modal */}
       {showProfileSetup && <ProfileSetup onComplete={handleProfileSetupComplete} />}
       
-      <h1 className="text-3xl font-bold text-white mb-6">
-        {getGreeting()}
-      </h1>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-white">
+          {getGreeting()}
+        </h1>
+        {getSubGreeting() && (
+          <p className="text-gray-400 mt-2">{getSubGreeting()}</p>
+        )}
+      </div>
+
+      {/* Expiry Warnings */}
+      <ExpiryWarning />
 
       {/* Two Wallet System */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">

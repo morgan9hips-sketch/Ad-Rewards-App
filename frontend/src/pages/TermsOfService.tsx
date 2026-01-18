@@ -115,6 +115,28 @@ export default function TermsOfService() {
             <strong>Fraud Prevention:</strong> We reserve the right to deny, delay, or reverse any withdrawal request if we suspect fraudulent activity, policy violations, or suspicious behavior. Suspected fraud will result in account termination and forfeiture of all pending earnings.
           </p>
 
+          <h3 className="text-lg font-semibold text-white mt-6 mb-3">4.4 Balance Expiry and Conversion</h3>
+          
+          <p className="text-gray-300 mb-4">
+            <strong>Coin Expiry:</strong> Coin balances expire after 30 consecutive days of account inactivity. "Inactivity" means no login to the platform. You will receive a warning notification 7 days before expiry. Expired coins cannot be recovered or reinstated.
+          </p>
+          
+          <p className="text-gray-300 mb-4">
+            <strong>Cash Wallet Expiry:</strong> Cash wallet balances expire after 90 consecutive days of account inactivity. "Inactivity" means no login, ad views, or withdrawal attempts. You will receive an email notification 14 days before expiry (if email is configured). Expired cash balances are forfeited and cannot be recovered.
+          </p>
+          
+          <p className="text-gray-300 mb-4">
+            <strong>Conversion Threshold:</strong> Coins are NOT automatically converted to cash until you reach the minimum withdrawal threshold (currently R150 ZAR / 150,000 coins). Below this threshold, balances remain as coins only and are subject to coin expiry rules (30 days). Once the threshold is reached, coins automatically convert to cash at the prevailing conversion rate (1,000 coins = R1 ZAR). Cash balances are subject to the 90-day expiry rule.
+          </p>
+          
+          <p className="text-gray-300 mb-4">
+            <strong>Rationale:</strong> These policies ensure platform sustainability and prevent accumulation of unclaimed, inactive balances. Users are encouraged to remain active and withdraw earnings regularly.
+          </p>
+          
+          <p className="text-gray-300 mb-4">
+            <strong>Reactivation:</strong> Logging in to your account resets the inactivity timer for both coins and cash.
+          </p>
+
           <h2 className="text-xl font-bold text-white mt-8 mb-4">5. Limitation of Liability</h2>
           
           <p className="text-gray-300 mb-4">
@@ -217,7 +239,7 @@ export default function TermsOfService() {
 
           <h3 className="text-lg font-semibold text-white mt-6 mb-3">8.4 Informal Resolution</h3>
           <p className="text-gray-300 mb-4">
-            Before filing any formal claim, you agree to contact us at <a href="mailto:legal@adrevtech.co.za" className="text-blue-400 hover:text-blue-300 underline">legal@adrevtech.co.za</a> to attempt to resolve the dispute informally.
+            Before filing any formal claim, you agree to contact us at <a href="mailto:admin@adrevtechnologies.com" className="text-blue-400 hover:text-blue-300 underline">admin@adrevtechnologies.com</a> to attempt to resolve the dispute informally.
           </p>
 
           <h2 className="text-xl font-bold text-white mt-8 mb-4">9. Changes to Terms</h2>
@@ -260,8 +282,8 @@ export default function TermsOfService() {
             If you have any questions about these Terms of Service, please contact us:
           </p>
           <ul className="list-none text-gray-300 mb-6 space-y-2">
-            <li><strong>Email:</strong> <a href="mailto:legal@adrevtech.co.za" className="text-blue-400 hover:text-blue-300 underline">legal@adrevtech.co.za</a></li>
-            <li><strong>Support:</strong> <a href="mailto:support@adrevtech.co.za" className="text-blue-400 hover:text-blue-300 underline">support@adrevtech.co.za</a></li>
+            <li><strong>Email:</strong> <a href="mailto:admin@adrevtechnologies.com" className="text-blue-400 hover:text-blue-300 underline">admin@adrevtechnologies.com</a></li>
+            <li><strong>Support:</strong> <a href="mailto:admin@adrevtechnologies.com" className="text-blue-400 hover:text-blue-300 underline">admin@adrevtechnologies.com</a></li>
           </ul>
 
           <div className="bg-yellow-900/20 border border-yellow-600/50 rounded p-4 mt-8">
