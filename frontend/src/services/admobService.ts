@@ -1,4 +1,4 @@
-import { AdMob, RewardedAdPluginEvents, InterstitialAdPluginEvents, BannerAdPluginEvents, AdMobBannerSize } from '@capacitor-community/admob';
+import { AdMob, RewardAdPluginEvents, InterstitialAdPluginEvents, BannerAdSize, BannerAdPosition } from '@capacitor-community/admob';
 import { Capacitor } from '@capacitor/core';
 
 interface AdMobConfig {
@@ -62,7 +62,7 @@ class AdMobService {
     
     if (this.isNative) {
       // Real AdMob: Prepare rewarded ad
-      await AdMob.prepareRewardedVideoAd({
+      await AdMob.prepareRewardVideoAd({
         adId: this.config.rewardedAdUnitId,
       })
     } else {
@@ -85,28 +85,25 @@ class AdMobService {
         // Real AdMob: Show rewarded video ad
         
         // Set up reward listener
-        AdMob.addListener(RewardedAdPluginEvents.Rewarded, (reward) => {
+        await AdMob.addListener(RewardAdPluginEvents.Rewarded, (reward) => {
           console.log('💰 User earned reward:', reward)
           onRewarded({ amount: 100, type: 'coins' })
         })
         
         // Set up dismissed listener
-        AdMob.addListener(RewardedAdPluginEvents.Dismissed, () => {
+        await AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
           console.log('✅ Rewarded ad closed')
           onAdClosed()
-          // Clean up listeners
-          AdMob.removeAllListeners()
         })
         
         // Set up failed listener
-        AdMob.addListener(RewardedAdPluginEvents.FailedToShow, (error) => {
+        await AdMob.addListener(RewardAdPluginEvents.FailedToShow, (error) => {
           console.error('❌ Failed to show rewarded ad:', error)
           onAdFailedToShow(error.message || 'Unknown error')
-          AdMob.removeAllListeners()
         })
         
         // Show the ad
-        await AdMob.showRewardedVideoAd()
+        await AdMob.showRewardVideoAd()
         
       } else {
         // Mock: Simulate ad display
@@ -153,16 +150,14 @@ class AdMobService {
       console.log('🎥 Showing interstitial ad...')
       
       if (this.isNative) {
-        AdMob.addListener(InterstitialAdPluginEvents.Dismissed, () => {
+        await AdMob.addListener(InterstitialAdPluginEvents.Dismissed, () => {
           console.log('✅ Interstitial ad closed')
           onAdClosed()
-          AdMob.removeAllListeners()
         })
         
-        AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (error) => {
+        await AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, (error) => {
           console.error('❌ Failed to show interstitial ad:', error)
           onAdFailedToShow(error.message || 'Unknown error')
-          AdMob.removeAllListeners()
         })
         
         await AdMob.showInterstitial()
@@ -187,8 +182,8 @@ class AdMobService {
       console.log('📺 Showing banner ad...')
       await AdMob.showBanner({
         adId: this.config.bannerAdUnitId,
-        adSize: AdMobBannerSize.BANNER,
-        position: 'BOTTOM_CENTER',
+        adSize: BannerAdSize.BANNER,
+        position: BannerAdPosition.BOTTOM_CENTER,
         margin: 0,
       })
       console.log('✅ Banner ad shown')
@@ -197,9 +192,18 @@ class AdMobService {
     }
   }
 
-  async hideBannerAd(): Promise<void> {
-    if (this.isNative) {
-      await AdMob.hideBanner()
+  // Can be called with or without containerId for backward compatibility
+  hideBannerAd(containerId?: string): void {
+    if (containerId && !this.isNative) {
+      // Legacy web behavior: clear DOM container
+      const container = document.getElementById(containerId)
+      if (container) {
+        container.innerHTML = ''
+      }
+      console.log('👻 Banner ad hidden')
+    } else if (this.isNative) {
+      // Native behavior: hide banner through SDK
+      AdMob.hideBanner()
       console.log('✅ Banner ad hidden')
     }
   }
@@ -279,18 +283,6 @@ class AdMobService {
     }
     
     console.log('✅ Banner ad loaded')
-  }
-
-  hideBannerAdLegacy(containerId: string): void {
-    if (this.isNative) {
-      this.hideBannerAd()
-    } else {
-      const container = document.getElementById(containerId)
-      if (container) {
-        container.innerHTML = ''
-      }
-      console.log('👻 Banner ad hidden')
-    }
   }
 }
 
