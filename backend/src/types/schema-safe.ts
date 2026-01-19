@@ -205,58 +205,58 @@ export function getLocationPoolData(pool: LocationRevenuePool): SafeLocationPool
  */
 
 export function isValidUserBalance(user: unknown): user is UserProfile {
+  if (user === null || typeof user !== 'object') return false
+  const obj = user as Record<string, unknown>
   return (
-    user !== null &&
-    typeof user === 'object' &&
-    'coinsBalance' in user &&
-    'cashBalanceUsd' in user &&
-    'preferredCurrency' in user &&
-    typeof (user as any).preferredCurrency === 'string'
+    'coinsBalance' in obj &&
+    'cashBalanceUsd' in obj &&
+    'preferredCurrency' in obj &&
+    typeof obj.preferredCurrency === 'string'
   )
 }
 
 export function isValidTransaction(tx: unknown): tx is Transaction {
+  if (tx === null || typeof tx !== 'object') return false
+  const obj = tx as Record<string, unknown>
   return (
-    tx !== null &&
-    typeof tx === 'object' &&
-    'type' in tx &&
-    typeof tx.type === 'string' &&
-    ('coinsChange' in tx || 'cashChangeUsd' in tx)
+    'type' in obj &&
+    typeof obj.type === 'string' &&
+    ('coinsChange' in obj || 'cashChangeUsd' in obj)
   )
 }
 
 export function isValidWithdrawal(withdrawal: unknown): withdrawal is Withdrawal {
+  if (withdrawal === null || typeof withdrawal !== 'object') return false
+  const obj = withdrawal as Record<string, unknown>
   return (
-    withdrawal !== null &&
-    typeof withdrawal === 'object' &&
-    'amountUsd' in withdrawal &&
-    'status' in withdrawal &&
-    typeof withdrawal.status === 'string'
+    'amountUsd' in obj &&
+    'status' in obj &&
+    typeof obj.status === 'string'
   )
 }
 
 export function isValidExchangeRate(rate: unknown): rate is ExchangeRate {
+  if (rate === null || typeof rate !== 'object') return false
+  const obj = rate as Record<string, unknown>
   return (
-    rate !== null &&
-    typeof rate === 'object' &&
-    'baseCurrency' in rate &&
-    'targetCurrency' in rate &&
-    'rate' in rate &&
-    typeof rate.baseCurrency === 'string' &&
-    typeof rate.targetCurrency === 'string'
+    'baseCurrency' in obj &&
+    'targetCurrency' in obj &&
+    'rate' in obj &&
+    typeof obj.baseCurrency === 'string' &&
+    typeof obj.targetCurrency === 'string'
   )
 }
 
 export function isValidLocationPool(pool: unknown): pool is LocationRevenuePool {
+  if (pool === null || typeof pool !== 'object') return false
+  const obj = pool as Record<string, unknown>
   return (
-    pool !== null &&
-    typeof pool === 'object' &&
-    'countryCode' in pool &&
-    'admobRevenueUsd' in pool &&
-    'userShareUsd' in pool &&
-    'status' in pool &&
-    typeof pool.countryCode === 'string' &&
-    typeof pool.status === 'string'
+    'countryCode' in obj &&
+    'admobRevenueUsd' in obj &&
+    'userShareUsd' in obj &&
+    'status' in obj &&
+    typeof obj.countryCode === 'string' &&
+    typeof obj.status === 'string'
   )
 }
 
