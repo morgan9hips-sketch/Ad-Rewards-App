@@ -9,6 +9,8 @@ import { UserProfile, Transaction, Withdrawal, ExchangeRate, LocationRevenuePool
 
 /**
  * Type-safe user balance getters
+ * Note: For precise monetary calculations, use the Decimal fields directly from Prisma
+ * These helpers convert to number for display purposes only
  */
 export interface SafeUserBalance {
   coinsBalance: bigint
@@ -21,15 +23,16 @@ export interface SafeUserBalance {
 
 /**
  * Extract safe balance fields from UserProfile
+ * WARNING: Converts Decimal to Number - use only for display, not calculations
  */
 export function getUserBalance(user: UserProfile): SafeUserBalance {
   return {
     coinsBalance: user.coinsBalance,
-    cashBalanceUsd: Number(user.cashBalanceUsd),
+    cashBalanceUsd: parseFloat(user.cashBalanceUsd.toString()),
     preferredCurrency: user.preferredCurrency,
     totalCoinsEarned: user.totalCoinsEarned,
-    totalCashEarnedUsd: Number(user.totalCashEarnedUsd),
-    totalWithdrawnUsd: Number(user.totalWithdrawnUsd),
+    totalCashEarnedUsd: parseFloat(user.totalCashEarnedUsd.toString()),
+    totalWithdrawnUsd: parseFloat(user.totalWithdrawnUsd.toString()),
   }
 }
 
@@ -201,66 +204,99 @@ export function getLocationPoolData(pool: LocationRevenuePool): SafeLocationPool
  * Type guards for runtime validation
  */
 
-export function isValidUserBalance(user: any): user is UserProfile {
+export function isValidUserBalance(user: unknown): user is UserProfile {
   return (
-    user &&
-    typeof user.coinsBalance !== 'undefined' &&
-    typeof user.cashBalanceUsd !== 'undefined' &&
-    typeof user.preferredCurrency === 'string'
+    user !== null &&
+    typeof user === 'object' &&
+    'coinsBalance' in user &&
+    'cashBalanceUsd' in user &&
+    'preferredCurrency' in user &&
+    typeof (user as any).preferredCurrency === 'string'
   )
 }
 
-export function isValidTransaction(tx: any): tx is Transaction {
+export function isValidTransaction(tx: unknown): tx is Transaction {
   return (
-    tx &&
+    tx !== null &&
+    typeof tx === 'object' &&
+    'type' in tx &&
     typeof tx.type === 'string' &&
-    (typeof tx.coinsChange !== 'undefined' || typeof tx.cashChangeUsd !== 'undefined')
+    ('coinsChange' in tx || 'cashChangeUsd' in tx)
   )
 }
 
-export function isValidWithdrawal(withdrawal: any): withdrawal is Withdrawal {
+export function isValidWithdrawal(withdrawal: unknown): withdrawal is Withdrawal {
   return (
-    withdrawal &&
-    typeof withdrawal.amountUsd !== 'undefined' &&
+    withdrawal !== null &&
+    typeof withdrawal === 'object' &&
+    'amountUsd' in withdrawal &&
+    'status' in withdrawal &&
     typeof withdrawal.status === 'string'
   )
 }
 
-export function isValidExchangeRate(rate: any): rate is ExchangeRate {
+export function isValidExchangeRate(rate: unknown): rate is ExchangeRate {
   return (
-    rate &&
+    rate !== null &&
+    typeof rate === 'object' &&
+    'baseCurrency' in rate &&
+    'targetCurrency' in rate &&
+    'rate' in rate &&
     typeof rate.baseCurrency === 'string' &&
-    typeof rate.targetCurrency === 'string' &&
-    typeof rate.rate !== 'undefined'
+    typeof rate.targetCurrency === 'string'
   )
 }
 
-export function isValidLocationPool(pool: any): pool is LocationRevenuePool {
+export function isValidLocationPool(pool: unknown): pool is LocationRevenuePool {
   return (
-    pool &&
+    pool !== null &&
+    typeof pool === 'object' &&
+    'countryCode' in pool &&
+    'admobRevenueUsd' in pool &&
+    'userShareUsd' in pool &&
+    'status' in pool &&
     typeof pool.countryCode === 'string' &&
-    typeof pool.admobRevenueUsd !== 'undefined' &&
-    typeof pool.userShareUsd !== 'undefined' &&
     typeof pool.status === 'string'
   )
 }
 
 /**
  * Helper to ensure BigInt is properly handled
+ * Throws error if value is not a valid number
  */
 export function safeBigInt(value: bigint | number | string): bigint {
   if (typeof value === 'bigint') {
     return value
   }
-  return BigInt(value)
+  
+  try {
+    return BigInt(value)
+  } catch (error) {
+    throw new Error(`Invalid BigInt value: ${value}`)
+  }
 }
 
 /**
  * Helper to safely convert Decimal to number
+ * WARNING: Use only for display purposes, not for precise calculations
+ * For precise calculations, work with Decimal values directly
  */
-export function safeDecimalToNumber(value: any): number {
+export function safeDecimalToNumber(value: unknown): number {
   if (typeof value === 'number') {
     return value
   }
-  return Number(value.toString())
+  
+  if (value === null || value === undefined) {
+    return 0
+  }
+  
+  // Handle Prisma Decimal type
+  const str = value.toString()
+  const num = parseFloat(str)
+  
+  if (isNaN(num)) {
+    throw new Error(`Cannot convert to number: ${str}`)
+  }
+  
+  return num
 }
