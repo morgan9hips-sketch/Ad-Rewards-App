@@ -21,10 +21,17 @@ const app = express()
 const PORT = process.env.PORT || 4000
 
 // Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true,
-}))
+app.use(
+  cors({
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:5173',
+      'http://192.168.1.61:4000',
+      'capacitor://localhost',
+      'http://localhost',
+    ],
+    credentials: true,
+  }),
+)
 app.use(express.json())
 
 // Health check
@@ -47,17 +54,25 @@ app.use('/api/subscriptions', authenticate, subscriptionsRoutes)
 app.use('/api/payouts', authenticate, payoutsRoutes)
 
 // Error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err)
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal server error',
-  })
-})
+app.use(
+  (
+    err: any,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    console.error('Error:', err)
+    res.status(err.status || 500).json({
+      error: err.message || 'Internal server error',
+    })
+  },
+)
 
-app.listen(Number(PORT), () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`)
+  console.log(`🌐 Also accessible on http://192.168.1.61:${PORT}`)
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
-  
+
   // Start balance expiry cron job
   scheduleExpiryJob()
 })

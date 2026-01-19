@@ -1,5 +1,12 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react'
 import { useAuth } from './AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 interface CurrencyInfo {
   displayCurrency: string
@@ -20,7 +27,9 @@ interface CurrencyContextType {
   refreshCurrencyInfo: () => Promise<void>
 }
 
-const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined)
+const CurrencyContext = createContext<CurrencyContextType | undefined>(
+  undefined,
+)
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const { session } = useAuth()
@@ -34,8 +43,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      const response = await fetch('http://localhost:4000/api/user/currency-info', {
-        headers: { Authorization: `Bearer ${session.access_token}` }
+      const response = await fetch(`${API_BASE_URL}/api/user/currency-info`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
       })
 
       if (response.ok) {
@@ -53,7 +62,10 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     loadCurrencyInfo()
   }, [session])
 
-  const formatAmount = (amountUsd: number, showBoth: boolean = false): string => {
+  const formatAmount = (
+    amountUsd: number,
+    showBoth: boolean = false,
+  ): string => {
     if (!currencyInfo) {
       return `$${amountUsd.toFixed(2)}`
     }
@@ -62,12 +74,13 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     const formatted = localAmount.toFixed(currencyInfo.formatting.decimals)
     const withCommas = parseFloat(formatted).toLocaleString('en-US', {
       minimumFractionDigits: currencyInfo.formatting.decimals,
-      maximumFractionDigits: currencyInfo.formatting.decimals
+      maximumFractionDigits: currencyInfo.formatting.decimals,
     })
 
-    let result = currencyInfo.formatting.position === 'before'
-      ? `${currencyInfo.formatting.symbol}${withCommas}`
-      : `${withCommas}${currencyInfo.formatting.symbol}`
+    let result =
+      currencyInfo.formatting.position === 'before'
+        ? `${currencyInfo.formatting.symbol}${withCommas}`
+        : `${withCommas}${currencyInfo.formatting.symbol}`
 
     if (showBoth && currencyInfo.displayCurrency !== 'USD') {
       result += ` (≈ $${amountUsd.toFixed(2)} USD)`
@@ -81,7 +94,9 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <CurrencyContext.Provider value={{ currencyInfo, loading, formatAmount, refreshCurrencyInfo }}>
+    <CurrencyContext.Provider
+      value={{ currencyInfo, loading, formatAmount, refreshCurrencyInfo }}
+    >
       {children}
     </CurrencyContext.Provider>
   )
