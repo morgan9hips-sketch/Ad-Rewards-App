@@ -61,6 +61,8 @@ if (process.env.VERCEL !== '1') {
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
     
     // Start balance expiry cron job
+    // NOTE: This will not run in Vercel's serverless environment
+    // For Vercel, you'll need to create a separate Vercel Cron Job endpoint
     scheduleExpiryJob()
   })
 }
