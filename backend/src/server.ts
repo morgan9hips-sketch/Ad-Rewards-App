@@ -1,19 +1,19 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import { authenticate } from './middleware/auth.js'
-import { scheduleExpiryJob } from './jobs/expireBalances.js'
+import { authenticate } from './middleware/auth'
+import { scheduleExpiryJob } from './jobs/expireBalances'
 
 // Import routes
-import userRoutes from './routes/user.js'
-import adsRoutes from './routes/ads.js'
-import withdrawalRoutes from './routes/withdrawals.js'
-import leaderboardRoutes from './routes/leaderboard.js'
-import badgesRoutes from './routes/badges.js'
-import adminRoutes from './routes/admin.js'
-import videosRoutes from './routes/videos.js'
-import subscriptionsRoutes from './routes/subscriptions.js'
-import payoutsRoutes from './routes/payouts.js'
+import userRoutes from './routes/user'
+import adsRoutes from './routes/ads'
+import withdrawalRoutes from './routes/withdrawals'
+import leaderboardRoutes from './routes/leaderboard'
+import badgesRoutes from './routes/badges'
+import adminRoutes from './routes/admin'
+import videosRoutes from './routes/videos'
+import subscriptionsRoutes from './routes/subscriptions'
+import payoutsRoutes from './routes/payouts'
 
 dotenv.config()
 
