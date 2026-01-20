@@ -54,10 +54,15 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   })
 })
 
-app.listen(Number(PORT), () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
-  
-  // Start balance expiry cron job
-  scheduleExpiryJob()
-})
+// Only start server if not in Vercel (Vercel handles this automatically)
+if (process.env.VERCEL !== '1') {
+  app.listen(Number(PORT), () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`)
+    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
+    
+    // Start balance expiry cron job
+    scheduleExpiryJob()
+  })
+}
+
+export default app
