@@ -68,9 +68,17 @@ app.use(
   },
 )
 
-app.listen(Number(PORT), '0.0.0.0', () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-  console.log(`🌐 Also accessible on http://192.168.1.61:${PORT}`)
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
-  scheduleExpiryJob()
-})
+// Only start server if not in Vercel (Vercel handles this automatically)
+if (process.env.VERCEL !== '1') {
+  app.listen(Number(PORT), () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`)
+    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
+
+    // Start balance expiry cron job
+    // NOTE: This will not run in Vercel's serverless environment
+    // For Vercel, you'll need to create a separate Vercel Cron Job endpoint
+    scheduleExpiryJob()
+  })
+}
+
+export default app
