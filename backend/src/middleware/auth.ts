@@ -43,3 +43,4 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
     res.status(401).json({ error: 'Authentication failed' })
   }
 }
+

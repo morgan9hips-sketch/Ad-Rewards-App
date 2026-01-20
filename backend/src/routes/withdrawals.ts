@@ -1,8 +1,8 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { AuthRequest } from '../middleware/auth.js'
-import { getExchangeRate, convertFromUSD } from '../services/currencyService.js'
-import { processWithdrawal } from '../services/transactionService.js'
+import { AuthRequest } from '../middleware/auth'
+import { getExchangeRate, convertFromUSD } from '../services/currencyService'
+import { processWithdrawal } from '../services/transactionService'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -140,3 +140,4 @@ router.get('/:id', async (req: AuthRequest, res) => {
 })
 
 export default router
+

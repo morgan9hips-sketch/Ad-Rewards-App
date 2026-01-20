@@ -1,12 +1,12 @@
 import { Router } from 'express'
-import { AuthRequest } from '../middleware/auth.js'
+import { AuthRequest } from '../middleware/auth'
 import {
   getUserVideoCapStatus,
   canWatchRewardedVideo,
   recordRewardedVideoWatch,
   recordInterstitialWatch,
   getVideoCapDisplay,
-} from '../services/videoCapService.js'
+} from '../services/videoCapService'
 
 const router = Router()
 
@@ -116,3 +116,4 @@ router.post('/watch-complete', async (req: AuthRequest, res) => {
 })
 
 export default router
+

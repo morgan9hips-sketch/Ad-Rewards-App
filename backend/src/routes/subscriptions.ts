@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { AuthRequest } from '../middleware/auth.js'
+import { AuthRequest } from '../middleware/auth'
 import {
   createSubscription,
   getSubscriptionDetails,
   cancelSubscription,
   verifyWebhookSignature,
-} from '../services/paypalService.js'
+} from '../services/paypalService'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -317,3 +317,4 @@ async function handlePaymentFailed(resource: any) {
 }
 
 export default router
+

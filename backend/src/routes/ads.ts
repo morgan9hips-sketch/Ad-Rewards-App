@@ -1,8 +1,8 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { AuthRequest } from '../middleware/auth.js'
-import { getClientIP, detectCountryFromIP } from '../services/geoService.js'
-import { awardCoins } from '../services/transactionService.js'
+import { AuthRequest } from '../middleware/auth'
+import { getClientIP, detectCountryFromIP } from '../services/geoService'
+import { awardCoins } from '../services/transactionService'
 import {
   checkDailyAdLimit,
   checkRapidAdViewing,
@@ -10,7 +10,7 @@ import {
   detectVPNMismatch,
   trackUserRevenueCountry,
   updateUserLocation
-} from '../services/fraudDetection.js'
+} from '../services/fraudDetection'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -296,3 +296,4 @@ router.post('/track-impression', async (req: AuthRequest, res) => {
 })
 
 export default router
+

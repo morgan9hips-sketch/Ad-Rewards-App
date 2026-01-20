@@ -1,5 +1,5 @@
 import geoip from 'geoip-lite'
-import { getCurrencyForCountry } from './currencyService.js'
+import { getCurrencyForCountry } from './currencyService'
 
 /**
  * Detect country from IP address
@@ -48,3 +48,4 @@ export function getClientIP(req: any): string {
   
   return req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown'
 }
+

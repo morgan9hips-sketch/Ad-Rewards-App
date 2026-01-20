@@ -1,10 +1,10 @@
 import { Router } from 'express'
 import { PrismaClient, Prisma } from '@prisma/client'
-import { AuthRequest } from '../middleware/auth.js'
-import { requireAdmin } from '../middleware/requireAdmin.js'
-import { logAdminAction } from '../middleware/logAdminAction.js'
-import { convertCoinsToUSD } from '../services/transactionService.js'
-import { updateExchangeRates, getExchangeRate } from '../services/currencyService.js'
+import { AuthRequest } from '../middleware/auth'
+import { requireAdmin } from '../middleware/requireAdmin'
+import { logAdminAction } from '../middleware/logAdminAction'
+import { convertCoinsToUSD } from '../services/transactionService'
+import { updateExchangeRates, getExchangeRate } from '../services/currencyService'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -593,7 +593,7 @@ router.get('/stats/by-location', logAdminAction('VIEW_LOCATION_STATS'), async (r
  */
 router.get('/fraud-stats', logAdminAction('VIEW_FRAUD_STATS'), async (req: AuthRequest, res) => {
   try {
-    const { getFraudStats, getSuspiciousUsers, getVPNDetections } = await import('../services/fraudDetection.js')
+    const { getFraudStats, getSuspiciousUsers, getVPNDetections } = await import('../services/fraudDetection')
 
     const stats = await getFraudStats()
     const suspiciousUsers = await getSuspiciousUsers(1, 20)
@@ -615,7 +615,7 @@ router.get('/fraud-stats', logAdminAction('VIEW_FRAUD_STATS'), async (req: AuthR
 router.get('/fraud/user/:userId', logAdminAction('VIEW_USER_FRAUD'), async (req: AuthRequest, res) => {
   try {
     const { userId } = req.params
-    const { getVPNDetections } = await import('../services/fraudDetection.js')
+    const { getVPNDetections } = await import('../services/fraudDetection')
 
     const detections = await getVPNDetections(userId)
 
@@ -832,3 +832,4 @@ router.get('/expired-balances', logAdminAction('VIEW_EXPIRED_BALANCES'), async (
 })
 
 export default router
+

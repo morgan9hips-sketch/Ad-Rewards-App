@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { detectCountryFromIP } from './geoService.js'
+import { detectCountryFromIP } from './geoService'
 
 const prisma = new PrismaClient()
 
@@ -316,3 +316,4 @@ export async function getVPNDetections(userId: string) {
 
   return Object.values(groupedMismatches)
 }
+

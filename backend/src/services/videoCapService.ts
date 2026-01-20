@@ -207,3 +207,4 @@ export function getVideoCapDisplay(status: any): {
     resetTime: `Resets in ${getTimeUntilReset(resetAt)}`,
   }
 }
+

@@ -1,9 +1,9 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { AuthRequest } from '../middleware/auth.js'
-import { getExchangeRate, convertFromUSD, getUserCurrencyInfo } from '../services/currencyService.js'
-import { getUserTransactions } from '../services/transactionService.js'
-import { getClientIP, detectCountryFromIP } from '../services/geoService.js'
+import { AuthRequest } from '../middleware/auth'
+import { getExchangeRate, convertFromUSD, getUserCurrencyInfo } from '../services/currencyService'
+import { getUserTransactions } from '../services/transactionService'
+import { getClientIP, detectCountryFromIP } from '../services/geoService'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -245,3 +245,4 @@ router.get('/detect-country', async (req: AuthRequest, res) => {
 })
 
 export default router
+

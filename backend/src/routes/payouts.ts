@@ -1,9 +1,9 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { AuthRequest } from '../middleware/auth.js'
-import { createPayout, getPayoutStatus } from '../services/paypalService.js'
-import { getUserCurrencyInfo, convertFromUSD, CURRENCY_FORMATS } from '../services/currencyService.js'
-import { getClientIP } from '../services/geoService.js'
+import { AuthRequest } from '../middleware/auth'
+import { createPayout, getPayoutStatus } from '../services/paypalService'
+import { getUserCurrencyInfo, convertFromUSD, CURRENCY_FORMATS } from '../services/currencyService'
+import { getClientIP } from '../services/geoService'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -248,3 +248,4 @@ router.get('/:id/status', async (req: AuthRequest, res) => {
 })
 
 export default router
+

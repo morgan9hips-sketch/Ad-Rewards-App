@@ -217,7 +217,7 @@ export async function getUserCurrencyInfo(userId: string, ipAddress?: string): P
     
     // If IP provided, detect country from it
     if (ipAddress) {
-      const { detectCountryFromIP } = await import('./geoService.js')
+      const { detectCountryFromIP } = await import('./geoService')
       const ipCountry = detectCountryFromIP(ipAddress)
       if (ipCountry) {
         detectedCountry = ipCountry
@@ -257,3 +257,4 @@ export function formatCurrency(amountUsd: number, currencyInfo: UserCurrencyInfo
     ? `${currencyInfo.formatting.symbol}${withCommas}`
     : `${withCommas}${currencyInfo.formatting.symbol}`
 }
+
