@@ -52,14 +52,14 @@ export default function AdminConversions() {
   const [conversions, setConversions] = useState<Conversion[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [useLocationBased, setUseLocationBased] = useState(true)
-  
+
   // Location-based form
   const [revenues, setRevenues] = useState<LocationRevenue[]>([
     { countryCode: 'US', admobRevenueUsd: '' },
   ])
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7))
   const [notes, setNotes] = useState('')
-  
+
   // Legacy global form
   const [formData, setFormData] = useState({
     admobRevenue: '',
@@ -75,7 +75,9 @@ export default function AdminConversions() {
 
   // Helper to calculate total revenue
   const calculateTotalRevenue = (): string => {
-    return revenues.reduce((sum, r) => sum + (parseFloat(r.admobRevenueUsd) || 0), 0).toFixed(2)
+    return revenues
+      .reduce((sum, r) => sum + (parseFloat(r.admobRevenueUsd) || 0), 0)
+      .toFixed(2)
   }
 
   useEffect(() => {
@@ -88,8 +90,10 @@ export default function AdminConversions() {
       const token = session?.access_token
       if (!token) return
 
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+
       // Fetch conversions
-      const conversionsRes = await fetch('http://localhost:4000/api/admin/conversions', {
+      const conversionsRes = await fetch(`${API_URL}/api/admin/conversions`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (conversionsRes.ok) {
@@ -98,7 +102,7 @@ export default function AdminConversions() {
       }
 
       // Fetch stats
-      const statsRes = await fetch('http://localhost:4000/api/admin/stats', {
+      const statsRes = await fetch(`${API_URL}/api/admin/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (statsRes.ok) {
@@ -120,7 +124,11 @@ export default function AdminConversions() {
     setRevenues(revenues.filter((_, i) => i !== index))
   }
 
-  const updateLocationRevenue = (index: number, field: keyof LocationRevenue, value: string) => {
+  const updateLocationRevenue = (
+    index: number,
+    field: keyof LocationRevenue,
+    value: string,
+  ) => {
     const updated = [...revenues]
     updated[index] = { ...updated[index], [field]: value }
     setRevenues(updated)
@@ -128,18 +136,31 @@ export default function AdminConversions() {
 
   const handleProcessLocationConversion = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Validate
-    const validRevenues = revenues.filter(r => r.admobRevenueUsd && parseFloat(r.admobRevenueUsd) > 0)
-    
+    const validRevenues = revenues.filter(
+      (r) => r.admobRevenueUsd && parseFloat(r.admobRevenueUsd) > 0,
+    )
+
     if (validRevenues.length === 0) {
       alert('Please enter at least one valid revenue amount')
       return
     }
 
-    const totalRevenue = validRevenues.reduce((sum, r) => sum + parseFloat(r.admobRevenueUsd), 0)
-    
-    if (!confirm(`Process location-based conversion for ${month}?\n\n${validRevenues.length} locations, Total Revenue: $${totalRevenue.toFixed(2)}\n\nThis will convert all pending coins to cash for users. This action cannot be undone.`)) {
+    const totalRevenue = validRevenues.reduce(
+      (sum, r) => sum + parseFloat(r.admobRevenueUsd),
+      0,
+    )
+
+    if (
+      !confirm(
+        `Process location-based conversion for ${month}?\n\n${
+          validRevenues.length
+        } locations, Total Revenue: $${totalRevenue.toFixed(
+          2,
+        )}\n\nThis will convert all pending coins to cash for users. This action cannot be undone.`,
+      )
+    ) {
       return
     }
 
@@ -148,33 +169,42 @@ export default function AdminConversions() {
       const token = session?.access_token
       if (!token) return
 
-      const res = await fetch('http://localhost:4000/api/admin/process-location-conversion', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+      const res = await fetch(
+        `${API_URL}/api/admin/process-location-conversion`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            revenues: validRevenues,
+            month,
+            notes,
+          }),
         },
-        body: JSON.stringify({
-          revenues: validRevenues,
-          month,
-          notes,
-        }),
-      })
+      )
 
       const result = await res.json()
 
       if (result.success) {
-        const summary = result.results.map((r: any) => 
-          `${r.countryCode}: ${r.usersAffected} users, ${r.totalCoins} coins, rate $${parseFloat(r.conversionRate).toFixed(8)}/coin`
-        ).join('\n')
-        
+        const summary = result.results
+          .map(
+            (r: any) =>
+              `${r.countryCode}: ${r.usersAffected} users, ${
+                r.totalCoins
+              } coins, rate $${parseFloat(r.conversionRate).toFixed(8)}/coin`,
+          )
+          .join('\n')
+
         alert(`Location-based conversion completed successfully!\n\n${summary}`)
-        
+
         // Reset form
         setRevenues([{ countryCode: 'US', admobRevenueUsd: '' }])
         setMonth(new Date().toISOString().slice(0, 7))
         setNotes('')
-        
+
         // Refresh data
         fetchData()
       } else {
@@ -190,13 +220,17 @@ export default function AdminConversions() {
 
   const handleProcessConversion = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.admobRevenue || parseFloat(formData.admobRevenue) <= 0) {
       alert('Please enter a valid AdMob revenue amount')
       return
     }
 
-    if (!confirm(`Process conversion for ${formData.month}?\n\nAdMob Revenue: $${formData.admobRevenue}\n\nThis will convert all pending coins to cash for users. This action cannot be undone.`)) {
+    if (
+      !confirm(
+        `Process conversion for ${formData.month}?\n\nAdMob Revenue: $${formData.admobRevenue}\n\nThis will convert all pending coins to cash for users. This action cannot be undone.`,
+      )
+    ) {
       return
     }
 
@@ -205,7 +239,8 @@ export default function AdminConversions() {
       const token = session?.access_token
       if (!token) return
 
-      const res = await fetch('http://localhost:4000/api/admin/process-conversion', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+      const res = await fetch(`${API_URL}/api/admin/process-conversion`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -221,15 +256,23 @@ export default function AdminConversions() {
       const result = await res.json()
 
       if (result.success) {
-        alert(`Conversion completed successfully!\n\nUsers affected: ${result.data.usersAffected}\nTotal coins converted: ${result.data.totalCoinsConverted}\nConversion rate: $${parseFloat(result.data.conversionRate).toFixed(8)} per coin`)
-        
+        alert(
+          `Conversion completed successfully!\n\nUsers affected: ${
+            result.data.usersAffected
+          }\nTotal coins converted: ${
+            result.data.totalCoinsConverted
+          }\nConversion rate: $${parseFloat(result.data.conversionRate).toFixed(
+            8,
+          )} per coin`,
+        )
+
         // Reset form
         setFormData({
           admobRevenue: '',
           month: new Date().toISOString().slice(0, 7),
           notes: '',
         })
-        
+
         // Refresh data
         fetchData()
       } else {
@@ -253,7 +296,9 @@ export default function AdminConversions() {
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
-      <h1 className="text-3xl font-bold text-white mb-6">💰 Coin Conversions</h1>
+      <h1 className="text-3xl font-bold text-white mb-6">
+        💰 Coin Conversions
+      </h1>
 
       {/* Stats Dashboard */}
       {stats && (
@@ -302,14 +347,16 @@ export default function AdminConversions() {
       {/* Conversion Form */}
       <Card className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-white">Process Monthly Conversion</h2>
+          <h2 className="text-xl font-bold text-white">
+            Process Monthly Conversion
+          </h2>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setUseLocationBased(true)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                useLocationBased 
-                  ? 'bg-blue-600 text-white' 
+                useLocationBased
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               }`}
             >
@@ -319,8 +366,8 @@ export default function AdminConversions() {
               type="button"
               onClick={() => setUseLocationBased(false)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                !useLocationBased 
-                  ? 'bg-blue-600 text-white' 
+                !useLocationBased
+                  ? 'bg-blue-600 text-white'
                   : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               }`}
             >
@@ -331,16 +378,22 @@ export default function AdminConversions() {
 
         {useLocationBased ? (
           // Location-Based Form
-          <form onSubmit={handleProcessLocationConversion} className="space-y-4">
+          <form
+            onSubmit={handleProcessLocationConversion}
+            className="space-y-4"
+          >
             <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 mb-4">
               <p className="text-sm text-blue-300">
-                <strong>📍 Location-Based Conversion:</strong> Process revenue separately per country.
-                Each location gets its own conversion rate based on its revenue pool.
+                <strong>📍 Location-Based Conversion:</strong> Process revenue
+                separately per country. Each location gets its own conversion
+                rate based on its revenue pool.
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Month *</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Month *
+              </label>
               <input
                 type="month"
                 value={month}
@@ -366,14 +419,23 @@ export default function AdminConversions() {
 
               <div className="space-y-3">
                 {revenues.map((rev, index) => (
-                  <div key={index} className="flex gap-3 items-start bg-gray-800/50 p-3 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex gap-3 items-start bg-gray-800/50 p-3 rounded-lg"
+                  >
                     <div className="flex-1">
                       <select
                         value={rev.countryCode}
-                        onChange={(e) => updateLocationRevenue(index, 'countryCode', e.target.value)}
+                        onChange={(e) =>
+                          updateLocationRevenue(
+                            index,
+                            'countryCode',
+                            e.target.value,
+                          )
+                        }
                         className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none text-sm"
                       >
-                        {COUNTRIES.map(country => (
+                        {COUNTRIES.map((country) => (
                           <option key={country.code} value={country.code}>
                             {country.name}
                           </option>
@@ -386,13 +448,20 @@ export default function AdminConversions() {
                         step="0.01"
                         min="0"
                         value={rev.admobRevenueUsd}
-                        onChange={(e) => updateLocationRevenue(index, 'admobRevenueUsd', e.target.value)}
+                        onChange={(e) =>
+                          updateLocationRevenue(
+                            index,
+                            'admobRevenueUsd',
+                            e.target.value,
+                          )
+                        }
                         className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none text-sm"
                         placeholder="Revenue (USD)"
                       />
                       {rev.admobRevenueUsd && (
                         <p className="text-xs text-gray-400 mt-1">
-                          User share (85%): ${calculateUserShare(rev.admobRevenueUsd)}
+                          User share (85%): $
+                          {calculateUserShare(rev.admobRevenueUsd)}
                         </p>
                       )}
                     </div>
@@ -415,7 +484,9 @@ export default function AdminConversions() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Notes
+              </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -426,7 +497,9 @@ export default function AdminConversions() {
             </div>
 
             <Button type="submit" fullWidth disabled={processing}>
-              {processing ? 'Processing...' : 'Process Location-Based Conversion'}
+              {processing
+                ? 'Processing...'
+                : 'Process Location-Based Conversion'}
             </Button>
           </form>
         ) : (
@@ -434,82 +507,107 @@ export default function AdminConversions() {
           <form onSubmit={handleProcessConversion} className="space-y-4">
             <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3 mb-4">
               <p className="text-sm text-yellow-300">
-                <strong>⚠️ Legacy Mode:</strong> Global conversion pools all users together.
-                Consider using Location-Based for more accurate payouts.
+                <strong>⚠️ Legacy Mode:</strong> Global conversion pools all
+                users together. Consider using Location-Based for more accurate
+                payouts.
               </p>
             </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              AdMob Revenue (USD) *
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.admobRevenue}
-              onChange={(e) => setFormData({ ...formData, admobRevenue: e.target.value })}
-              className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
-              placeholder="Enter AdMob revenue amount"
-              required
-            />
-            {formData.admobRevenue && (
-              <p className="text-sm text-gray-400 mt-1">
-                User payout (85%): ${calculateUserShare(formData.admobRevenue)}
-              </p>
-            )}
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                AdMob Revenue (USD) *
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.admobRevenue}
+                onChange={(e) =>
+                  setFormData({ ...formData, admobRevenue: e.target.value })
+                }
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
+                placeholder="Enter AdMob revenue amount"
+                required
+              />
+              {formData.admobRevenue && (
+                <p className="text-sm text-gray-400 mt-1">
+                  User payout (85%): $
+                  {calculateUserShare(formData.admobRevenue)}
+                </p>
+              )}
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Month *</label>
-            <input
-              type="month"
-              value={formData.month}
-              onChange={(e) => setFormData({ ...formData, month: e.target.value })}
-              className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
-              required
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Month *
+              </label>
+              <input
+                type="month"
+                value={formData.month}
+                onChange={(e) =>
+                  setFormData({ ...formData, month: e.target.value })
+                }
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
+                required
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
-              rows={3}
-              placeholder="Optional notes about this conversion"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Notes
+              </label>
+              <textarea
+                value={formData.notes}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
+                rows={3}
+                placeholder="Optional notes about this conversion"
+              />
+            </div>
 
-          <Button type="submit" fullWidth disabled={processing}>
-            {processing ? 'Processing...' : 'Process Global Conversion'}
-          </Button>
-        </form>
+            <Button type="submit" fullWidth disabled={processing}>
+              {processing ? 'Processing...' : 'Process Global Conversion'}
+            </Button>
+          </form>
         )}
       </Card>
 
       {/* Conversion History */}
       <Card>
-        <h2 className="text-xl font-bold text-white mb-4">Conversion History</h2>
+        <h2 className="text-xl font-bold text-white mb-4">
+          Conversion History
+        </h2>
         {conversions.length === 0 ? (
-          <p className="text-gray-400 text-center py-8">No conversions processed yet</p>
+          <p className="text-gray-400 text-center py-8">
+            No conversions processed yet
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-800">
                   <th className="text-left py-2 px-2 text-gray-400">Date</th>
-                  <th className="text-right py-2 px-2 text-gray-400">Revenue</th>
-                  <th className="text-right py-2 px-2 text-gray-400">Payout (85%)</th>
+                  <th className="text-right py-2 px-2 text-gray-400">
+                    Revenue
+                  </th>
+                  <th className="text-right py-2 px-2 text-gray-400">
+                    Payout (85%)
+                  </th>
                   <th className="text-right py-2 px-2 text-gray-400">Coins</th>
                   <th className="text-right py-2 px-2 text-gray-400">Rate</th>
                   <th className="text-right py-2 px-2 text-gray-400">Users</th>
-                  <th className="text-center py-2 px-2 text-gray-400">Status</th>
+                  <th className="text-center py-2 px-2 text-gray-400">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {conversions.map((conv) => (
-                  <tr key={conv.id} className="border-b border-gray-800 hover:bg-gray-800">
+                  <tr
+                    key={conv.id}
+                    className="border-b border-gray-800 hover:bg-gray-800"
+                  >
                     <td className="py-2 px-2 text-white">
                       {new Date(conv.conversionDate).toLocaleDateString()}
                     </td>
@@ -525,7 +623,9 @@ export default function AdminConversions() {
                     <td className="py-2 px-2 text-right text-blue-500">
                       ${parseFloat(conv.conversionRateUsdPerCoin).toFixed(8)}
                     </td>
-                    <td className="py-2 px-2 text-right text-white">{conv.usersAffected}</td>
+                    <td className="py-2 px-2 text-right text-white">
+                      {conv.usersAffected}
+                    </td>
                     <td className="py-2 px-2 text-center">
                       <span
                         className={`px-2 py-1 rounded text-xs ${
