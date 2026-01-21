@@ -16,7 +16,7 @@ export const auth = {
       options: {
         redirectTo: `${
           import.meta.env.VITE_APP_URL || window.location.origin
-        }/auth/callback`,
+        }`,
       },
     }),
 
@@ -26,7 +26,7 @@ export const auth = {
       options: {
         redirectTo: `${
           import.meta.env.VITE_APP_URL || window.location.origin
-        }/auth/callback`,
+        }`,
       },
     }),
 

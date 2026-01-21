@@ -1,9 +1,31 @@
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 import Button from '../components/Button'
 import Card from '../components/Card'
 
 export default function Home() {
   const navigate = useNavigate()
+
+  useEffect(() => {
+    // Check for auth session on page load
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate('/dashboard')
+      }
+    })
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        navigate('/dashboard')
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [navigate])
 
   return (
     <div className="min-h-screen bg-black">
