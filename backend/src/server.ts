@@ -1,19 +1,19 @@
-import express from 'express'
-import cors from 'cors'
-import dotenv from 'dotenv'
-import { authenticate } from './middleware/auth.js'
-import { scheduleExpiryJob } from './jobs/expireBalances.js'
+const express = require('express')
+const cors = require('cors')
+const dotenv = require('dotenv')
+const { authenticate } = require('./middleware/auth')
+const { scheduleExpiryJob } = require('./jobs/expireBalances')
 
 // Import routes
-import userRoutes from './routes/user.js'
-import adsRoutes from './routes/ads.js'
-import withdrawalRoutes from './routes/withdrawals.js'
-import leaderboardRoutes from './routes/leaderboard.js'
-import badgesRoutes from './routes/badges.js'
-import adminRoutes from './routes/admin.js'
-import videosRoutes from './routes/videos.js'
-import subscriptionsRoutes from './routes/subscriptions.js'
-import payoutsRoutes from './routes/payouts.js'
+const userRoutes = require('./routes/user')
+const adsRoutes = require('./routes/ads')
+const withdrawalRoutes = require('./routes/withdrawals')
+const leaderboardRoutes = require('./routes/leaderboard')
+const badgesRoutes = require('./routes/badges')
+const adminRoutes = require('./routes/admin')
+const videosRoutes = require('./routes/videos')
+const subscriptionsRoutes = require('./routes/subscriptions')
+const payoutsRoutes = require('./routes/payouts')
 
 dotenv.config()
 
@@ -21,10 +21,12 @@ const app = express()
 const PORT = process.env.PORT || 4000
 
 // Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true,
-}))
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true,
+  }),
+)
 app.use(express.json())
 
 // Health check
@@ -47,19 +49,26 @@ app.use('/api/subscriptions', authenticate, subscriptionsRoutes)
 app.use('/api/payouts', authenticate, payoutsRoutes)
 
 // Error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err)
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal server error',
-  })
-})
+app.use(
+  (
+    err: any,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    console.error('Error:', err)
+    res.status(err.status || 500).json({
+      error: err.message || 'Internal server error',
+    })
+  },
+)
 
 // Only start server if not in Vercel (Vercel handles this automatically)
 if (process.env.VERCEL !== '1') {
   app.listen(Number(PORT), () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`)
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
-    
+
     // Start balance expiry cron job
     // NOTE: This will not run in Vercel's serverless environment
     // For Vercel, you'll need to create a separate Vercel Cron Job endpoint
@@ -67,4 +76,4 @@ if (process.env.VERCEL !== '1') {
   })
 }
 
-export default app
+module.exports = app
