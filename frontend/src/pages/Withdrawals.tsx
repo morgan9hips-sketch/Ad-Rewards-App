@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import EmptyState from '../components/EmptyState'
 import CurrencyDisplay from '../components/CurrencyDisplay'
 import { useAuth } from '../contexts/AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 interface Withdrawal {
   id: string
@@ -47,7 +48,7 @@ export default function Withdrawals() {
       if (!token) return
 
       // Fetch balance
-      const balanceRes = await fetch('http://localhost:4000/api/user/balance', {
+      const balanceRes = await fetch(`${API_BASE_URL}/api/user/balance`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (balanceRes.ok) {
@@ -57,7 +58,7 @@ export default function Withdrawals() {
 
       // Fetch withdrawal history
       const withdrawalsRes = await fetch(
-        'http://localhost:4000/api/withdrawals/history',
+        `${API_BASE_URL}/api/withdrawals/history`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -99,7 +100,7 @@ export default function Withdrawals() {
       const token = session?.access_token
       if (!token) return
 
-      const res = await fetch('http://localhost:4000/api/withdrawals/request', {
+      const res = await fetch(`${API_BASE_URL}/api/withdrawals/request`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

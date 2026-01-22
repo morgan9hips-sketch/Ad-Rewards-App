@@ -3,6 +3,7 @@ import Card from '../components/Card'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { useAuth } from '../contexts/AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 interface Conversion {
   id: number
@@ -88,7 +89,7 @@ export default function AdminConversions() {
 
       // Fetch conversions
       const conversionsRes = await fetch(
-        'http://localhost:4000/api/admin/conversions',
+        `${API_BASE_URL}/api/admin/conversions`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -99,7 +100,7 @@ export default function AdminConversions() {
       }
 
       // Fetch stats
-      const statsRes = await fetch('http://localhost:4000/api/admin/stats', {
+      const statsRes = await fetch(`${API_BASE_URL}/api/admin/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (statsRes.ok) {
@@ -167,7 +168,7 @@ export default function AdminConversions() {
       if (!token) return
 
       const res = await fetch(
-        'http://localhost:4000/api/admin/process-location-conversion',
+        `${API_BASE_URL}/api/admin/process-location-conversion`,
         {
           method: 'POST',
           headers: {
@@ -241,21 +242,18 @@ export default function AdminConversions() {
       const token = session?.access_token
       if (!token) return
 
-      const res = await fetch(
-        'http://localhost:4000/api/admin/process-conversion',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            admobRevenue: parseFloat(formData.admobRevenue),
-            month: formData.month,
-            notes: formData.notes,
-          }),
+      const res = await fetch(`${API_BASE_URL}/api/admin/process-conversion`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-      )
+        body: JSON.stringify({
+          admobRevenue: parseFloat(formData.admobRevenue),
+          month: formData.month,
+          notes: formData.notes,
+        }),
+      })
 
       const result = await res.json()
 

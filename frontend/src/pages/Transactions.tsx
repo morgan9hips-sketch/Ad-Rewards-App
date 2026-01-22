@@ -4,6 +4,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import EmptyState from '../components/EmptyState'
 import CurrencyDisplay from '../components/CurrencyDisplay'
 import { useAuth } from '../contexts/AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 interface Transaction {
   id: number
@@ -36,7 +37,7 @@ export default function Transactions() {
 
       const filterParam = filter !== 'all' ? `&type=${filter}` : ''
       const res = await fetch(
-        `http://localhost:4000/api/user/transactions?page=${page}&perPage=20${filterParam}`,
+        `${API_BASE_URL}/api/user/transactions?page=${page}&perPage=20${filterParam}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },

@@ -1,9 +1,17 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { AuthRequest } from '../middleware/auth.js'
-import { getExchangeRate, convertFromUSD, getUserCurrencyInfo } from '../services/currencyService.js'
+import {
+  getExchangeRate,
+  convertFromUSD,
+  getUserCurrencyInfo,
+} from '../services/currencyService.js'
 import { getUserTransactions } from '../services/transactionService.js'
-import { getClientIP, detectCountryFromIP } from '../services/geoService.js'
+import {
+  getClientIP,
+  detectCountryFromIP,
+  getUserLocationInfoFromCoordinates,
+} from '../services/geoService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -12,15 +20,29 @@ const prisma = new PrismaClient()
 router.post('/setup-profile', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
-    const { displayName, avatarEmoji, avatarUrl, countryBadge, hideCountry, showOnLeaderboard } = req.body
+    const {
+      displayName,
+      avatarEmoji,
+      avatarUrl,
+      countryBadge,
+      hideCountry,
+      showOnLeaderboard,
+    } = req.body
 
     // Validate display name
     if (displayName) {
       if (displayName.length < 3 || displayName.length > 20) {
-        return res.status(400).json({ error: 'Display name must be between 3 and 20 characters' })
+        return res
+          .status(400)
+          .json({ error: 'Display name must be between 3 and 20 characters' })
       }
       if (!/^[a-zA-Z0-9_]+$/.test(displayName)) {
-        return res.status(400).json({ error: 'Display name can only contain letters, numbers, and underscores' })
+        return res
+          .status(400)
+          .json({
+            error:
+              'Display name can only contain letters, numbers, and underscores',
+          })
       }
 
       // Check if display name is already taken
@@ -41,7 +63,8 @@ router.post('/setup-profile', async (req: AuthRequest, res) => {
         avatarUrl: avatarUrl || undefined,
         countryBadge: countryBadge || undefined,
         hideCountry: hideCountry !== undefined ? hideCountry : false,
-        showOnLeaderboard: showOnLeaderboard !== undefined ? showOnLeaderboard : true,
+        showOnLeaderboard:
+          showOnLeaderboard !== undefined ? showOnLeaderboard : true,
         profileSetupCompleted: true,
       },
     })
@@ -89,34 +112,43 @@ router.get('/profile', async (req: AuthRequest, res) => {
 router.put('/profile', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
-    const { 
-      name, 
-      country, 
-      paypalEmail, 
-      preferredCurrency, 
+    const {
+      name,
+      country,
+      paypalEmail,
+      preferredCurrency,
       autoDetectCurrency,
       displayName,
       avatarEmoji,
       avatarUrl,
       countryBadge,
       hideCountry,
-      showOnLeaderboard
+      showOnLeaderboard,
     } = req.body
 
     const updateData: any = {}
     if (name !== undefined) updateData.name = name
     if (country !== undefined) updateData.country = country
     if (paypalEmail !== undefined) updateData.paypalEmail = paypalEmail
-    if (preferredCurrency !== undefined) updateData.preferredCurrency = preferredCurrency
-    if (autoDetectCurrency !== undefined) updateData.autoDetectCurrency = autoDetectCurrency
-    
+    if (preferredCurrency !== undefined)
+      updateData.preferredCurrency = preferredCurrency
+    if (autoDetectCurrency !== undefined)
+      updateData.autoDetectCurrency = autoDetectCurrency
+
     // Validate and update display name
     if (displayName !== undefined) {
       if (displayName && (displayName.length < 3 || displayName.length > 20)) {
-        return res.status(400).json({ error: 'Display name must be between 3 and 20 characters' })
+        return res
+          .status(400)
+          .json({ error: 'Display name must be between 3 and 20 characters' })
       }
       if (displayName && !/^[a-zA-Z0-9_]+$/.test(displayName)) {
-        return res.status(400).json({ error: 'Display name can only contain letters, numbers, and underscores' })
+        return res
+          .status(400)
+          .json({
+            error:
+              'Display name can only contain letters, numbers, and underscores',
+          })
       }
 
       // Check if display name is already taken
@@ -125,18 +157,21 @@ router.put('/profile', async (req: AuthRequest, res) => {
           where: { displayName },
         })
         if (existingUser && existingUser.userId !== userId) {
-          return res.status(400).json({ error: 'Display name is already taken' })
+          return res
+            .status(400)
+            .json({ error: 'Display name is already taken' })
         }
       }
-      
+
       updateData.displayName = displayName || null
     }
-    
+
     if (avatarEmoji !== undefined) updateData.avatarEmoji = avatarEmoji
     if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl
     if (countryBadge !== undefined) updateData.countryBadge = countryBadge
     if (hideCountry !== undefined) updateData.hideCountry = hideCountry
-    if (showOnLeaderboard !== undefined) updateData.showOnLeaderboard = showOnLeaderboard
+    if (showOnLeaderboard !== undefined)
+      updateData.showOnLeaderboard = showOnLeaderboard
 
     const profile = await prisma.userProfile.update({
       where: { userId },
@@ -170,11 +205,11 @@ router.get('/balance', async (req: AuthRequest, res) => {
     }
 
     const cashUSD = parseFloat(profile.cashBalanceUsd.toString())
-    
+
     // Get user's currency info
     const currencyInfo = await getUserCurrencyInfo(userId, ipAddress)
     const cashLocal = cashUSD * currencyInfo.exchangeRate
-    
+
     // Format the local amount
     const cashLocalFormatted = `${currencyInfo.formatting.symbol}${cashLocal.toFixed(currencyInfo.formatting.decimals)}`
 
@@ -200,11 +235,58 @@ router.get('/balance', async (req: AuthRequest, res) => {
 router.get('/currency-info', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
-    const ipAddress = getClientIP(req)
+    const { lat, lng } = req.query
 
-    const currencyInfo = await getUserCurrencyInfo(userId, ipAddress)
+    // Check if coordinates are provided
+    if (!lat || !lng) {
+      return res.status(403).json({
+        error: 'Location coordinates required',
+        message: 'Please enable location services to use this app',
+        locationRequired: true,
+      })
+    }
 
-    res.json(currencyInfo)
+    const latitude = parseFloat(lat as string)
+    const longitude = parseFloat(lng as string)
+
+    // Validate coordinates
+    if (
+      isNaN(latitude) ||
+      isNaN(longitude) ||
+      latitude < -90 ||
+      latitude > 90 ||
+      longitude < -180 ||
+      longitude > 180
+    ) {
+      return res.status(400).json({
+        error: 'Invalid coordinates',
+        message: 'Please provide valid latitude and longitude',
+      })
+    }
+
+    // Get location info from coordinates
+    const locationInfo = getUserLocationInfoFromCoordinates(latitude, longitude)
+
+    if (!locationInfo.countryCode) {
+      return res.status(400).json({
+        error: 'Unable to determine country from location',
+        message: 'Your location could not be mapped to a supported country',
+      })
+    }
+
+    // Get currency info using the detected country
+    const currencyInfo = await getUserCurrencyInfo(
+      userId,
+      'coordinates',
+      locationInfo.countryCode,
+    )
+
+    res.json({
+      ...currencyInfo,
+      locationDetected: true,
+      coordinates: { lat: latitude, lng: longitude },
+      detectedCountry: locationInfo.countryCode,
+    })
   } catch (error) {
     console.error('Error fetching currency info:', error)
     res.status(500).json({ error: 'Failed to fetch currency info' })
@@ -233,10 +315,10 @@ router.get('/detect-country', async (req: AuthRequest, res) => {
   try {
     const ipAddress = getClientIP(req)
     const countryCode = detectCountryFromIP(ipAddress)
-    
-    res.json({ 
+
+    res.json({
       countryCode,
-      ipAddress: ipAddress !== 'unknown' ? ipAddress : null
+      ipAddress: ipAddress !== 'unknown' ? ipAddress : null,
     })
   } catch (error) {
     console.error('Error detecting country:', error)

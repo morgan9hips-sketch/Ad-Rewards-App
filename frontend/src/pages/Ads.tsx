@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import VideoCapProgress from '../components/VideoCapProgress'
 import InterstitialPrompt from '../components/InterstitialPrompt'
 import { useAuth } from '../contexts/AuthContext'
+import { API_BASE_URL } from '../config/api'
 import admobService from '../services/admobService'
 
 interface VideoCapStatus {
@@ -27,7 +28,9 @@ export default function Ads() {
   const navigate = useNavigate()
   const { session } = useAuth()
   const [loading, setLoading] = useState(true)
-  const [videoCapStatus, setVideoCapStatus] = useState<VideoCapStatus | null>(null)
+  const [videoCapStatus, setVideoCapStatus] = useState<VideoCapStatus | null>(
+    null,
+  )
   const [watching, setWatching] = useState(false)
   const [showingInterstitial, setShowingInterstitial] = useState(false)
 
@@ -49,7 +52,7 @@ export default function Ads() {
       const token = session?.access_token
       if (!token) return
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+      const API_URL = API_BASE_URL
       const res = await fetch(`${API_URL}/api/videos/daily-cap`, {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -72,7 +75,7 @@ export default function Ads() {
     try {
       // Load and show rewarded ad
       await admobService.loadRewardedAd()
-      
+
       await admobService.showRewardedAd(
         async (reward) => {
           console.log('Rewarded:', reward)
@@ -88,7 +91,7 @@ export default function Ads() {
         (error) => {
           console.error('Ad failed:', error)
           setWatching(false)
-        }
+        },
       )
     } catch (error) {
       console.error('Error showing rewarded video:', error)
@@ -101,7 +104,7 @@ export default function Ads() {
     try {
       // Load and show interstitial ad
       await admobService.loadInterstitialAd()
-      
+
       await admobService.showInterstitialAd(
         async () => {
           console.log('Interstitial closed')
@@ -114,7 +117,7 @@ export default function Ads() {
         (error) => {
           console.error('Interstitial failed:', error)
           setShowingInterstitial(false)
-        }
+        },
       )
     } catch (error) {
       console.error('Error showing interstitial:', error)
@@ -127,7 +130,7 @@ export default function Ads() {
       const token = session?.access_token
       if (!token) return
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+      const API_URL = API_BASE_URL
       const impressionData = admobService.generateImpressionData(adType)
 
       // Track ad completion
@@ -138,9 +141,10 @@ export default function Ads() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          adUnitId: adType === 'rewarded' 
-            ? import.meta.env.VITE_ADMOB_REWARDED_ID 
-            : import.meta.env.VITE_ADMOB_INTERSTITIAL_ID,
+          adUnitId:
+            adType === 'rewarded'
+              ? import.meta.env.VITE_ADMOB_REWARDED_ID
+              : import.meta.env.VITE_ADMOB_INTERSTITIAL_ID,
           watchedSeconds: adType === 'rewarded' ? 30 : 15,
           ...impressionData,
         }),
@@ -155,9 +159,10 @@ export default function Ads() {
         },
         body: JSON.stringify({
           adType,
-          adUnitId: adType === 'rewarded' 
-            ? import.meta.env.VITE_ADMOB_REWARDED_ID 
-            : import.meta.env.VITE_ADMOB_INTERSTITIAL_ID,
+          adUnitId:
+            adType === 'rewarded'
+              ? import.meta.env.VITE_ADMOB_REWARDED_ID
+              : import.meta.env.VITE_ADMOB_INTERSTITIAL_ID,
           revenueUsd: impressionData.estimatedEarnings,
           country: impressionData.countryCode,
           currency: impressionData.currency,
@@ -183,7 +188,7 @@ export default function Ads() {
       const token = session?.access_token
       if (!token) return
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+      const API_URL = API_BASE_URL
       await fetch(`${API_URL}/api/videos/watch-complete`, {
         method: 'POST',
         headers: {
@@ -210,7 +215,9 @@ export default function Ads() {
       <div className="container mx-auto px-4 py-6 pb-24">
         <h1 className="text-3xl font-bold text-white mb-6">Watch Ads 📺</h1>
         <Card>
-          <p className="text-gray-400">Unable to load video status. Please try again.</p>
+          <p className="text-gray-400">
+            Unable to load video status. Please try again.
+          </p>
         </Card>
       </div>
     )
@@ -218,7 +225,9 @@ export default function Ads() {
 
   return (
     <div className="container mx-auto px-4 py-6 pb-32">
-      <h1 className="text-3xl font-bold text-white mb-6">Watch Ads & Earn 💰</h1>
+      <h1 className="text-3xl font-bold text-white mb-6">
+        Watch Ads & Earn 💰
+      </h1>
 
       {/* Video cap progress */}
       <VideoCapProgress
@@ -333,4 +342,3 @@ export default function Ads() {
     </div>
   )
 }
-

@@ -5,6 +5,7 @@ import Button from '../components/Button'
 import ProgressBar from '../components/ProgressBar'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { useAuth } from '../contexts/AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 export default function WatchAd() {
   const { id } = useParams()
@@ -48,7 +49,7 @@ export default function WatchAd() {
       const token = session?.access_token
       if (!token) return
 
-      const res = await fetch('http://localhost:4000/api/ads/complete', {
+      const res = await fetch(`${API_BASE_URL}/api/ads/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +135,8 @@ export default function WatchAd() {
               </p>
             </div>
             <p className="text-gray-400 text-sm mb-4">
-              💡 Your coins will convert to cash when we receive ad revenue (monthly)
+              💡 Your coins will convert to cash when we receive ad revenue
+              (monthly)
             </p>
             <Button onClick={claimReward}>Continue to Dashboard</Button>
           </div>
@@ -143,4 +145,3 @@ export default function WatchAd() {
     </div>
   )
 }
-

@@ -1,5 +1,12 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react'
 import { useAuth } from './AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 interface CurrencyInfo {
   displayCurrency: string
@@ -11,49 +18,121 @@ interface CurrencyInfo {
     decimals: number
     position: 'before' | 'after'
   }
+  locationDetected: boolean
+  locationRequired: boolean
 }
 
 interface CurrencyContextType {
   currencyInfo: CurrencyInfo | null
   loading: boolean
+  locationError: boolean
   formatAmount: (amountUsd: number, showBoth?: boolean) => string
   refreshCurrencyInfo: () => Promise<void>
+  requestLocationPermission: () => Promise<boolean>
 }
 
-const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined)
+const CurrencyContext = createContext<CurrencyContextType | undefined>(
+  undefined,
+)
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const { session } = useAuth()
   const [currencyInfo, setCurrencyInfo] = useState<CurrencyInfo | null>(null)
   const [loading, setLoading] = useState(true)
+  const [locationError, setLocationError] = useState(false)
 
-  const loadCurrencyInfo = async () => {
+  const requestLocationPermission = async (): Promise<boolean> => {
+    try {
+      // Check if geolocation is available
+      if (!navigator.geolocation) {
+        console.error('Geolocation not supported')
+        setLocationError(true)
+        return false
+      }
+
+      // Request location permission
+      return new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            console.log(
+              'Location detected:',
+              position.coords.latitude,
+              position.coords.longitude,
+            )
+            setLocationError(false)
+            loadCurrencyInfo(
+              position.coords.latitude,
+              position.coords.longitude,
+            )
+            resolve(true)
+          },
+          (error) => {
+            console.error('Location error:', error.message)
+            setLocationError(true)
+            resolve(false)
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000, // Cache for 5 minutes
+          },
+        )
+      })
+    } catch (error) {
+      console.error('Error requesting location:', error)
+      setLocationError(true)
+      return false
+    }
+  }
+
+  const loadCurrencyInfo = async (lat?: number, lng?: number) => {
     try {
       if (!session?.access_token) {
         setLoading(false)
         return
       }
 
-      const response = await fetch('http://localhost:4000/api/user/currency-info', {
-        headers: { Authorization: `Bearer ${session.access_token}` }
+      let url = `${API_BASE_URL}/api/user/currency-info`
+      if (lat && lng) {
+        url += `?lat=${lat}&lng=${lng}`
+      }
+
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
       })
 
       if (response.ok) {
         const data = await response.json()
-        setCurrencyInfo(data)
+        setCurrencyInfo({
+          ...data,
+          locationDetected: !!(lat && lng),
+          locationRequired: true,
+        })
+        setLocationError(false)
+      } else if (response.status === 403) {
+        // Location required but not provided
+        setLocationError(true)
+        setCurrencyInfo(null)
       }
     } catch (error) {
       console.error('Error loading currency info:', error)
+      setLocationError(true)
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    loadCurrencyInfo()
+    if (session?.access_token) {
+      // Always try to get location first
+      requestLocationPermission()
+    }
   }, [session])
 
-  const formatAmount = (amountUsd: number, showBoth: boolean = false): string => {
+  const formatAmount = (
+    amountUsd: number,
+    showBoth: boolean = false,
+  ): string => {
     if (!currencyInfo) {
       return `$${amountUsd.toFixed(2)}`
     }
@@ -62,12 +141,13 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     const formatted = localAmount.toFixed(currencyInfo.formatting.decimals)
     const withCommas = parseFloat(formatted).toLocaleString('en-US', {
       minimumFractionDigits: currencyInfo.formatting.decimals,
-      maximumFractionDigits: currencyInfo.formatting.decimals
+      maximumFractionDigits: currencyInfo.formatting.decimals,
     })
 
-    let result = currencyInfo.formatting.position === 'before'
-      ? `${currencyInfo.formatting.symbol}${withCommas}`
-      : `${withCommas}${currencyInfo.formatting.symbol}`
+    let result =
+      currencyInfo.formatting.position === 'before'
+        ? `${currencyInfo.formatting.symbol}${withCommas}`
+        : `${withCommas}${currencyInfo.formatting.symbol}`
 
     if (showBoth && currencyInfo.displayCurrency !== 'USD') {
       result += ` (≈ $${amountUsd.toFixed(2)} USD)`
@@ -77,11 +157,21 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   }
 
   const refreshCurrencyInfo = async () => {
-    await loadCurrencyInfo()
+    setLoading(true)
+    await requestLocationPermission()
   }
 
   return (
-    <CurrencyContext.Provider value={{ currencyInfo, loading, formatAmount, refreshCurrencyInfo }}>
+    <CurrencyContext.Provider
+      value={{
+        currencyInfo,
+        loading,
+        locationError,
+        formatAmount,
+        refreshCurrencyInfo,
+        requestLocationPermission,
+      }}
+    >
       {children}
     </CurrencyContext.Provider>
   )

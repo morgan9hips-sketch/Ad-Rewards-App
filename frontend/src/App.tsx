@@ -1,12 +1,18 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { CurrencyProvider } from './contexts/CurrencyContext'
+import { CurrencyProvider, useCurrency } from './contexts/CurrencyContext'
 import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
 import CookieConsent from './components/CookieConsent'
 import BetaBanner from './components/BetaBanner'
 import AdBanner from './components/AdBanner'
 import LoadingSpinner from './components/LoadingSpinner'
+import LocationRequired from './components/LocationRequired'
 
 // Pages
 import Home from './pages/Home'
@@ -28,10 +34,21 @@ import Transactions from './pages/Transactions'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 
-function ProtectedRoute({ children, requireAdmin = false }: { children: React.ReactNode; requireAdmin?: boolean }) {
+function ProtectedRoute({
+  children,
+  requireAdmin = false,
+}: {
+  children: React.ReactNode
+  requireAdmin?: boolean
+}) {
   const { isAuthenticated, loading, user } = useAuth()
+  const {
+    currencyInfo,
+    loading: currencyLoading,
+    locationError,
+  } = useCurrency()
 
-  if (loading) {
+  if (loading || currencyLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-black">
         <LoadingSpinner size="large" />
@@ -43,13 +60,21 @@ function ProtectedRoute({ children, requireAdmin = false }: { children: React.Re
     return <Navigate to="/login" replace />
   }
 
+  // Location is required for authenticated users
+  if (locationError || !currencyInfo?.locationDetected) {
+    return <LocationRequired />
+  }
+
   if (requireAdmin && user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN') {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-black p-8 text-center">
         <div className="max-w-md">
-          <h1 className="text-3xl font-bold text-red-600 mb-4">⛔ Access Denied</h1>
+          <h1 className="text-3xl font-bold text-red-600 mb-4">
+            ⛔ Access Denied
+          </h1>
           <p className="text-gray-300 mb-6">
-            You do not have permission to access this page. Admin privileges are required.
+            You do not have permission to access this page. Admin privileges are
+            required.
           </p>
           <button
             onClick={() => window.history.back()}
@@ -72,14 +97,14 @@ function AppContent() {
     <div className="min-h-screen bg-black">
       <BetaBanner />
       <TopHeader />
-      
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
-        
+
         <Route
           path="/dashboard"
           element={

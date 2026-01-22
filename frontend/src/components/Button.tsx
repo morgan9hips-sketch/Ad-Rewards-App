@@ -5,6 +5,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'success'
   fullWidth?: boolean
   size?: 'sm' | 'md' | 'lg'
+  loading?: boolean
 }
 
 export default function Button({
@@ -12,12 +13,14 @@ export default function Button({
   variant = 'primary',
   fullWidth = false,
   size = 'md',
+  loading = false,
   className = '',
   disabled,
   ...props
 }: ButtonProps) {
-  const baseClasses = 'font-semibold rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
-  
+  const baseClasses =
+    'font-semibold rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+
   const variantClasses = {
     primary: 'bg-blue-600 hover:bg-blue-700 text-white',
     secondary: 'bg-gray-700 hover:bg-gray-600 text-white',
@@ -36,10 +39,17 @@ export default function Button({
   return (
     <button
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${widthClass} ${className}`}
-      disabled={disabled}
+      disabled={disabled || loading}
       {...props}
     >
-      {children}
+      {loading ? (
+        <div className="flex items-center justify-center gap-2">
+          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          {children}
+        </div>
+      ) : (
+        children
+      )}
     </button>
   )
 }

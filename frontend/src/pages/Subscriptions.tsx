@@ -4,6 +4,7 @@ import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 import SubscriptionPlans from '../components/SubscriptionPlans'
 import { useAuth } from '../contexts/AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 interface SubscriptionStatus {
   tier: string
@@ -16,7 +17,8 @@ interface SubscriptionStatus {
 export default function Subscriptions() {
   const { session } = useAuth()
   const [loading, setLoading] = useState(true)
-  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null)
+  const [subscriptionStatus, setSubscriptionStatus] =
+    useState<SubscriptionStatus | null>(null)
 
   useEffect(() => {
     fetchSubscriptionStatus()
@@ -27,7 +29,7 @@ export default function Subscriptions() {
       const token = session?.access_token
       if (!token) return
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+      const API_URL = API_BASE_URL
       const res = await fetch(`${API_URL}/api/subscriptions/status`, {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -48,7 +50,7 @@ export default function Subscriptions() {
       const token = session?.access_token
       if (!token) return
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+      const API_URL = API_BASE_URL
       const res = await fetch(`${API_URL}/api/subscriptions/create`, {
         method: 'POST',
         headers: {
@@ -129,7 +131,8 @@ export default function Subscriptions() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-white mb-1">
-                Current Plan: <span className="text-purple-400">{currentTier}</span>
+                Current Plan:{' '}
+                <span className="text-purple-400">{currentTier}</span>
               </h3>
               {subscriptionStatus.subscriptionStatus && (
                 <p className="text-sm text-gray-400">
@@ -137,22 +140,25 @@ export default function Subscriptions() {
                 </p>
               )}
             </div>
-            {currentTier !== 'Bronze' && subscriptionStatus.subscriptionStatus === 'ACTIVE' && (
-              <Button
-                onClick={handleCancelSubscription}
-                variant="secondary"
-                size="sm"
-              >
-                Cancel Subscription
-              </Button>
-            )}
+            {currentTier !== 'Bronze' &&
+              subscriptionStatus.subscriptionStatus === 'ACTIVE' && (
+                <Button
+                  onClick={handleCancelSubscription}
+                  variant="secondary"
+                  size="sm"
+                >
+                  Cancel Subscription
+                </Button>
+              )}
           </div>
         </Card>
       )}
 
       {/* Benefits comparison */}
       <Card className="mb-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Plan Comparison</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">
+          Plan Comparison
+        </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -168,7 +174,9 @@ export default function Subscriptions() {
                 <td className="py-3 px-4">Videos per day</td>
                 <td className="py-3 px-4 text-center">30</td>
                 <td className="py-3 px-4 text-center">30</td>
-                <td className="py-3 px-4 text-center text-green-400 font-bold">40</td>
+                <td className="py-3 px-4 text-center text-green-400 font-bold">
+                  40
+                </td>
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-3 px-4">Forced interstitial ads</td>
@@ -207,30 +215,44 @@ export default function Subscriptions() {
 
       {/* FAQ */}
       <Card className="mt-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Frequently Asked Questions</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">
+          Frequently Asked Questions
+        </h3>
         <div className="space-y-4">
           <div>
-            <h4 className="text-white font-semibold mb-1">How does billing work?</h4>
+            <h4 className="text-white font-semibold mb-1">
+              How does billing work?
+            </h4>
             <p className="text-gray-400 text-sm">
-              Subscriptions are billed monthly through PayPal. You can cancel anytime.
+              Subscriptions are billed monthly through PayPal. You can cancel
+              anytime.
             </p>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-1">Can I change plans?</h4>
+            <h4 className="text-white font-semibold mb-1">
+              Can I change plans?
+            </h4>
             <p className="text-gray-400 text-sm">
-              Yes! You can upgrade or downgrade at any time. Changes take effect immediately.
+              Yes! You can upgrade or downgrade at any time. Changes take effect
+              immediately.
             </p>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-1">What happens if I cancel?</h4>
+            <h4 className="text-white font-semibold mb-1">
+              What happens if I cancel?
+            </h4>
             <p className="text-gray-400 text-sm">
-              You'll be downgraded to the Bronze (Free) tier at the end of your billing period.
+              You'll be downgraded to the Bronze (Free) tier at the end of your
+              billing period.
             </p>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-1">Do I still earn coins with a subscription?</h4>
+            <h4 className="text-white font-semibold mb-1">
+              Do I still earn coins with a subscription?
+            </h4>
             <p className="text-gray-400 text-sm">
-              Absolutely! You earn the same 85% revenue share on all rewarded videos you watch.
+              Absolutely! You earn the same 85% revenue share on all rewarded
+              videos you watch.
             </p>
           </div>
         </div>
