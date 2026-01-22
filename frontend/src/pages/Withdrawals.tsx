@@ -4,6 +4,7 @@ import Card from '../components/Card'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 import EmptyState from '../components/EmptyState'
+import CurrencyDisplay from '../components/CurrencyDisplay'
 import { useAuth } from '../contexts/AuthContext'
 
 interface Withdrawal {
@@ -37,7 +38,7 @@ export default function Withdrawals() {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [session?.access_token])
 
   const fetchData = async () => {
     try {
@@ -55,9 +56,12 @@ export default function Withdrawals() {
       }
 
       // Fetch withdrawal history
-      const withdrawalsRes = await fetch('http://localhost:4000/api/withdrawals/history', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const withdrawalsRes = await fetch(
+        'http://localhost:4000/api/withdrawals/history',
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      )
       if (withdrawalsRes.ok) {
         const data = await withdrawalsRes.json()
         setWithdrawals(data.withdrawals || [])
@@ -82,7 +86,11 @@ export default function Withdrawals() {
       return
     }
 
-    if (!confirm(`Request withdrawal of ${balance.cashLocal} ${balance.currency} ($${balance.cashUSD} USD) to ${paypalEmail}?`)) {
+    if (
+      !confirm(
+        `Request withdrawal of ${balance.cashLocal} ${balance.currency} ($${balance.cashUSD} USD) to ${paypalEmail}?`,
+      )
+    ) {
       return
     }
 
@@ -103,7 +111,9 @@ export default function Withdrawals() {
       const result = await res.json()
 
       if (result.success) {
-        alert(`Withdrawal request submitted successfully!\n\nAmount: ${result.amountLocal} ${result.currency} ($${result.amountUSD} USD)\n\nYou will receive payment within 5-7 business days.`)
+        alert(
+          `Withdrawal request submitted successfully!\n\nAmount: ${result.amountLocal} ${result.currency} ($${result.amountUSD} USD)\n\nYou will receive payment within 5-7 business days.`,
+        )
         setShowForm(false)
         setPaypalEmail('')
         fetchData() // Refresh data
@@ -146,14 +156,14 @@ export default function Withdrawals() {
       <Card className="mb-6">
         <h2 className="text-xl font-bold text-white mb-4">Available Balance</h2>
         <div className="text-center py-4">
-          <p className="text-4xl font-bold text-green-500 mb-2">
-            {balance ? `${balance.cashLocal} ${balance.currency}` : '$0.00'}
-          </p>
-          <p className="text-sm text-gray-400">
-            {balance ? `$${parseFloat(balance.cashUSD).toFixed(2)} USD` : '$0.00 USD'}
-          </p>
+          <CurrencyDisplay
+            amountUsd={balance ? parseFloat(balance.cashUSD) : 0}
+            showBoth={true}
+            size="lg"
+            className="text-green-500"
+          />
         </div>
-        
+
         {!canWithdraw && (
           <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-3 mt-4">
             <p className="text-yellow-300 text-sm text-center">
@@ -163,18 +173,14 @@ export default function Withdrawals() {
         )}
 
         {!showForm && canWithdraw && (
-          <Button 
-            fullWidth 
-            className="mt-4"
-            onClick={() => setShowForm(true)}
-          >
+          <Button fullWidth className="mt-4" onClick={() => setShowForm(true)}>
             Request Withdrawal
           </Button>
         )}
 
         {!canWithdraw && (
-          <Button 
-            fullWidth 
+          <Button
+            fullWidth
             variant="secondary"
             className="mt-4"
             onClick={() => navigate('/ads')}
@@ -187,7 +193,9 @@ export default function Withdrawals() {
       {/* Withdrawal Form */}
       {showForm && canWithdraw && (
         <Card className="mb-6">
-          <h2 className="text-xl font-bold text-white mb-4">Request Withdrawal</h2>
+          <h2 className="text-xl font-bold text-white mb-4">
+            Request Withdrawal
+          </h2>
           <form onSubmit={handleWithdrawal} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -210,21 +218,19 @@ export default function Withdrawals() {
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-400">Amount:</span>
                 <span className="text-white font-semibold">
-                  {balance?.cashLocal} {balance?.currency}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">USD Equivalent:</span>
-                <span className="text-white font-semibold">
-                  ${balance?.cashUSD}
+                  <CurrencyDisplay
+                    amountUsd={balance ? parseFloat(balance.cashUSD) : 0}
+                    showBoth={true}
+                    size="sm"
+                  />
                 </span>
               </div>
             </div>
 
             <div className="flex gap-3">
-              <Button 
-                type="button" 
-                variant="secondary" 
+              <Button
+                type="button"
+                variant="secondary"
                 fullWidth
                 onClick={() => {
                   setShowForm(false)
@@ -243,7 +249,9 @@ export default function Withdrawals() {
 
       {/* Withdrawal History */}
       <Card>
-        <h2 className="text-xl font-bold text-white mb-4">Withdrawal History</h2>
+        <h2 className="text-xl font-bold text-white mb-4">
+          Withdrawal History
+        </h2>
         {withdrawals.length === 0 ? (
           <EmptyState
             icon="📋"
@@ -253,20 +261,19 @@ export default function Withdrawals() {
         ) : (
           <div className="space-y-3">
             {withdrawals.map((withdrawal) => (
-              <div
-                key={withdrawal.id}
-                className="p-4 bg-gray-800 rounded-lg"
-              >
+              <div key={withdrawal.id} className="p-4 bg-gray-800 rounded-lg">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <p className="text-white font-semibold">
-                      {withdrawal.amountLocal} {withdrawal.currencyCode}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      ${parseFloat(withdrawal.amountUsd).toFixed(2)} USD
-                    </p>
+                    <CurrencyDisplay
+                      amountUsd={parseFloat(withdrawal.amountUsd)}
+                      showBoth={true}
+                      size="sm"
+                      className="text-white font-semibold"
+                    />
                   </div>
-                  <span className={`px-2 py-1 rounded text-xs ${getStatusColor(withdrawal.status)}`}>
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${getStatusColor(withdrawal.status)}`}
+                  >
                     {withdrawal.status}
                   </span>
                 </div>
@@ -278,7 +285,8 @@ export default function Withdrawals() {
                 </p>
                 {withdrawal.completedAt && (
                   <p className="text-xs text-gray-600">
-                    Completed: {new Date(withdrawal.completedAt).toLocaleString()}
+                    Completed:{' '}
+                    {new Date(withdrawal.completedAt).toLocaleString()}
                   </p>
                 )}
               </div>

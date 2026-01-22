@@ -14,14 +14,14 @@ export default function Settings() {
   const [country, setCountry] = useState('US')
   const [preferredCurrency, setPreferredCurrency] = useState('USD')
   const [autoDetectCurrency, setAutoDetectCurrency] = useState(true)
-  
+
   // Profile fields
   const [displayName, setDisplayName] = useState('')
   const [avatarEmoji, setAvatarEmoji] = useState<string | null>(null)
   const [countryBadge, setCountryBadge] = useState<string | null>(null)
   const [hideCountry, setHideCountry] = useState(false)
   const [showOnLeaderboard, setShowOnLeaderboard] = useState(true)
-  
+
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -35,7 +35,7 @@ export default function Settings() {
       if (!token) return
 
       const res = await fetch(`${API_BASE_URL}/api/user/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       })
 
       if (res.ok) {
@@ -67,7 +67,7 @@ export default function Settings() {
 
   const handleSave = async () => {
     setError(null)
-    
+
     // Validate display name
     const nameError = validateDisplayName(displayName)
     if (nameError) {
@@ -83,7 +83,7 @@ export default function Settings() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           paypalEmail,
@@ -95,7 +95,7 @@ export default function Settings() {
           countryBadge,
           hideCountry,
           showOnLeaderboard,
-        })
+        }),
       })
 
       if (res.ok) {
@@ -156,7 +156,9 @@ export default function Settings() {
                 className="w-5 h-5 mt-1"
               />
               <div>
-                <span className="text-gray-300 block font-medium">Hide my country</span>
+                <span className="text-gray-300 block font-medium">
+                  Hide my country
+                </span>
                 <span className="text-sm text-gray-500">
                   Show 🌍 instead of your country flag for privacy
                 </span>
@@ -186,10 +188,14 @@ export default function Settings() {
       </Card>
 
       <Card className="mb-6">
-        <h2 className="text-xl font-bold text-white mb-4">Account Information</h2>
+        <h2 className="text-xl font-bold text-white mb-4">
+          Account Information
+        </h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Email
+            </label>
             <input
               type="email"
               value={user?.email || ''}
@@ -217,7 +223,9 @@ export default function Settings() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Country</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Country
+            </label>
             <select
               value={country}
               onChange={(e) => setCountry(e.target.value)}
@@ -240,17 +248,21 @@ export default function Settings() {
       </Card>
 
       <Card className="mb-6">
-        <h2 className="text-xl font-bold text-white mb-4">💱 Currency Display</h2>
+        <h2 className="text-xl font-bold text-white mb-4">
+          💱 Currency Display
+        </h2>
         <div className="space-y-4">
           <label className="flex items-start gap-3">
-            <input 
+            <input
               type="checkbox"
               className="w-5 h-5 mt-1"
               checked={autoDetectCurrency}
               onChange={(e) => setAutoDetectCurrency(e.target.checked)}
             />
             <div>
-              <span className="text-gray-300 block font-medium">Auto-detect currency from location</span>
+              <span className="text-gray-300 block font-medium">
+                Auto-detect currency from location
+              </span>
               <span className="text-sm text-gray-500">
                 We'll automatically display amounts in your local currency
               </span>
@@ -283,10 +295,41 @@ export default function Settings() {
 
           <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
             <p className="text-sm text-blue-300">
-              ℹ️ <strong>Display only.</strong> Earnings are based on ads watched in{' '}
-              {currencyInfo?.revenueCountry || 'your location'}. All payouts are in USD.
+              ℹ️ <strong>Display only.</strong> Earnings are based on ads
+              watched in {currencyInfo?.revenueCountry || 'your location'}. All
+              payouts are in USD.
             </p>
           </div>
+        </div>
+      </Card>
+
+      <Card className="mb-6">
+        <h2 className="text-xl font-bold text-white mb-4">
+          📄 Legal Documents
+        </h2>
+        <div className="space-y-3">
+          <a
+            href="/terms"
+            className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-white"
+          >
+            <span className="text-xl">📋</span>
+            <div>
+              <p className="font-medium">Terms of Service</p>
+              <p className="text-sm text-gray-400">
+                Review our terms and conditions
+              </p>
+            </div>
+          </a>
+          <a
+            href="/privacy"
+            className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-white"
+          >
+            <span className="text-xl">🔒</span>
+            <div>
+              <p className="font-medium">Privacy Policy</p>
+              <p className="text-sm text-gray-400">How we protect your data</p>
+            </div>
+          </a>
         </div>
       </Card>
 

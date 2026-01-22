@@ -14,14 +14,14 @@ export default function Login() {
       setError('Please accept the Terms of Service to continue')
       return
     }
-    
+
     setLoading(true)
     setError('')
     try {
       const { error } = await auth.signInWithGoogle()
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Login failed')
       setLoading(false)
     }
   }
@@ -31,14 +31,14 @@ export default function Login() {
       setError('Please accept the Terms of Service to continue')
       return
     }
-    
+
     setLoading(true)
     setError('')
     try {
       const { error } = await auth.signInWithFacebook()
       if (error) throw error
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Login failed')
       setLoading(false)
     }
   }
@@ -56,11 +56,16 @@ export default function Login() {
           <Button fullWidth onClick={handleGoogleLogin} disabled={loading}>
             🔍 Continue with Google
           </Button>
-          <Button fullWidth variant="secondary" onClick={handleFacebookLogin} disabled={loading}>
+          <Button
+            fullWidth
+            variant="secondary"
+            onClick={handleFacebookLogin}
+            disabled={loading}
+          >
             📘 Continue with Facebook
           </Button>
         </div>
-        
+
         <div className="mt-6 pt-6 border-t border-gray-700">
           <label className="flex items-start gap-3 cursor-pointer group">
             <input
@@ -71,19 +76,28 @@ export default function Login() {
             />
             <span className="text-sm text-gray-300 group-hover:text-gray-200 transition-colors">
               I agree to the{' '}
-              <Link to="/terms" className="text-blue-400 hover:text-blue-300 underline" target="_blank">
+              <Link
+                to="/terms"
+                className="text-blue-400 hover:text-blue-300 underline"
+                target="_blank"
+              >
                 Terms of Service
-              </Link>
-              {' '}and{' '}
-              <Link to="/privacy" className="text-blue-400 hover:text-blue-300 underline" target="_blank">
+              </Link>{' '}
+              and{' '}
+              <Link
+                to="/privacy"
+                className="text-blue-400 hover:text-blue-300 underline"
+                target="_blank"
+              >
                 Privacy Policy
               </Link>
             </span>
           </label>
         </div>
-        
+
         <p className="text-xs text-gray-500 mt-4 text-center">
-          By signing in, you acknowledge that you are at least 18 years old or have parental consent.
+          By signing in, you acknowledge that you are at least 18 years old or
+          have parental consent.
         </p>
       </Card>
     </div>

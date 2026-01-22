@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 import Card from './Card'
+import CurrencyDisplay from './CurrencyDisplay'
 
 // Expiry configuration constants (must match backend)
 const COIN_EXPIRY_DAYS = 30
@@ -41,7 +42,7 @@ export default function ExpiryWarning() {
         const lastLogin = new Date(profile.lastLogin)
         const now = new Date()
         const daysSinceLogin = Math.floor(
-          (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60 * 24)
+          (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60 * 24),
         )
 
         const coinsBalance = Number(profile.coinsBalance || 0)
@@ -49,11 +50,17 @@ export default function ExpiryWarning() {
 
         // Check coin expiry
         const coinsDaysLeft = COIN_EXPIRY_DAYS - daysSinceLogin
-        const coinsExpiring = coinsDaysLeft <= COIN_WARNING_THRESHOLD_DAYS && coinsDaysLeft > 0 && coinsBalance > 0
+        const coinsExpiring =
+          coinsDaysLeft <= COIN_WARNING_THRESHOLD_DAYS &&
+          coinsDaysLeft > 0 &&
+          coinsBalance > 0
 
         // Check cash expiry
         const cashDaysLeft = CASH_EXPIRY_DAYS - daysSinceLogin
-        const cashExpiring = cashDaysLeft <= CASH_WARNING_THRESHOLD_DAYS && cashDaysLeft > 0 && cashBalance > 0
+        const cashExpiring =
+          cashDaysLeft <= CASH_WARNING_THRESHOLD_DAYS &&
+          cashDaysLeft > 0 &&
+          cashBalance > 0
 
         if (coinsExpiring || cashExpiring) {
           setExpiryStatus({
@@ -88,9 +95,11 @@ export default function ExpiryWarning() {
                   Your Coins Are Expiring Soon!
                 </h3>
                 <p className="text-gray-300 mb-3">
-                  You have {expiryStatus.coinsAmount.toLocaleString()} coins that will expire in{' '}
+                  You have {expiryStatus.coinsAmount.toLocaleString()} coins
+                  that will expire in{' '}
                   <span className="font-bold text-yellow-400">
-                    {expiryStatus.coinsDaysLeft} day{expiryStatus.coinsDaysLeft !== 1 ? 's' : ''}
+                    {expiryStatus.coinsDaysLeft} day
+                    {expiryStatus.coinsDaysLeft !== 1 ? 's' : ''}
                   </span>{' '}
                   due to inactivity.
                 </p>
@@ -120,14 +129,23 @@ export default function ExpiryWarning() {
                   Your Cash Balance Is Expiring Soon!
                 </h3>
                 <p className="text-gray-300 mb-3">
-                  You have ${expiryStatus.cashAmount.toFixed(2)} USD that will expire in{' '}
+                  You have{' '}
+                  <CurrencyDisplay
+                    amountUsd={expiryStatus.cashAmount}
+                    showBoth={true}
+                    size="sm"
+                    className="font-bold text-red-400"
+                  />{' '}
+                  that will expire in{' '}
                   <span className="font-bold text-red-400">
-                    {expiryStatus.cashDaysLeft} day{expiryStatus.cashDaysLeft !== 1 ? 's' : ''}
+                    {expiryStatus.cashDaysLeft} day
+                    {expiryStatus.cashDaysLeft !== 1 ? 's' : ''}
                   </span>{' '}
                   due to inactivity.
                 </p>
                 <p className="text-sm text-gray-400 mb-4">
-                  Log in or watch an ad to reset the timer and preserve your balance! 💰
+                  Log in or watch an ad to reset the timer and preserve your
+                  balance! 💰
                 </p>
                 <div className="flex gap-3">
                   <a
