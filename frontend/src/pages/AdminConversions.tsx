@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Card from '../components/Card'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -80,11 +80,7 @@ export default function AdminConversions() {
       .toFixed(2)
   }
 
-  useEffect(() => {
-    fetchData()
-  }, [session?.access_token])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       const token = session?.access_token
@@ -115,7 +111,11 @@ export default function AdminConversions() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [session?.access_token])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const addLocationRevenue = () => {
     setRevenues([...revenues, { countryCode: 'US', admobRevenueUsd: '' }])
