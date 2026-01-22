@@ -1,0 +1,14 @@
+{
+  "name": "ad-rewards-app",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "cd backend && npm install && npm run prisma:generate",
+    "start": "cd backend && npm start"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}
