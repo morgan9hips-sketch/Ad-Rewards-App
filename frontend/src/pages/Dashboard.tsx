@@ -76,7 +76,7 @@ export default function Dashboard() {
       if (profileRes.ok) {
         const profileData = await profileRes.json()
         setProfile(profileData)
-        
+
         // Show profile setup if not completed
         if (!profileData.profileSetupCompleted) {
           setShowProfileSetup(true)
@@ -84,9 +84,12 @@ export default function Dashboard() {
       }
 
       // Fetch recent transactions
-      const txRes = await fetch(`${API_BASE_URL}/api/user/transactions?perPage=5`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const txRes = await fetch(
+        `${API_BASE_URL}/api/user/transactions?perPage=5`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      )
       if (txRes.ok) {
         const txData = await txRes.json()
         setTransactions(txData.transactions || [])
@@ -100,32 +103,33 @@ export default function Dashboard() {
 
   const getGreeting = () => {
     if (!profile) return 'Welcome!'
-    
-    const displayName = profile.displayName || user?.email?.split('@')[0] || 'User'
+
+    const displayName =
+      profile.displayName || user?.email?.split('@')[0] || 'User'
     const hoursSinceCreation = Math.floor(
-      (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60)
+      (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60),
     )
-    
+
     // New user check
     if (hoursSinceCreation < NEW_USER_THRESHOLD_HOURS) {
       return `Welcome, ${displayName}! 🎉`
     }
-    
+
     return `Welcome back, ${displayName}! 👋`
   }
 
   const getSubGreeting = () => {
     if (!profile) return ''
-    
+
     const hoursSinceCreation = Math.floor(
-      (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60)
+      (Date.now() - new Date(profile.createdAt).getTime()) / (1000 * 60 * 60),
     )
-    
+
     // New user sub-greeting
     if (hoursSinceCreation < NEW_USER_THRESHOLD_HOURS) {
       return 'Ready to start earning? Watch your first ad below!'
     }
-    
+
     return ''
   }
 
@@ -156,12 +160,12 @@ export default function Dashboard() {
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
       {/* Profile Setup Modal */}
-      {showProfileSetup && <ProfileSetup onComplete={handleProfileSetupComplete} />}
-      
+      {showProfileSetup && (
+        <ProfileSetup onComplete={handleProfileSetupComplete} />
+      )}
+
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white">
-          {getGreeting()}
-        </h1>
+        <h1 className="text-3xl font-bold text-white">{getGreeting()}</h1>
         {getSubGreeting() && (
           <p className="text-gray-400 mt-2">{getSubGreeting()}</p>
         )}
@@ -175,39 +179,51 @@ export default function Dashboard() {
         {/* Coins Wallet */}
         <Card>
           <div className="p-4">
-            <h2 className="text-xl font-bold text-white mb-3">🪙 Coins Wallet</h2>
+            <h2 className="text-xl font-bold text-white mb-3">
+              🪙 Coins Wallet
+            </h2>
             <p className="text-4xl font-bold text-yellow-500 mb-3">
               {balance ? parseInt(balance.coins).toLocaleString() : '0'} Coins
             </p>
             <p className="text-sm text-gray-400 mb-2">(Pending Conversion)</p>
-            
+
             {/* Progress to conversion threshold */}
-            {balance && parseInt(balance.coins) < CONVERSION_THRESHOLD_COINS && (
-              <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
-                <p className="text-xs text-gray-300 mb-2">
-                  📊 Progress to monthly conversion
-                </p>
-                <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                  <div
-                    className="bg-green-500 h-2 rounded-full transition-all"
-                    style={{ width: `${Math.min(100, (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) * 100)}%` }}
-                  />
+            {balance &&
+              parseInt(balance.coins) < CONVERSION_THRESHOLD_COINS && (
+                <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
+                  <p className="text-xs text-gray-300 mb-2">
+                    📊 Progress to monthly conversion
+                  </p>
+                  <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                    <div
+                      className="bg-green-500 h-2 rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(100, (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    {parseInt(balance.coins).toLocaleString()} /{' '}
+                    {CONVERSION_THRESHOLD_COINS.toLocaleString()} coins (
+                    {Math.floor(
+                      (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) *
+                        100,
+                    )}
+                    %)
+                  </p>
                 </div>
-                <p className="text-xs text-gray-400">
-                  {parseInt(balance.coins).toLocaleString()} / {CONVERSION_THRESHOLD_COINS.toLocaleString()} coins ({Math.floor((parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) * 100)}%)
-                </p>
-              </div>
-            )}
-            
+              )}
+
             <div className="bg-gray-800 p-3 rounded-lg mt-4">
               <p className="text-xs text-gray-300 mb-2">
-                💡 Coins convert to cash when we receive ad revenue (monthly, around the 25th)
+                💡 Coins convert to cash when we receive ad revenue (monthly,
+                around the 25th)
               </p>
               <p className="text-xs text-green-400 font-semibold">
                 You always receive 85% of ad revenue!
               </p>
             </div>
-            
+
             <p className="text-xs text-gray-500 mt-3">
               Next conversion: Feb 25-28, 2026
             </p>
@@ -217,21 +233,27 @@ export default function Dashboard() {
         {/* Cash Wallet */}
         <Card>
           <div className="p-4">
-            <h2 className="text-xl font-bold text-white mb-3">💵 Cash Wallet</h2>
-            <CurrencyDisplay 
+            <h2 className="text-xl font-bold text-white mb-3">
+              💵 Cash Wallet
+            </h2>
+            <CurrencyDisplay
               amountUsd={balance ? parseFloat(balance.cashUSD) : 0}
               showBoth={true}
               size="lg"
               className="mb-3"
             />
-            
+
             <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
-              <p className="text-xs text-gray-300 mb-1">Available to withdraw</p>
-              <p className="text-xs text-gray-500">Minimum withdrawal: $10 USD</p>
+              <p className="text-xs text-gray-300 mb-1">
+                Available to withdraw
+              </p>
+              <p className="text-xs text-gray-500">
+                Minimum withdrawal: $10 USD
+              </p>
             </div>
-            
-            <Button 
-              fullWidth 
+
+            <Button
+              fullWidth
               onClick={() => navigate('/withdrawals')}
               disabled={balance ? parseFloat(balance.cashUSD) < 10 : true}
             >
@@ -246,7 +268,9 @@ export default function Dashboard() {
         <Card>
           <div className="text-center">
             <p className="text-gray-400 text-sm mb-2">Ads Watched</p>
-            <p className="text-3xl font-bold text-purple-500">{profile?.adsWatched || 0}</p>
+            <p className="text-3xl font-bold text-purple-500">
+              {profile?.adsWatched || 0}
+            </p>
           </div>
         </Card>
 
@@ -262,7 +286,9 @@ export default function Dashboard() {
         <Card>
           <div className="text-center">
             <p className="text-gray-400 text-sm mb-2">Current Tier</p>
-            <p className="text-3xl font-bold text-blue-500">{profile?.tier || 'Bronze'}</p>
+            <p className="text-3xl font-bold text-blue-500">
+              {profile?.tier || 'Bronze'}
+            </p>
           </div>
         </Card>
       </div>
@@ -279,38 +305,52 @@ export default function Dashboard() {
       {/* Recent Transactions */}
       {transactions.length > 0 && (
         <Card className="mb-6">
-          <h2 className="text-xl font-bold text-white mb-4">Recent Transactions</h2>
+          <h2 className="text-xl font-bold text-white mb-4">
+            Recent Transactions
+          </h2>
           <div className="space-y-2">
             {transactions.map((tx) => {
               const coinsChange = BigInt(tx.coinsChange)
               const cashChange = parseFloat(tx.cashChangeUsd)
-              
+
               return (
-              <div key={tx.id} className="flex justify-between items-center py-2 border-b border-gray-800">
-                <div>
-                  <p className="text-white text-sm">{tx.description || tx.type}</p>
-                  <p className="text-gray-500 text-xs">
-                    {new Date(tx.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="text-right">
-                  {coinsChange !== BigInt(0) && (
-                    <p className={`text-sm font-semibold ${coinsChange > 0 ? 'text-yellow-500' : 'text-gray-400'}`}>
-                      {coinsChange > 0 ? '+' : ''}{tx.coinsChange} coins
+                <div
+                  key={tx.id}
+                  className="flex justify-between items-center py-2 border-b border-gray-800"
+                >
+                  <div>
+                    <p className="text-white text-sm">
+                      {tx.description || tx.type}
                     </p>
-                  )}
-                  {cashChange !== 0 && (
-                    <p className={`text-sm font-semibold ${cashChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {cashChange > 0 ? '+' : ''}${Math.abs(cashChange).toFixed(2)}
+                    <p className="text-gray-500 text-xs">
+                      {new Date(tx.createdAt).toLocaleDateString()}
                     </p>
-                  )}
+                  </div>
+                  <div className="text-right">
+                    {coinsChange !== BigInt(0) && (
+                      <p
+                        className={`text-sm font-semibold ${coinsChange > 0 ? 'text-yellow-500' : 'text-gray-400'}`}
+                      >
+                        {coinsChange > 0 ? '+' : ''}
+                        {tx.coinsChange} coins
+                      </p>
+                    )}
+                    {cashChange !== 0 && (
+                      <p
+                        className={`text-sm font-semibold ${cashChange > 0 ? 'text-green-500' : 'text-red-500'}`}
+                      >
+                        {cashChange > 0 ? '+' : ''}$
+                        {Math.abs(cashChange).toFixed(2)}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )})}
+              )
+            })}
           </div>
-          <Button 
-            fullWidth 
-            variant="secondary" 
+          <Button
+            fullWidth
+            variant="secondary"
             className="mt-4"
             onClick={() => navigate('/transactions')}
           >
@@ -320,7 +360,9 @@ export default function Dashboard() {
       )}
 
       <Card className="mb-6">
-        <h2 className="text-xl font-bold text-white mb-4">Earnings This Week</h2>
+        <h2 className="text-xl font-bold text-white mb-4">
+          Earnings This Week
+        </h2>
         <EarningsChart data={earningsData} />
       </Card>
 
@@ -330,8 +372,8 @@ export default function Dashboard() {
           <Button fullWidth onClick={() => navigate('/ads')}>
             Watch Ads & Earn Coins
           </Button>
-          <Button 
-            fullWidth 
+          <Button
+            fullWidth
             variant="secondary"
             onClick={() => navigate('/withdrawals')}
           >
