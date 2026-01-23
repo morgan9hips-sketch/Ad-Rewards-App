@@ -10,7 +10,6 @@
     "skipLibCheck": true,
     "strict": false,
     "outDir": "./dist",
-    "rootDir": "./src",
     "declaration": false,
     "sourceMap": false,
     "types": ["node"]
@@ -18,4 +17,3 @@
   "include": ["src/**/*", "api/**/*"],
   "exclude": ["node_modules", "dist"]
 }
-
