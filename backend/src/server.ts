@@ -1,19 +1,19 @@
-const express = require('express')
-const cors = require('cors')
-const dotenv = require('dotenv')
-const { authenticate } = require('./middleware/auth')
-const { scheduleExpiryJob } = require('./jobs/expireBalances')
+import express from 'express'
+import cors from 'cors'
+import dotenv from 'dotenv'
+import { authenticate } from './middleware/auth.js'
+import { scheduleExpiryJob } from './jobs/expireBalances.js'
 
 // Import routes
-const userRoutes = require('./routes/user')
-const adsRoutes = require('./routes/ads')
-const withdrawalRoutes = require('./routes/withdrawals')
-const leaderboardRoutes = require('./routes/leaderboard')
-const badgesRoutes = require('./routes/badges')
-const adminRoutes = require('./routes/admin')
-const videosRoutes = require('./routes/videos')
-const subscriptionsRoutes = require('./routes/subscriptions')
-const payoutsRoutes = require('./routes/payouts')
+import userRoutes from './routes/user.js'
+import adsRoutes from './routes/ads.js'
+import withdrawalRoutes from './routes/withdrawals.js'
+import leaderboardRoutes from './routes/leaderboard.js'
+import badgesRoutes from './routes/badges.js'
+import adminRoutes from './routes/admin.js'
+import videosRoutes from './routes/videos.js'
+import subscriptionsRoutes from './routes/subscriptions.js'
+import payoutsRoutes from './routes/payouts.js'
 
 dotenv.config()
 
@@ -76,4 +76,4 @@ if (process.env.VERCEL !== '1') {
   })
 }
 
-module.exports = app
+export default app
