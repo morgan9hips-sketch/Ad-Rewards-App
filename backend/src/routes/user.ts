@@ -37,12 +37,10 @@ router.post('/setup-profile', async (req: AuthRequest, res) => {
           .json({ error: 'Display name must be between 3 and 20 characters' })
       }
       if (!/^[a-zA-Z0-9_]+$/.test(displayName)) {
-        return res
-          .status(400)
-          .json({
-            error:
-              'Display name can only contain letters, numbers, and underscores',
-          })
+        return res.status(400).json({
+          error:
+            'Display name can only contain letters, numbers, and underscores',
+        })
       }
 
       // Check if display name is already taken
@@ -87,10 +85,22 @@ router.get('/profile', async (req: AuthRequest, res) => {
 
     // Create profile if it doesn't exist
     if (!profile) {
+      // Get user's country from IP
+      const geoService = await import('../services/geoService.js')
+      const { country } = await geoService.getLocationFromIP(
+        req.ip || '127.0.0.1',
+      )
+
+      // Get currency for country
+      const currencyService = await import('../services/currencyService.js')
+      const currency = currencyService.getCurrencyForCountry(country)
+
       profile = await prisma.userProfile.create({
         data: {
           userId,
           email: req.user!.email,
+          country,
+          preferredCurrency: currency,
         },
       })
     } else {
@@ -143,12 +153,10 @@ router.put('/profile', async (req: AuthRequest, res) => {
           .json({ error: 'Display name must be between 3 and 20 characters' })
       }
       if (displayName && !/^[a-zA-Z0-9_]+$/.test(displayName)) {
-        return res
-          .status(400)
-          .json({
-            error:
-              'Display name can only contain letters, numbers, and underscores',
-          })
+        return res.status(400).json({
+          error:
+            'Display name can only contain letters, numbers, and underscores',
+        })
       }
 
       // Check if display name is already taken
