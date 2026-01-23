@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AdiFy Mobile Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .wallet {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+        }
+        
+        .wallet-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+        
+        .wallet-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .currency-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4ade80;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #4ade80, #22c55e);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        button:hover, button:active {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 222, 128, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .test-results {
+            margin-top: 20px;
+        }
+        
+        .test-item {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+        
+        .success { border-left: 4px solid #4ade80; }
+        .error { border-left: 4px solid #ef4444; }
+        .loading { border-left: 4px solid #f59e0b; }
+        
+        .country-flag {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+        
+        .location-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🚀 AdiFy</div>
+            <p>Your Mobile Rewards App</p>
+        </div>
+        
+        <div class="location-info">
+            <span class="country-flag">🇿🇦</span>
+            <span>South Africa • ZAR Currency</span>
+        </div>
+        
+        <div class="status" id="currencyStatus">
+            <strong>Currency System Status:</strong> <span id="statusText">Initializing...</span>
+        </div>
+        
+        <div class="wallet">
+            <div>
+                <div>🪙 Coins Wallet</div>
+                <div class="wallet-amount" id="coinsBalance">0 Coins</div>
+            </div>
+        </div>
+        
+        <div class="wallet">
+            <div>
+                <div>💵 Cash Wallet</div>
+                <div class="currency-display" id="cashBalance">R0.00</div>
+                <div style="font-size: 0.8rem; opacity: 0.8;" id="cashUSD">(≈ $0.00 USD)</div>
+            </div>
+        </div>
+        
+        <button onclick="testCurrency()" id="testBtn">🌍 Test Currency System</button>
+        <button onclick="testLocation()" id="locationBtn">📍 Test Location</button>
+        <button onclick="simulateEarning()" id="earnBtn">▶️ Simulate Ad Reward</button>
+        
+        <div class="test-results" id="results"></div>
+    </div>
+
+    <script>
+        let currentCurrency = {
+            symbol: 'R',
+            rate: 18.5,
+            code: 'ZAR'
+        };
+
+        function addResult(text, status = 'success') {
+            const results = document.getElementById('results');
+            const item = document.createElement('div');
+            item.className = `test-item ${status}`;
+            item.innerHTML = `${new Date().toLocaleTimeString()}: ${text}`;
+            results.appendChild(item);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function updateStatus(text, isSuccess = true) {
+            const statusEl = document.getElementById('statusText');
+            statusEl.textContent = text;
+            statusEl.style.color = isSuccess ? '#4ade80' : '#ef4444';
+        }
+
+        function formatZAR(usdAmount) {
+            const zarAmount = usdAmount * currentCurrency.rate;
+            return `${currentCurrency.symbol}${zarAmount.toFixed(2)}`;
+        }
+
+        async function testCurrency() {
+            const btn = document.getElementById('testBtn');
+            btn.disabled = true;
+            btn.textContent = '🌍 Testing...';
+            
+            addResult('Testing currency API...', 'loading');
+            
+            try {
+                const response = await fetch('/api/user/currency-info?lat=-26.2041&lng=28.0473');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✅ Currency API: ${data.displayCurrency} (${data.formatting.symbol}) - Rate: ${data.exchangeRate}`, 'success');
+                    
+                    // Update current currency
+                    currentCurrency = {
+                        symbol: data.formatting.symbol,
+                        rate: data.exchangeRate,
+                        code: data.displayCurrency
+                    };
+                    
+                    updateStatus('Currency system active ✅', true);
+                    
+                    // Test balance
+                    const balanceResponse = await fetch('/api/user/balance');
+                    if (balanceResponse.ok) {
+                        const balance = await balanceResponse.json();
+                        document.getElementById('coinsBalance').textContent = `${balance.coins} Coins`;
+                        document.getElementById('cashBalance').textContent = formatZAR(parseFloat(balance.cashUsd));
+                        document.getElementById('cashUSD').textContent = `(≈ $${balance.cashUsd} USD)`;
+                        addResult(`✅ Balance loaded: ${formatZAR(parseFloat(balance.cashUsd))}`, 'success');
+                    }
+                    
+                } else {
+                    throw new Error(`API returned ${response.status}`);
+                }
+                
+            } catch (error) {
+                addResult(`❌ Currency test failed: ${error.message}`, 'error');
+                updateStatus('Currency system error ❌', false);
+            }
+            
+            btn.disabled = false;
+            btn.textContent = '🌍 Test Currency System';
+        }
+
+        async function testLocation() {
+            const btn = document.getElementById('locationBtn');
+            btn.disabled = true;
+            btn.textContent = '📍 Getting location...';
+            
+            addResult('Testing geolocation...', 'loading');
+            
+            if (!navigator.geolocation) {
+                addResult('❌ Geolocation not supported', 'error');
+                btn.disabled = false;
+                btn.textContent = '📍 Test Location';
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude.toFixed(6);
+                    const lng = position.coords.longitude.toFixed(6);
+                    addResult(`✅ Location: ${lat}, ${lng} (accuracy: ${position.coords.accuracy}m)`, 'success');
+                    btn.disabled = false;
+                    btn.textContent = '📍 Test Location';
+                },
+                (error) => {
+                    addResult(`❌ Location error: ${error.message}`, 'error');
+                    btn.disabled = false;
+                    btn.textContent = '📍 Test Location';
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000
+                }
+            );
+        }
+
+        function simulateEarning() {
+            const btn = document.getElementById('earnBtn');
+            btn.disabled = true;
+            btn.textContent = '▶️ Playing ad...';
+            
+            addResult('Simulating ad reward...', 'loading');
+            
+            setTimeout(() => {
+                const rewardUSD = 0.10;
+                const rewardZAR = formatZAR(rewardUSD);
+                
+                // Update displayed balance
+                const currentCash = document.getElementById('cashBalance').textContent;
+                const currentAmount = parseFloat(currentCash.replace('R', '')) || 0;
+                const newAmount = currentAmount + (rewardUSD * currentCurrency.rate);
+                
+                document.getElementById('cashBalance').textContent = `R${newAmount.toFixed(2)}`;
+                document.getElementById('cashUSD').textContent = `(≈ $${(newAmount / currentCurrency.rate).toFixed(2)} USD)`;
+                
+                addResult(`🎉 Ad completed! Earned: ${rewardZAR} (+100 coins)`, 'success');
+                
+                btn.disabled = false;
+                btn.textContent = '▶️ Simulate Ad Reward';
+            }, 2000);
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testCurrency();
+            }, 1000);
+        });
+
+        // Add mobile touch feedback
+        document.addEventListener('touchstart', () => {}, {passive: true});
+    </script>
+</body>
+</html>
