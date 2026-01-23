@@ -37,8 +37,20 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const { session } = useAuth()
-  const [currencyInfo, setCurrencyInfo] = useState<CurrencyInfo | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [currencyInfo, setCurrencyInfo] = useState<CurrencyInfo>({
+    displayCurrency: 'ZAR',
+    revenueCountry: 'ZA',
+    displayCountry: 'ZA',
+    exchangeRate: 18.5, // Approximate USD to ZAR exchange rate
+    formatting: {
+      symbol: 'R',
+      decimals: 2,
+      position: 'before',
+    },
+    locationDetected: true,
+    locationRequired: false,
+  })
+  const [loading, setLoading] = useState(false) // Set to false since we're providing default ZAR
   const [locationError, setLocationError] = useState(false)
 
   const requestLocationPermission = async (): Promise<boolean> => {
@@ -103,20 +115,23 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         const data = await response.json()
+        console.log('Currency info loaded:', data)
         setCurrencyInfo({
           ...data,
           locationDetected: !!(lat && lng),
-          locationRequired: true,
+          locationRequired: false, // Always allow access with default ZAR
         })
         setLocationError(false)
-      } else if (response.status === 403) {
-        // Location required but not provided
-        setLocationError(true)
-        setCurrencyInfo(null)
+      } else {
+        console.warn('Currency API failed, using default ZAR')
+        // Keep default ZAR if API fails
+        setLocationError(false)
       }
     } catch (error) {
       console.error('Error loading currency info:', error)
-      setLocationError(true)
+      console.log('Using default ZAR currency')
+      // Keep default ZAR on error
+      setLocationError(false)
     } finally {
       setLoading(false)
     }

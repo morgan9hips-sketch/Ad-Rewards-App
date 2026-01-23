@@ -23,8 +23,16 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     switch (fullPath) {
       case 'user/profile':
         return handleUserProfile(req, res)
+      case 'user/currency-info':
+        return handleCurrencyInfo(req, res)
+      case 'user/balance':
+        return handleUserBalance(req, res)
       case 'videos/available':
         return handleVideosAvailable(req, res)
+      case 'ads/watch':
+        return handleAdsWatch(req, res)
+      case 'withdrawals/calculate':
+        return handleWithdrawalCalculate(req, res)
       default:
         return res.status(404).json({ error: 'Endpoint not found' })
     }
@@ -47,6 +55,93 @@ function handleUserProfile(req: VercelRequest, res: VercelResponse) {
     showOnLeaderboard: true,
     hideCountry: false,
   })
+}
+
+function handleCurrencyInfo(req: VercelRequest, res: VercelResponse) {
+  // Always return South African ZAR currency info
+  res.json({
+    displayCurrency: 'ZAR',
+    revenueCountry: 'ZA',
+    displayCountry: 'ZA',
+    exchangeRate: 18.5,
+    formatting: {
+      symbol: 'R',
+      decimals: 2,
+      position: 'before'
+    },
+    locationDetected: true,
+    locationRequired: false,
+    coordinates: {
+      lat: req.query.lat || -26.2041,
+      lng: req.query.lng || 28.0473
+    },
+    detectedCountry: 'ZA'
+  })
+}
+
+function handleUserBalance(req: VercelRequest, res: VercelResponse) {
+  // Return balance in ZAR currency
+  const cashUSD = 2.25
+  const exchangeRate = 18.5
+  const cashZAR = cashUSD * exchangeRate
+  
+  res.json({
+    coins: '150',
+    cashUsd: cashUSD.toFixed(4),
+    cashLocal: cashZAR.toFixed(2),
+    cashLocalFormatted: `R${cashZAR.toFixed(2)}`,
+    displayCurrency: 'ZAR',
+    displayCountry: 'ZA',
+    revenueCountry: 'ZA',
+    exchangeRate: exchangeRate.toFixed(6),
+    currencySymbol: 'R',
+    currencyPosition: 'before'
+  })
+}
+
+function handleAdsWatch(req: VercelRequest, res: VercelResponse) {
+  if (req.method === 'POST') {
+    // Mock ad watch completion with ZAR rewards
+    res.json({
+      success: true,
+      reward: {
+        coins: 100,
+        cashUSD: 0.10,
+        cashZAR: 1.85,
+        formatted: 'R1.85'
+      },
+      newBalance: {
+        coins: 250,
+        cashUSD: 2.35,
+        cashZAR: 43.48,
+        formatted: 'R43.48'
+      }
+    })
+  } else {
+    res.status(405).json({ error: 'Method not allowed' })
+  }
+}
+
+function handleWithdrawalCalculate(req: VercelRequest, res: VercelResponse) {
+  if (req.method === 'POST') {
+    const { amount } = req.body
+    const exchangeRate = 18.5
+    const amountUSD = amount / exchangeRate
+    
+    res.json({
+      amountLocal: amount,
+      amountUSD: amountUSD.toFixed(2),
+      exchangeRate: exchangeRate,
+      currency: 'ZAR',
+      symbol: 'R',
+      fees: {
+        paypalFee: amountUSD * 0.03,
+        platformFee: amountUSD * 0.02
+      }
+    })
+  } else {
+    res.status(405).json({ error: 'Method not allowed' })
+  }
 }
 
 function handleVideosAvailable(req: VercelRequest, res: VercelResponse) {
