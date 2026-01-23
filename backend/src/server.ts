@@ -29,23 +29,37 @@ app.use(
 )
 app.use(express.json())
 
-// Health check
+// Health check - both root and /health for different deployment scenarios
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), message: 'Ad Rewards API is running' })
+})
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
 // Public routes
+app.use('/leaderboard', leaderboardRoutes)
 app.use('/api/leaderboard', leaderboardRoutes)
+app.use('/subscriptions/webhook', subscriptionsRoutes) // Webhook should be public
 app.use('/api/subscriptions/webhook', subscriptionsRoutes) // Webhook should be public
 
 // Protected routes
+app.use('/user', authenticate, userRoutes)
 app.use('/api/user', authenticate, userRoutes)
+app.use('/ads', authenticate, adsRoutes)
 app.use('/api/ads', authenticate, adsRoutes)
+app.use('/withdrawals', authenticate, withdrawalRoutes)
 app.use('/api/withdrawals', authenticate, withdrawalRoutes)
+app.use('/badges', authenticate, badgesRoutes)
 app.use('/api/badges', authenticate, badgesRoutes)
+app.use('/admin', authenticate, adminRoutes)
 app.use('/api/admin', authenticate, adminRoutes)
+app.use('/videos', authenticate, videosRoutes)
 app.use('/api/videos', authenticate, videosRoutes)
+app.use('/subscriptions', authenticate, subscriptionsRoutes)
 app.use('/api/subscriptions', authenticate, subscriptionsRoutes)
+app.use('/payouts', authenticate, payoutsRoutes)
 app.use('/api/payouts', authenticate, payoutsRoutes)
 
 // Error handler
