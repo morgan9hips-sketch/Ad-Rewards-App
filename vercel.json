@@ -3,5 +3,11 @@
     "api/index.ts": {
       "runtime": "@vercel/node@18.x"
     }
-  }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.ts"
+    }
+  ]
 }

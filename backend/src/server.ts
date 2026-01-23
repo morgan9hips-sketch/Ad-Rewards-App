@@ -31,7 +31,11 @@ app.use(express.json())
 
 // Health check - both root and /health for different deployment scenarios
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), message: 'Ad Rewards API is running' })
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    message: 'Ad Rewards API is running',
+  })
 })
 
 app.get('/health', (req, res) => {
