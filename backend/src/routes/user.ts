@@ -91,9 +91,8 @@ router.get('/profile', async (req: AuthRequest, res) => {
         req.ip || '127.0.0.1',
       )
 
-      // Get currency for country
-      const currencyService = await import('../services/currencyService.js')
-      const currency = currencyService.getCurrencyForCountry(country)
+      // Get currency for country (default to ZAR for South Africa)
+      const currency = country === 'ZA' ? 'ZAR' : currencyService.getCurrencyForCountry(country)
 
       profile = await prisma.userProfile.create({
         data: {
