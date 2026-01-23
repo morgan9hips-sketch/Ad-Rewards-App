@@ -5,12 +5,14 @@ import {
   getExchangeRate,
   convertFromUSD,
   getUserCurrencyInfo,
+  getCurrencyForCountry,
 } from '../services/currencyService.js'
 import { getUserTransactions } from '../services/transactionService.js'
 import {
   getClientIP,
   detectCountryFromIP,
   getUserLocationInfoFromCoordinates,
+  getUserLocationInfo,
 } from '../services/geoService.js'
 
 const router = Router()
@@ -85,21 +87,16 @@ router.get('/profile', async (req: AuthRequest, res) => {
 
     // Create profile if it doesn't exist
     if (!profile) {
-      // Get user's country from IP
-      const geoService = await import('../services/geoService.js')
-      const { country } = await geoService.getLocationFromIP(
-        req.ip || '127.0.0.1',
-      )
-
-      // Get currency for country (default to ZAR for South Africa)
-      const currency = country === 'ZA' ? 'ZAR' : currencyService.getCurrencyForCountry(country)
+      // Get user's country from IP automatically
+      const clientIP = getClientIP(req)
+      const { countryCode, currency } = getUserLocationInfo(clientIP)
 
       profile = await prisma.userProfile.create({
         data: {
           userId,
           email: req.user!.email,
-          country,
-          preferredCurrency: currency,
+          country: countryCode || 'ZA', // Default to ZA if detection fails
+          preferredCurrency: currency || 'ZAR', // Default to ZAR
         },
       })
     } else {
