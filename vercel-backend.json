@@ -1,0 +1,15 @@
+{
+  "functions": {
+    "backend/api/index.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/backend/api/index.js"
+    }
+  ],
+  "installCommand": "cd backend && npm install",
+  "buildCommand": "cd backend && npm run vercel-build"
+}
