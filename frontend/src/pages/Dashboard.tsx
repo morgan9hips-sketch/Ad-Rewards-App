@@ -257,7 +257,11 @@ export default function Dashboard() {
             <Button
               fullWidth
               onClick={() => navigate('/withdrawals')}
-              disabled={balance ? parseFloat(balance.cashLocal) < (balance.minWithdrawal || 0) : true}
+              disabled={
+                balance
+                  ? parseFloat(balance.cashLocal) < (balance.minWithdrawal || 0)
+                  : true
+              }
             >
               Withdraw via PayPal →
             </Button>

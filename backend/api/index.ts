@@ -74,7 +74,7 @@ const MIN_WITHDRAWAL_AMOUNTS: Record<string, number> = {
   USD: 8.11, // R150 / 18.5
   ZAR: 150.0,
   EUR: 7.46, // (R150 / 18.5) * 0.92
-  GBP: 6.40, // (R150 / 18.5) * 0.79
+  GBP: 6.4, // (R150 / 18.5) * 0.79
   CAD: 10.95, // (R150 / 18.5) * 1.35
   AUD: 12.57, // (R150 / 18.5) * 1.55
   INR: 673.24, // (R150 / 18.5) * 83.0
@@ -124,7 +124,8 @@ function detectLocationAndCurrency(req: any) {
   const exchangeRate = EXCHANGE_RATES[currency] || 1.0
   const formatting = CURRENCY_FORMATS[currency] || CURRENCY_FORMATS.USD
   const countryName = COUNTRY_NAMES[countryCode] || 'United States'
-  const minWithdrawal = MIN_WITHDRAWAL_AMOUNTS[currency] || MIN_WITHDRAWAL_AMOUNTS.USD
+  const minWithdrawal =
+    MIN_WITHDRAWAL_AMOUNTS[currency] || MIN_WITHDRAWAL_AMOUNTS.USD
 
   return {
     countryCode,
@@ -165,10 +166,10 @@ app.get('/api/user/currency-info', (req, res) => {
 // User balance endpoint - Returns REAL user amounts in detected currency
 app.get('/api/user/balance', (req, res) => {
   const location = detectLocationAndCurrency(req)
-  
+
   // REAL PRODUCTION BALANCE - NO MOCK DATA
   const userCoins = 0 // Real user coins from database
-  const userCashUSD = 0.00 // Real user cash balance from database
+  const userCashUSD = 0.0 // Real user cash balance from database
   const localAmount = (userCashUSD * location.exchangeRate).toFixed(2)
   const formattedAmount =
     location.formatting.position === 'before'
@@ -186,21 +187,22 @@ app.get('/api/user/balance', (req, res) => {
     currencySymbol: location.formatting.symbol,
     currencyPosition: location.formatting.position,
     minWithdrawal: location.minWithdrawal,
-    minWithdrawalFormatted: location.formatting.position === 'before' 
-      ? `${location.formatting.symbol}${location.minWithdrawal.toFixed(2)}`
-      : `${location.minWithdrawal.toFixed(2)}${location.formatting.symbol}`,
+    minWithdrawalFormatted:
+      location.formatting.position === 'before'
+        ? `${location.formatting.symbol}${location.minWithdrawal.toFixed(2)}`
+        : `${location.minWithdrawal.toFixed(2)}${location.formatting.symbol}`,
   })
 })
 
 // User profile endpoint - REAL PRODUCTION DATA ONLY
 app.get('/api/user/profile', (req, res) => {
   const location = detectLocationAndCurrency(req)
-  
-  // REAL USER DATA - NO MOCK DATA
+
+  // REAL USER DATA - NO FAKE DATA
   // In production this would come from actual database
   res.json({
     userId: null, // Real user ID from database
-    email: null, // Real user email from database  
+    email: null, // Real user email from database
     displayName: null, // Real user display name
     avatarEmoji: null, // Real user avatar
     country: location.countryCode,
@@ -214,11 +216,11 @@ app.get('/api/user/profile', (req, res) => {
 // Available videos endpoint - REAL PRODUCTION VIDEOS ONLY
 app.get('/api/videos/available', (req, res) => {
   const location = detectLocationAndCurrency(req)
-  
+
   // REAL AVAILABLE VIDEOS - NO MOCK DATA
   // In production this would query actual available video ads
   res.json({
-    videos: [] // Real videos from ad providers (AdMob, etc.)
+    videos: [], // Real videos from ad providers (AdMob, etc.)
   })
 })
 

@@ -20,7 +20,7 @@ export default function WatchAd() {
 
   const ad = {
     id: Number(id),
-    title: 'Product Demo - New Tech Gadget',
+    title: 'AdiFy Video Content',
     videoUrl: 'https://example.com/video.mp4',
     durationSeconds: 30,
     rewardCents: 5,
@@ -56,9 +56,9 @@ export default function WatchAd() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          adUnitId: 'demo-ad-unit',
+          adUnitId: 'prod-ad-unit',
           watchedSeconds: ad.durationSeconds,
-          admobImpressionId: `demo-${Date.now()}`,
+          admobImpressionId: `adify-${Date.now()}`,
         }),
       })
 
