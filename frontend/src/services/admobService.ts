@@ -272,22 +272,22 @@ class AdMobService {
       admobImpressionId: `mock_${adType}_${uuid}`,
       countryCode: this.detectCountryCode(),
       estimatedEarnings: this.generateMockRevenue(adType),
-      currency: 'USD',
+      currency: 'ZAR',
     }
   }
 
   private detectCountryCode(): string {
     // In a real app, AdMob SDK provides this
     // For testing, we'll use a mock value
-    return 'US' // Default to US for testing
+    return 'ZA' // Default to South Africa for ZAR
   }
 
   private generateMockRevenue(adType: 'rewarded' | 'interstitial' | 'banner'): number {
     // Mock CPM rates (AdMob provides real values)
     const cpmRates = {
-      rewarded: 2.50,    // $2.50 CPM
-      interstitial: 3.00, // $3.00 CPM
-      banner: 1.20,       // $1.20 CPM
+      rewarded: 46.25,    // R46.25 CPM (2.50 * 18.5)
+      interstitial: 55.50, // R55.50 CPM (3.00 * 18.5)
+      banner: 22.20,       // R22.20 CPM (1.20 * 18.5)
     }
     
     // Calculate revenue (CPM / 1000)
