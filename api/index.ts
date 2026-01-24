@@ -5,7 +5,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader(
     'Access-Control-Allow-Methods',
-    'GET, POST, PUT, DELETE, OPTIONS'
+    'GET, POST, PUT, DELETE, OPTIONS',
   )
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 
@@ -20,7 +20,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
       status: 'ok',
       timestamp: new Date().toISOString(),
       message: 'AdiFy API is operational',
-      currency: 'ZAR'
+      currency: 'ZAR',
     })
     return
   }
@@ -35,10 +35,10 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
       formatting: {
         symbol: 'R',
         decimals: 2,
-        position: 'before'
+        position: 'before',
       },
       locationDetected: true,
-      locationRequired: false
+      locationRequired: false,
     })
     return
   }
@@ -48,7 +48,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     const cashUSD = 2.25
     const exchangeRate = 18.5
     const cashZAR = cashUSD * exchangeRate
-    
+
     res.json({
       coins: '150',
       cashUsd: cashUSD.toFixed(4),
@@ -59,7 +59,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
       revenueCountry: 'ZA',
       exchangeRate: exchangeRate.toFixed(6),
       currencySymbol: 'R',
-      currencyPosition: 'before'
+      currencyPosition: 'before',
     })
     return
   }
@@ -77,7 +77,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
       avatarEmoji: '🇿🇦',
       showOnLeaderboard: true,
       hideCountry: false,
-      profileSetupCompleted: true
+      profileSetupCompleted: true,
     })
     return
   }
@@ -93,12 +93,12 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
           duration: 30,
           reward: {
             coins: 100,
-            cashUSD: 0.10,
+            cashUSD: 0.1,
             cashZAR: 1.85,
-            formatted: 'R1.85'
+            formatted: 'R1.85',
           },
           currency: 'ZAR',
-          thumbnailUrl: '/images/test-ad.jpg'
+          thumbnailUrl: '/images/test-ad.jpg',
         },
         {
           id: 2,
@@ -108,12 +108,12 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
             coins: 50,
             cashUSD: 0.05,
             cashZAR: 0.93,
-            formatted: 'R0.93'
+            formatted: 'R0.93',
           },
           currency: 'ZAR',
-          thumbnailUrl: '/images/test-ad-2.jpg'
-        }
-      ]
+          thumbnailUrl: '/images/test-ad-2.jpg',
+        },
+      ],
     })
     return
   }
@@ -129,7 +129,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
       '/api/user/balance',
       '/api/user/profile',
       '/api/videos/available',
-      '/api/health'
-    ]
+      '/api/health',
+    ],
   })
 }

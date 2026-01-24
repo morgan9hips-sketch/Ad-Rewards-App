@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/[...path].ts": {
-      "runtime": "@vercel/node@18.x"
-    }
-  }
-}
