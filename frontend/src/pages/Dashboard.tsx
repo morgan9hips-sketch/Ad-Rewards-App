@@ -17,10 +17,14 @@ const CONVERSION_THRESHOLD_COINS = 150000
 
 interface UserBalance {
   coins: string
-  cashUSD: string
   cashLocal: string
-  currency: string
+  cashLocalFormatted: string
+  displayCurrency: string
+  displayCountry: string
+  revenueCountry: string
   exchangeRate: string
+  currencySymbol: string
+  currencyPosition: string
 }
 
 interface Transaction {
@@ -236,26 +240,24 @@ export default function Dashboard() {
             <h2 className="text-xl font-bold text-white mb-3">
               💵 Cash Wallet
             </h2>
-            <CurrencyDisplay
-              amountUsd={balance ? parseFloat(balance.cashUSD) : 0}
-              showBoth={true}
-              size="lg"
-              className="mb-3"
-            />
+            <div className="text-3xl font-bold text-white mb-3">
+              {balance?.cashLocalFormatted || 'Loading...'}
+            </div>
 
             <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
               <p className="text-xs text-gray-300 mb-1">
                 Available to withdraw
               </p>
               <p className="text-xs text-gray-500">
-                Minimum withdrawal: $10 USD
+                Minimum withdrawal: {balance?.currencySymbol}10{' '}
+                {balance?.displayCurrency}
               </p>
             </div>
 
             <Button
               fullWidth
               onClick={() => navigate('/withdrawals')}
-              disabled={balance ? parseFloat(balance.cashUSD) < 10 : true}
+              disabled={balance ? parseFloat(balance.cashLocal) < 10 : true}
             >
               Withdraw via PayPal →
             </Button>

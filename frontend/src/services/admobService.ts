@@ -311,9 +311,9 @@ class AdMobService {
   ): number {
     // Base CPM rates in USD (will be converted by backend)
     const cpmRates = {
-      rewarded: 2.50, // $2.50 CPM base rate
-      interstitial: 3.00, // $3.00 CPM base rate  
-      banner: 1.20, // $1.20 CPM base rate
+      rewarded: 2.5, // $2.50 CPM base rate
+      interstitial: 3.0, // $3.00 CPM base rate
+      banner: 1.2, // $1.20 CPM base rate
     }
 
     // Calculate revenue (CPM / 1000)
