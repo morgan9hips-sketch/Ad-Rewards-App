@@ -16,23 +16,13 @@ const CONVERSION_THRESHOLD_COINS = 150000
 
 interface UserBalance {
   coins: string
-  cashLocal: string
-  cashLocalFormatted: string
-  displayCurrency: string
-  displayCountry: string
-  revenueCountry: string
-  exchangeRate: string
-  currencySymbol: string
-  currencyPosition: string
   minWithdrawal: number
-  minWithdrawalFormatted: string
 }
 
 interface Transaction {
   id: number
   type: string
   coinsChange: string
-  cashChangeLocal: string
   description: string
   createdAt: string
 }
@@ -179,112 +169,82 @@ export default function Dashboard() {
       {/* Expiry Warnings */}
       <ExpiryWarning />
 
-      {/* Two Wallet System */}
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
-        {/* Coins Wallet */}
-        <Card>
-          <div className="p-4">
-            <h2 className="text-xl font-bold text-white mb-3">
-              🪙 Coins Wallet
-            </h2>
-            <p className="text-4xl font-bold text-yellow-500 mb-3">
-              {balance ? parseInt(balance.coins).toLocaleString() : '0'} Coins
-            </p>
-            <p className="text-sm text-gray-400 mb-2">(Pending Conversion)</p>
+      {/* Coins Balance */}
+      <Card className="mb-6">
+        <div className="p-4">
+          <h2 className="text-xl font-bold text-white mb-3">
+            🪙 Your Balance
+          </h2>
+          <p className="text-4xl font-bold text-yellow-500 mb-3">
+            {balance ? parseInt(balance.coins).toLocaleString() : '0'} Coins
+          </p>
 
-            {/* Progress to conversion threshold */}
-            {balance &&
-              parseInt(balance.coins) < CONVERSION_THRESHOLD_COINS && (
-                <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
-                  <p className="text-xs text-gray-300 mb-2">
-                    📊 Progress to monthly conversion
-                  </p>
-                  <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                    <div
-                      className="bg-green-500 h-2 rounded-full transition-all"
-                      style={{
-                        width: `${Math.min(100, (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) * 100)}%`,
-                      }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    {parseInt(balance.coins).toLocaleString()} /{' '}
-                    {CONVERSION_THRESHOLD_COINS.toLocaleString()} coins (
-                    {Math.floor(
-                      (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) *
-                        100,
-                    )}
-                    %)
-                  </p>
+          {/* Progress to conversion threshold */}
+          {balance &&
+            parseInt(balance.coins) < CONVERSION_THRESHOLD_COINS && (
+              <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
+                <p className="text-xs text-gray-300 mb-2">
+                  📊 Progress to monthly conversion
+                </p>
+                <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                  <div
+                    className="bg-green-500 h-2 rounded-full transition-all"
+                    style={{
+                      width: `${Math.min(100, (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) * 100)}%`,
+                    }}
+                  />
                 </div>
-              )}
+                <p className="text-xs text-gray-400">
+                  {parseInt(balance.coins).toLocaleString()} /{' '}
+                  {CONVERSION_THRESHOLD_COINS.toLocaleString()} coins (
+                  {Math.floor(
+                    (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) *
+                      100,
+                  )}
+                  %)
+                </p>
+              </div>
+            )}
 
-            <div className="bg-gray-800 p-3 rounded-lg mt-4">
-              <p className="text-xs text-gray-300 mb-2">
-                💡 Coins convert to cash when we receive ad revenue (monthly,
-                around the 25th)
-              </p>
-              <p className="text-xs text-green-400 font-semibold">
-                You always receive 85% of ad revenue!
-              </p>
-            </div>
-
-            <p className="text-xs text-gray-500 mt-3">
-              Next conversion: Feb 25-28, 2026
+          <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
+            <p className="text-xs text-gray-300 mb-2">
+              💡 Coins convert to cash when we receive ad revenue (monthly,
+              around the 25th)
+            </p>
+            <p className="text-xs text-green-400 font-semibold">
+              You always receive 85% of ad revenue!
             </p>
           </div>
-        </Card>
 
-        {/* Cash Wallet */}
-        <Card>
-          <div className="p-4">
-            <h2 className="text-xl font-bold text-white mb-3">
-              💵 Cash Wallet
-            </h2>
-            <div className="text-3xl font-bold text-white mb-3">
-              {balance?.cashLocalFormatted || 'Loading...'}
-            </div>
+          <Button
+            fullWidth
+            onClick={() => navigate('/withdrawals')}
+          >
+            Withdraw
+          </Button>
 
-            <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
-              <p className="text-xs text-gray-300 mb-1">
-                Available to withdraw
-              </p>
-              <p className="text-xs text-gray-500">
-                Minimum withdrawal: {balance?.minWithdrawalFormatted}
-              </p>
-            </div>
-
-            <Button
-              fullWidth
-              onClick={() => navigate('/withdrawals')}
-              disabled={
-                balance
-                  ? parseFloat(balance.cashLocal) < (balance.minWithdrawal || 0)
-                  : true
-              }
-            >
-              Withdraw via PayPal →
-            </Button>
-          </div>
-        </Card>
-      </div>
+          <p className="text-xs text-gray-500 mt-3 text-center">
+            Next conversion: Feb 25-28, 2026
+          </p>
+        </div>
+      </Card>
 
       {/* Stats Overview */}
       <div className="grid md:grid-cols-3 gap-6 mb-6">
         <Card>
           <div className="text-center">
-            <p className="text-gray-400 text-sm mb-2">Ads Watched</p>
-            <p className="text-3xl font-bold text-purple-500">
-              {profile?.adsWatched || 0}
+            <p className="text-gray-400 text-sm mb-2">Total Coins</p>
+            <p className="text-3xl font-bold text-yellow-500">
+              {balance ? parseInt(balance.coins).toLocaleString() : '0'}
             </p>
           </div>
         </Card>
 
         <Card>
           <div className="text-center">
-            <p className="text-gray-400 text-sm mb-2">Total Coins Earned</p>
-            <p className="text-3xl font-bold text-yellow-500">
-              {balance ? parseInt(balance.coins).toLocaleString() : '0'}
+            <p className="text-gray-400 text-sm mb-2">Ads Watched</p>
+            <p className="text-3xl font-bold text-purple-500">
+              {profile?.adsWatched || 0}
             </p>
           </div>
         </Card>
@@ -317,7 +277,6 @@ export default function Dashboard() {
           <div className="space-y-2">
             {transactions.map((tx) => {
               const coinsChange = BigInt(tx.coinsChange)
-              const cashChange = parseFloat(tx.cashChangeLocal)
 
               return (
                 <div
@@ -333,22 +292,12 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <div className="text-right">
-                    {coinsChange !== BigInt(0) && (
-                      <p
-                        className={`text-sm font-semibold ${coinsChange > 0 ? 'text-yellow-500' : 'text-gray-400'}`}
-                      >
-                        {coinsChange > 0 ? '+' : ''}
-                        {tx.coinsChange} coins
-                      </p>
-                    )}
-                    {cashChange !== 0 && (
-                      <p
-                        className={`text-sm font-semibold ${cashChange > 0 ? 'text-green-500' : 'text-red-500'}`}
-                      >
-                        {cashChange > 0 ? '+' : ''}$
-                        {Math.abs(cashChange).toFixed(2)}
-                      </p>
-                    )}
+                    <p
+                      className={`text-sm font-semibold ${coinsChange > 0 ? 'text-yellow-500' : 'text-gray-400'}`}
+                    >
+                      {coinsChange > 0 ? '+' : ''}
+                      {tx.coinsChange} coins
+                    </p>
                   </div>
                 </div>
               )

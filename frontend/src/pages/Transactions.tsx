@@ -9,9 +9,7 @@ interface Transaction {
   id: number
   type: string
   coinsChange: string
-  cashChangeLocal: string
   coinsBalanceAfter: string | null
-  cashBalanceAfterLocal: string | null
   description: string
   createdAt: string
 }
@@ -128,7 +126,6 @@ export default function Transactions() {
             <div className="space-y-3">
               {transactions.map((tx) => {
                 const coinsChange = BigInt(tx.coinsChange)
-                const cashChange = parseFloat(tx.cashChangeLocal)
 
                 return (
                   <div
@@ -147,39 +144,21 @@ export default function Transactions() {
                       </p>
                     </div>
                     <div className="text-right ml-4">
-                      {coinsChange !== BigInt(0) && (
-                        <p
-                          className={`text-sm font-bold ${
-                            coinsChange > 0
-                              ? 'text-yellow-500'
-                              : 'text-gray-400'
-                          }`}
-                        >
-                          {coinsChange > 0 ? '+' : ''}
-                          {tx.coinsChange} 🪙
-                        </p>
-                      )}
-                      {cashChange !== 0 && (
-                        <span
-                          className={`font-bold ${
-                            cashChange > 0 ? 'text-green-500' : 'text-red-500'
-                          }`}
-                        >
-                          {Math.abs(cashChange).toFixed(2)}
-                        </span>
-                      )}
+                      <p
+                        className={`text-sm font-bold ${
+                          coinsChange > 0
+                            ? 'text-yellow-500'
+                            : 'text-gray-400'
+                        }`}
+                      >
+                        {coinsChange > 0 ? '+' : ''}
+                        {tx.coinsChange} 🪙
+                      </p>
                       {tx.coinsBalanceAfter && (
                         <p className="text-xs text-gray-500 mt-1">
                           Balance: {tx.coinsBalanceAfter} 🪙
                         </p>
                       )}
-                      {tx.cashBalanceAfterLocal &&
-                        parseFloat(tx.cashBalanceAfterLocal) > 0 && (
-                          <span className="text-xs text-gray-400">
-                            Balance:{' '}
-                            {parseFloat(tx.cashBalanceAfterLocal).toFixed(2)}
-                          </span>
-                        )}
                     </div>
                   </div>
                 )
