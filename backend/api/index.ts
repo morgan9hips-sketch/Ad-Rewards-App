@@ -69,6 +69,20 @@ const EXCHANGE_RATES: Record<string, number> = {
   MXN: 17.2,
 }
 
+// Minimum withdrawal amounts (R150 ZAR equivalent)
+const MIN_WITHDRAWAL_AMOUNTS: Record<string, number> = {
+  USD: 8.11, // R150 / 18.5
+  ZAR: 150.0,
+  EUR: 7.46, // (R150 / 18.5) * 0.92
+  GBP: 6.40, // (R150 / 18.5) * 0.79
+  CAD: 10.95, // (R150 / 18.5) * 1.35
+  AUD: 12.57, // (R150 / 18.5) * 1.55
+  INR: 673.24, // (R150 / 18.5) * 83.0
+  NGN: 12811.89, // (R150 / 18.5) * 1580.0
+  BRL: 42.16, // (R150 / 18.5) * 5.2
+  MXN: 139.46, // (R150 / 18.5) * 17.2
+}
+
 // Country name mapping
 const COUNTRY_NAMES: Record<string, string> = {
   US: 'United States',
@@ -110,6 +124,7 @@ function detectLocationAndCurrency(req: any) {
   const exchangeRate = EXCHANGE_RATES[currency] || 1.0
   const formatting = CURRENCY_FORMATS[currency] || CURRENCY_FORMATS.USD
   const countryName = COUNTRY_NAMES[countryCode] || 'United States'
+  const minWithdrawal = MIN_WITHDRAWAL_AMOUNTS[currency] || MIN_WITHDRAWAL_AMOUNTS.USD
 
   return {
     countryCode,
@@ -117,6 +132,7 @@ function detectLocationAndCurrency(req: any) {
     exchangeRate,
     formatting,
     countryName,
+    minWithdrawal,
     detectedIP: ip,
   }
 }
@@ -141,6 +157,7 @@ app.get('/api/user/currency-info', (req, res) => {
     revenueCountry: location.countryCode,
     exchangeRate: location.exchangeRate,
     formatting: location.formatting,
+    minWithdrawal: location.minWithdrawal,
     detectedFrom: 'geolocation',
   })
 })
@@ -165,6 +182,10 @@ app.get('/api/user/balance', (req, res) => {
     exchangeRate: location.exchangeRate.toString(),
     currencySymbol: location.formatting.symbol,
     currencyPosition: location.formatting.position,
+    minWithdrawal: location.minWithdrawal,
+    minWithdrawalFormatted: location.formatting.position === 'before' 
+      ? `${location.formatting.symbol}${location.minWithdrawal.toFixed(2)}`
+      : `${location.minWithdrawal.toFixed(2)}${location.formatting.symbol}`,
   })
 })
 

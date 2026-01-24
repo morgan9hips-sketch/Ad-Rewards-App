@@ -24,6 +24,8 @@ interface UserBalance {
   exchangeRate: string
   currencySymbol: string
   currencyPosition: string
+  minWithdrawal: number
+  minWithdrawalFormatted: string
 }
 
 interface Transaction {
@@ -248,15 +250,14 @@ export default function Dashboard() {
                 Available to withdraw
               </p>
               <p className="text-xs text-gray-500">
-                Minimum withdrawal: {balance?.currencySymbol}10{' '}
-                {balance?.displayCurrency}
+                Minimum withdrawal: {balance?.minWithdrawalFormatted}
               </p>
             </div>
 
             <Button
               fullWidth
               onClick={() => navigate('/withdrawals')}
-              disabled={balance ? parseFloat(balance.cashLocal) < 10 : true}
+              disabled={balance ? parseFloat(balance.cashLocal) < (balance.minWithdrawal || 0) : true}
             >
               Withdraw via PayPal →
             </Button>

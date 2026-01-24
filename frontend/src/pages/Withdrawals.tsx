@@ -25,6 +25,8 @@ interface UserBalance {
   displayCurrency: string
   currencySymbol: string
   exchangeRate: string
+  minWithdrawal: number
+  minWithdrawalFormatted: string
 }
 
 export default function Withdrawals() {
@@ -82,9 +84,9 @@ export default function Withdrawals() {
       return
     }
 
-    if (!balance || parseFloat(balance.cashLocal) < 10) {
+    if (!balance || parseFloat(balance.cashLocal) < (balance.minWithdrawal || 0)) {
       alert(
-        `Minimum withdrawal amount is ${balance.currencySymbol}10 ${balance.displayCurrency}`,
+        `Minimum withdrawal amount is ${balance.minWithdrawalFormatted}`,
       )
       return
     }
@@ -149,7 +151,7 @@ export default function Withdrawals() {
     )
   }
 
-  const canWithdraw = balance && parseFloat(balance.cashLocal) >= 10
+  const canWithdraw = balance && parseFloat(balance.cashLocal) >= (balance.minWithdrawal || 0)
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
@@ -167,8 +169,7 @@ export default function Withdrawals() {
         {!canWithdraw && (
           <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-3 mt-4">
             <p className="text-yellow-300 text-sm text-center">
-              ⚠️ Minimum withdrawal amount is {balance?.currencySymbol}10{' '}
-              {balance?.displayCurrency}
+              ⚠️ Minimum withdrawal amount is {balance?.minWithdrawalFormatted}
             </p>
           </div>
         )}
