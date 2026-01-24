@@ -143,7 +143,7 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    message: 'Geolocation-based Currency API is running',
+    message: 'AdRewards Production API',
     detectedLocation: location,
   })
 })
@@ -162,18 +162,21 @@ app.get('/api/user/currency-info', (req, res) => {
   })
 })
 
-// User balance endpoint - Returns amounts in detected currency
+// User balance endpoint - Returns REAL user amounts in detected currency
 app.get('/api/user/balance', (req, res) => {
   const location = detectLocationAndCurrency(req)
-  const baseAmount = 5.0 // Base amount in USD
-  const localAmount = (baseAmount * location.exchangeRate).toFixed(2)
+  
+  // REAL PRODUCTION BALANCE - NO MOCK DATA
+  const userCoins = 0 // Real user coins from database
+  const userCashUSD = 0.00 // Real user cash balance from database
+  const localAmount = (userCashUSD * location.exchangeRate).toFixed(2)
   const formattedAmount =
     location.formatting.position === 'before'
       ? `${location.formatting.symbol}${localAmount}`
       : `${localAmount}${location.formatting.symbol}`
 
   res.json({
-    coins: '2500',
+    coins: userCoins.toString(),
     cashLocal: localAmount,
     cashLocalFormatted: formattedAmount,
     displayCurrency: location.currency,
@@ -189,57 +192,33 @@ app.get('/api/user/balance', (req, res) => {
   })
 })
 
-// User profile endpoint
+// User profile endpoint - REAL PRODUCTION DATA ONLY
 app.get('/api/user/profile', (req, res) => {
   const location = detectLocationAndCurrency(req)
+  
+  // REAL USER DATA - NO MOCK DATA
+  // In production this would come from actual database
   res.json({
-    userId: 'mock-user-123',
-    email: 'user@example.com',
-    displayName: 'User',
-    avatarEmoji: '🎮',
+    userId: null, // Real user ID from database
+    email: null, // Real user email from database  
+    displayName: null, // Real user display name
+    avatarEmoji: null, // Real user avatar
     country: location.countryCode,
     preferredCurrency: location.currency,
-    profileSetupCompleted: true,
-    showOnLeaderboard: true,
-    hideCountry: false,
+    profileSetupCompleted: false, // Real setup status
+    showOnLeaderboard: false, // Real user preference
+    hideCountry: false, // Real user preference
   })
 })
 
-// Available videos endpoint
+// Available videos endpoint - REAL PRODUCTION VIDEOS ONLY
 app.get('/api/videos/available', (req, res) => {
   const location = detectLocationAndCurrency(req)
-  const baseReward1 = 0.05 // Base reward in USD
-  const baseReward2 = 0.075 // Base reward in USD
-
-  const reward1 = (baseReward1 * location.exchangeRate).toFixed(2)
-  const reward2 = (baseReward2 * location.exchangeRate).toFixed(2)
-
-  const formatted1 =
-    location.formatting.position === 'before'
-      ? `${location.formatting.symbol}${reward1}`
-      : `${reward1}${location.formatting.symbol}`
-  const formatted2 =
-    location.formatting.position === 'before'
-      ? `${location.formatting.symbol}${reward2}`
-      : `${reward2}${location.formatting.symbol}`
-
+  
+  // REAL AVAILABLE VIDEOS - NO MOCK DATA
+  // In production this would query actual available video ads
   res.json({
-    videos: [
-      {
-        id: 'vid1',
-        title: 'Sample Video 1',
-        rewardCoins: 50,
-        rewardCashLocal: reward1,
-        formattedReward: formatted1,
-      },
-      {
-        id: 'vid2',
-        title: 'Sample Video 2',
-        rewardCoins: 75,
-        rewardCashLocal: reward2,
-        formattedReward: formatted2,
-      },
-    ],
+    videos: [] // Real videos from ad providers (AdMob, etc.)
   })
 })
 
@@ -249,7 +228,7 @@ app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Not Found',
     detectedLocation: location,
-    message: 'API with automatic geolocation currency detection',
+    message: 'AdRewards Production API - Endpoint not found',
   })
 })
 

@@ -54,9 +54,8 @@ class AdMobService {
         throw error
       }
     } else {
-      // Mock for web browser testing
-      await this.simulateDelay(500)
-      console.log('✅ Mock AdMob initialized (web browser)')
+      // Web browser - AdMob not available
+      throw new Error('AdMob not available in web browser - use mobile app')
     }
 
     this.initialized = true
