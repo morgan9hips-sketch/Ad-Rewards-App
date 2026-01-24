@@ -88,7 +88,7 @@ export default function Withdrawals() {
       !balance ||
       parseFloat(balance.cashLocal) < (balance.minWithdrawal || 0)
     ) {
-      alert(`Minimum withdrawal amount is ${balance.minWithdrawalFormatted}`)
+      alert(`Minimum withdrawal amount is ${balance?.minWithdrawalFormatted || 'required'}`)
       return
     }
 

@@ -5,7 +5,7 @@ import {
   useEffect,
   ReactNode,
 } from 'react'
-import { useAuth } from './AuthContext'
+// import { useAuth } from './AuthContext'  // Unused for now
 import { API_BASE_URL } from '../config/api'
 
 interface CurrencyInfo {
@@ -36,7 +36,7 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(
 )
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const { session } = useAuth()
+  // const { session } = useAuth()  // Unused for now
   const [currencyInfo, setCurrencyInfo] = useState<CurrencyInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [locationError, setLocationError] = useState(false)

@@ -45,7 +45,7 @@ export default function Subscriptions() {
     }
   }
 
-  const handleSubscribe = async (tier: 'Silver' | 'Gold') => {
+  const handleSubscribe = async (tier: 'Elite') => {
     try {
       const token = session?.access_token
       if (!token) return
