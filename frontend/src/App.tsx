@@ -26,6 +26,7 @@ import Withdrawals from './pages/Withdrawals'
 import Leaderboard from './pages/Leaderboard'
 import Badges from './pages/Badges'
 import Subscriptions from './pages/Subscriptions'
+import Referrals from './pages/Referrals'
 import AdminPanel from './pages/AdminPanel'
 import AdminConversions from './pages/AdminConversions'
 import AdminLogs from './pages/AdminLogs'
@@ -174,6 +175,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Subscriptions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/referrals"
+          element={
+            <ProtectedRoute>
+              <Referrals />
             </ProtectedRoute>
           }
         />

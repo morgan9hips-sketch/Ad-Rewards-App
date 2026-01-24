@@ -7,6 +7,7 @@ import EarningsChart from '../components/EarningsChart'
 import TierProgress from '../components/TierProgress'
 import ProfileSetup from '../components/ProfileSetup'
 import ExpiryWarning from '../components/ExpiryWarning'
+import CoinValuationTicker from '../components/CoinValuationTicker'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 
@@ -168,6 +169,9 @@ export default function Dashboard() {
 
       {/* Expiry Warnings */}
       <ExpiryWarning />
+
+      {/* Live Coin Valuation Ticker */}
+      <CoinValuationTicker />
 
       {/* Coins Balance */}
       <Card className="mb-6">
