@@ -37,20 +37,8 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const { session } = useAuth()
-  const [currencyInfo, setCurrencyInfo] = useState<CurrencyInfo>({
-    displayCurrency: 'ZAR',
-    revenueCountry: 'ZA',
-    displayCountry: 'ZA',
-    exchangeRate: 18.5,
-    formatting: {
-      symbol: 'R',
-      decimals: 2,
-      position: 'before',
-    },
-    locationDetected: true,
-    locationRequired: false,
-  })
-  const [loading, setLoading] = useState(false)
+  const [currencyInfo, setCurrencyInfo] = useState<CurrencyInfo | null>(null)
+  const [loading, setLoading] = useState(true)
   const [locationError, setLocationError] = useState(false)
 
   const requestLocationPermission = async (): Promise<boolean> => {
@@ -81,6 +69,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
           (error) => {
             console.error('Location error:', error.message)
             setLocationError(true)
+            // Still load currency based on IP if location is denied
+            loadCurrencyInfo()
             resolve(false)
           },
           {
@@ -93,25 +83,22 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error requesting location:', error)
       setLocationError(true)
+      // Still load currency based on IP if location fails
+      loadCurrencyInfo()
       return false
     }
   }
 
   const loadCurrencyInfo = async (lat?: number, lng?: number) => {
     try {
-      if (!session?.access_token) {
-        setLoading(false)
-        return
-      }
-
+      setLoading(true)
+      
       let url = `${API_BASE_URL}/api/user/currency-info`
       if (lat && lng) {
         url += `?lat=${lat}&lng=${lng}`
       }
 
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
+      const response = await fetch(url)
 
       if (response.ok) {
         const data = await response.json()
@@ -119,45 +106,53 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         setCurrencyInfo({
           ...data,
           locationDetected: !!(lat && lng),
-          locationRequired: false, // Always allow access with default ZAR
+          locationRequired: false,
         })
         setLocationError(false)
       } else {
-        console.warn('Currency API failed, using default ZAR')
-        // Keep default ZAR if API fails
-        setLocationError(false)
+        console.error('Currency API failed')
+        setLocationError(true)
+        setCurrencyInfo(null)
       }
     } catch (error) {
       console.error('Error loading currency info:', error)
-      console.log('Using default ZAR currency')
-      // Keep default ZAR on error
-      setLocationError(false)
+      setLocationError(true)
+      setCurrencyInfo(null)
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    if (session?.access_token) {
-      // Always try to get location first
-      requestLocationPermission()
-    }
-  }, [session])
+    // Always load currency info immediately when component mounts
+    loadCurrencyInfo()
+    // Also try to get precise location
+    requestLocationPermission()
+  }, [])
 
   const formatAmount = (
     amountUsd: number,
     showBoth: boolean = false,
   ): string => {
-    const localAmount = amountUsd * 18.5
-    const formatted = localAmount.toFixed(2)
+    if (!currencyInfo) {
+      return 'Loading...'
+    }
+
+    const localAmount = amountUsd * currencyInfo.exchangeRate
+    const formatted = localAmount.toFixed(currencyInfo.formatting.decimals)
     const withCommas = parseFloat(formatted).toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: currencyInfo.formatting.decimals,
+      maximumFractionDigits: currencyInfo.formatting.decimals,
     })
 
-    let result = `R${withCommas}`
+    let result: string
+    if (currencyInfo.formatting.position === 'before') {
+      result = `${currencyInfo.formatting.symbol}${withCommas}`
+    } else {
+      result = `${withCommas}${currencyInfo.formatting.symbol}`
+    }
 
-    if (showBoth) {
+    if (showBoth && currencyInfo.displayCurrency !== 'USD') {
       result += ` (≈ $${amountUsd.toFixed(2)} USD)`
     }
 

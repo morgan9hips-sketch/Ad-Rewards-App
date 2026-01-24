@@ -21,9 +21,10 @@ interface Withdrawal {
 
 interface UserBalance {
   coins: string
-  cashUSD: string
   cashLocal: string
-  currency: string
+  cashLocalFormatted: string
+  displayCurrency: string
+  currencySymbol: string
   exchangeRate: string
 }
 
@@ -82,14 +83,16 @@ export default function Withdrawals() {
       return
     }
 
-    if (!balance || parseFloat(balance.cashUSD) < 10) {
-      alert('Minimum withdrawal amount is $10 USD')
+    if (!balance || parseFloat(balance.cashLocal) < 10) {
+      alert(
+        `Minimum withdrawal amount is ${balance.currencySymbol}10 ${balance.displayCurrency}`,
+      )
       return
     }
 
     if (
       !confirm(
-        `Request withdrawal of ${balance.cashLocal} ${balance.currency} ($${balance.cashUSD} USD) to ${paypalEmail}?`,
+        `Request withdrawal of ${balance.cashLocalFormatted} to ${paypalEmail}?`,
       )
     ) {
       return
@@ -219,11 +222,7 @@ export default function Withdrawals() {
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-400">Amount:</span>
                 <span className="text-white font-semibold">
-                  <CurrencyDisplay
-                    amountUsd={balance ? parseFloat(balance.cashUSD) : 0}
-                    showBoth={true}
-                    size="sm"
-                  />
+                  {balance ? balance.cashLocalFormatted : 'Loading...'}
                 </span>
               </div>
             </div>

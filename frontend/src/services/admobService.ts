@@ -1,5 +1,11 @@
-import { AdMob, RewardAdPluginEvents, InterstitialAdPluginEvents, BannerAdSize, BannerAdPosition } from '@capacitor-community/admob';
-import { Capacitor, PluginListenerHandle } from '@capacitor/core';
+import {
+  AdMob,
+  RewardAdPluginEvents,
+  InterstitialAdPluginEvents,
+  BannerAdSize,
+  BannerAdPosition,
+} from '@capacitor-community/admob'
+import { Capacitor, PluginListenerHandle } from '@capacitor/core'
 
 interface AdMobConfig {
   appId: string
@@ -22,7 +28,7 @@ class AdMobService {
       interstitialAdUnitId: import.meta.env.VITE_ADMOB_INTERSTITIAL_ID || '',
       bannerAdUnitId: import.meta.env.VITE_ADMOB_BANNER_ID || '',
     }
-    
+
     // Check if running in native Capacitor app
     this.isNative = Capacitor.isNativePlatform()
   }
@@ -33,12 +39,13 @@ class AdMobService {
     console.log('🎬 Initializing AdMob SDK...')
     console.log('Platform:', this.isNative ? 'Native (Android/iOS)' : 'Web')
     console.log('App ID:', this.config.appId)
-    
+
     if (this.isNative) {
       // Real AdMob initialization for native app
       try {
         await AdMob.initialize({
-          testingDevices: import.meta.env.VITE_ADMOB_TEST_DEVICE_IDS?.split(',') || [],
+          testingDevices:
+            import.meta.env.VITE_ADMOB_TEST_DEVICE_IDS?.split(',') || [],
           initializeForTesting: import.meta.env.DEV, // Use test ads in development
         })
         console.log('✅ Real AdMob SDK initialized')
@@ -51,7 +58,7 @@ class AdMobService {
       await this.simulateDelay(500)
       console.log('✅ Mock AdMob initialized (web browser)')
     }
-    
+
     this.initialized = true
   }
 
@@ -61,7 +68,7 @@ class AdMobService {
     }
 
     console.log('📥 Loading rewarded ad...')
-    
+
     if (this.isNative) {
       // Real AdMob: Prepare rewarded ad
       await AdMob.prepareRewardVideoAd({
@@ -71,66 +78,75 @@ class AdMobService {
       // Mock: Simulate loading
       await this.simulateDelay(1000)
     }
-    
+
     console.log('✅ Rewarded ad loaded')
   }
 
   async showRewardedAd(
     onRewarded: (reward: { amount: number; type: string }) => void,
     onAdClosed: () => void,
-    onAdFailedToShow: (error: string) => void
+    onAdFailedToShow: (error: string) => void,
   ): Promise<void> {
     try {
       console.log('🎥 Showing rewarded ad...')
-      
+
       if (this.isNative) {
         // Clean up any existing listeners
         await this.cleanupRewardedAdListeners()
-        
+
         // Real AdMob: Show rewarded video ad
-        
+
         // Set up reward listener
-        const rewardedListener = await AdMob.addListener(RewardAdPluginEvents.Rewarded, (reward) => {
-          console.log('💰 User earned reward:', reward)
-          onRewarded({ amount: 100, type: 'coins' })
-        })
+        const rewardedListener = await AdMob.addListener(
+          RewardAdPluginEvents.Rewarded,
+          (reward) => {
+            console.log('💰 User earned reward:', reward)
+            onRewarded({ amount: 100, type: 'coins' })
+          },
+        )
         this.rewardedAdListeners.push(rewardedListener)
-        
+
         // Set up dismissed listener
-        const dismissedListener = await AdMob.addListener(RewardAdPluginEvents.Dismissed, async () => {
-          console.log('✅ Rewarded ad closed')
-          onAdClosed()
-          // Clean up listeners after ad is dismissed
-          await this.cleanupRewardedAdListeners()
-        })
+        const dismissedListener = await AdMob.addListener(
+          RewardAdPluginEvents.Dismissed,
+          async () => {
+            console.log('✅ Rewarded ad closed')
+            onAdClosed()
+            // Clean up listeners after ad is dismissed
+            await this.cleanupRewardedAdListeners()
+          },
+        )
         this.rewardedAdListeners.push(dismissedListener)
-        
+
         // Set up failed listener
-        const failedListener = await AdMob.addListener(RewardAdPluginEvents.FailedToShow, async (error) => {
-          console.error('❌ Failed to show rewarded ad:', error)
-          onAdFailedToShow(error.message || 'Unknown error')
-          // Clean up listeners on failure
-          await this.cleanupRewardedAdListeners()
-        })
+        const failedListener = await AdMob.addListener(
+          RewardAdPluginEvents.FailedToShow,
+          async (error) => {
+            console.error('❌ Failed to show rewarded ad:', error)
+            onAdFailedToShow(error.message || 'Unknown error')
+            // Clean up listeners on failure
+            await this.cleanupRewardedAdListeners()
+          },
+        )
         this.rewardedAdListeners.push(failedListener)
-        
+
         // Show the ad
         await AdMob.showRewardVideoAd()
-        
       } else {
         // Mock: Simulate ad display
         await this.simulateDelay(2000)
-        
+
         const reward = { amount: 100, type: 'coins' }
         onRewarded(reward)
         console.log('💰 User earned reward (mock):', reward)
-        
+
         await this.simulateDelay(500)
         onAdClosed()
         console.log('✅ Rewarded ad closed (mock)')
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error'
       onAdFailedToShow(errorMessage)
       console.error('❌ Failed to show rewarded ad:', errorMessage)
       // Clean up listeners on error
@@ -153,7 +169,7 @@ class AdMobService {
     }
 
     console.log('📥 Loading interstitial ad...')
-    
+
     if (this.isNative) {
       await AdMob.prepareInterstitial({
         adId: this.config.interstitialAdUnitId,
@@ -161,37 +177,43 @@ class AdMobService {
     } else {
       await this.simulateDelay(1000)
     }
-    
+
     console.log('✅ Interstitial ad loaded')
   }
 
   async showInterstitialAd(
     onAdClosed: () => void,
-    onAdFailedToShow: (error: string) => void
+    onAdFailedToShow: (error: string) => void,
   ): Promise<void> {
     try {
       console.log('🎥 Showing interstitial ad...')
-      
+
       if (this.isNative) {
         // Clean up any existing listeners
         await this.cleanupInterstitialAdListeners()
-        
-        const dismissedListener = await AdMob.addListener(InterstitialAdPluginEvents.Dismissed, async () => {
-          console.log('✅ Interstitial ad closed')
-          onAdClosed()
-          // Clean up listeners after ad is dismissed
-          await this.cleanupInterstitialAdListeners()
-        })
+
+        const dismissedListener = await AdMob.addListener(
+          InterstitialAdPluginEvents.Dismissed,
+          async () => {
+            console.log('✅ Interstitial ad closed')
+            onAdClosed()
+            // Clean up listeners after ad is dismissed
+            await this.cleanupInterstitialAdListeners()
+          },
+        )
         this.interstitialAdListeners.push(dismissedListener)
-        
-        const failedListener = await AdMob.addListener(InterstitialAdPluginEvents.FailedToShow, async (error) => {
-          console.error('❌ Failed to show interstitial ad:', error)
-          onAdFailedToShow(error.message || 'Unknown error')
-          // Clean up listeners on failure
-          await this.cleanupInterstitialAdListeners()
-        })
+
+        const failedListener = await AdMob.addListener(
+          InterstitialAdPluginEvents.FailedToShow,
+          async (error) => {
+            console.error('❌ Failed to show interstitial ad:', error)
+            onAdFailedToShow(error.message || 'Unknown error')
+            // Clean up listeners on failure
+            await this.cleanupInterstitialAdListeners()
+          },
+        )
         this.interstitialAdListeners.push(failedListener)
-        
+
         await AdMob.showInterstitial()
       } else {
         await this.simulateDelay(3000)
@@ -199,7 +221,8 @@ class AdMobService {
         console.log('✅ Interstitial ad closed (mock)')
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error'
       onAdFailedToShow(errorMessage)
       console.error('❌ Failed to show interstitial ad:', errorMessage)
       // Clean up listeners on error
@@ -252,7 +275,7 @@ class AdMobService {
   }
 
   private simulateDelay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms))
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   // Helper to generate mock AdMob impression data
@@ -264,32 +287,35 @@ class AdMobService {
   } {
     // In a real app, this data would come from AdMob SDK
     // Using crypto.randomUUID() for more robust ID generation
-    const uuid = typeof crypto !== 'undefined' && crypto.randomUUID 
-      ? crypto.randomUUID() 
-      : `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`
-    
+    const uuid =
+      typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`
+
     return {
       admobImpressionId: `mock_${adType}_${uuid}`,
       countryCode: this.detectCountryCode(),
       estimatedEarnings: this.generateMockRevenue(adType),
-      currency: 'ZAR',
+      currency: 'AUTO',
     }
   }
 
   private detectCountryCode(): string {
     // In a real app, AdMob SDK provides this
     // For testing, we'll use a mock value
-    return 'ZA' // Default to South Africa for ZAR
+    return 'XX' // Let backend handle detection
   }
 
-  private generateMockRevenue(adType: 'rewarded' | 'interstitial' | 'banner'): number {
-    // Mock CPM rates (AdMob provides real values)
+  private generateMockRevenue(
+    adType: 'rewarded' | 'interstitial' | 'banner',
+  ): number {
+    // Base CPM rates in USD (will be converted by backend)
     const cpmRates = {
-      rewarded: 46.25,    // R46.25 CPM (2.50 * 18.5)
-      interstitial: 55.50, // R55.50 CPM (3.00 * 18.5)
-      banner: 22.20,       // R22.20 CPM (1.20 * 18.5)
+      rewarded: 2.50, // $2.50 CPM base rate
+      interstitial: 3.00, // $3.00 CPM base rate  
+      banner: 1.20, // $1.20 CPM base rate
     }
-    
+
     // Calculate revenue (CPM / 1000)
     return cpmRates[adType] / 1000
   }
@@ -301,11 +327,11 @@ class AdMobService {
     }
 
     console.log('📥 Loading banner ad in container:', containerId)
-    
+
     if (this.isNative) {
       // For native, use showBannerAd() instead
       // Fire and forget - caller doesn't expect a promise from this legacy method
-      this.showBannerAd().catch(error => {
+      this.showBannerAd().catch((error) => {
         console.error('Failed to show banner ad:', error)
       })
     } else {
@@ -327,7 +353,7 @@ class AdMobService {
         `
       }
     }
-    
+
     console.log('✅ Banner ad loaded')
   }
 }
