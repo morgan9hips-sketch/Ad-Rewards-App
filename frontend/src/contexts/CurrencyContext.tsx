@@ -41,7 +41,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     displayCurrency: 'ZAR',
     revenueCountry: 'ZA',
     displayCountry: 'ZA',
-    exchangeRate: 18.5, // Approximate USD to ZAR exchange rate
+    exchangeRate: 18.5,
     formatting: {
       symbol: 'R',
       decimals: 2,
@@ -50,7 +50,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     locationDetected: true,
     locationRequired: false,
   })
-  const [loading, setLoading] = useState(false) // Set to false since we're providing default ZAR
+  const [loading, setLoading] = useState(false)
   const [locationError, setLocationError] = useState(false)
 
   const requestLocationPermission = async (): Promise<boolean> => {
@@ -148,23 +148,16 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     amountUsd: number,
     showBoth: boolean = false,
   ): string => {
-    if (!currencyInfo) {
-      return `$${amountUsd.toFixed(2)}`
-    }
-
-    const localAmount = amountUsd * currencyInfo.exchangeRate
-    const formatted = localAmount.toFixed(currencyInfo.formatting.decimals)
+    const localAmount = amountUsd * 18.5
+    const formatted = localAmount.toFixed(2)
     const withCommas = parseFloat(formatted).toLocaleString('en-US', {
-      minimumFractionDigits: currencyInfo.formatting.decimals,
-      maximumFractionDigits: currencyInfo.formatting.decimals,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     })
 
-    let result =
-      currencyInfo.formatting.position === 'before'
-        ? `${currencyInfo.formatting.symbol}${withCommas}`
-        : `${withCommas}${currencyInfo.formatting.symbol}`
+    let result = `R${withCommas}`
 
-    if (showBoth && currencyInfo.displayCurrency !== 'USD') {
+    if (showBoth) {
       result += ` (≈ $${amountUsd.toFixed(2)} USD)`
     }
 
