@@ -1,69 +1,135 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
-import express from 'express'
-import cors from 'cors'
 
-const app = express()
+export default function handler(req: VercelRequest, res: VercelResponse) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, DELETE, OPTIONS'
+  )
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-  }),
-)
+  if (req.method === 'OPTIONS') {
+    res.status(200).end()
+    return
+  }
 
-app.use(express.json())
-
-// Health check
-app.get('/', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    message: 'Ad Rewards API Gateway',
-  })
-})
-
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-  })
-})
-
-// Test user endpoint - return ZAR currency
-app.get('/api/user/profile', async (req, res) => {
-  try {
-    // Mock user profile for testing with ZAR currency
+  // Health check
+  if (req.url === '/health' || req.url === '/api/health') {
     res.json({
-      id: 'test-user',
-      email: 'test@example.com',
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      message: 'AdiFy API is operational',
+      currency: 'ZAR'
+    })
+    return
+  }
+
+  // Currency info endpoint
+  if (req.url?.includes('currency-info')) {
+    res.json({
+      displayCurrency: 'ZAR',
+      revenueCountry: 'ZA',
+      displayCountry: 'ZA',
+      exchangeRate: 18.5,
+      formatting: {
+        symbol: 'R',
+        decimals: 2,
+        position: 'before'
+      },
+      locationDetected: true,
+      locationRequired: false
+    })
+    return
+  }
+
+  // User balance endpoint
+  if (req.url?.includes('user/balance')) {
+    const cashUSD = 2.25
+    const exchangeRate = 18.5
+    const cashZAR = cashUSD * exchangeRate
+    
+    res.json({
+      coins: '150',
+      cashUsd: cashUSD.toFixed(4),
+      cashLocal: cashZAR.toFixed(2),
+      cashLocalFormatted: `R${cashZAR.toFixed(2)}`,
+      displayCurrency: 'ZAR',
+      displayCountry: 'ZA',
+      revenueCountry: 'ZA',
+      exchangeRate: exchangeRate.toFixed(6),
+      currencySymbol: 'R',
+      currencyPosition: 'before'
+    })
+    return
+  }
+
+  // User profile endpoint
+  if (req.url?.includes('user/profile')) {
+    res.json({
+      id: 'user-' + Date.now(),
+      email: 'user@example.com',
       country: 'ZA',
       preferredCurrency: 'ZAR',
-      coinsBalance: 100,
-      cashBalance: 1.5,
-      displayName: 'Test User',
+      coinsBalance: 150,
+      cashBalance: 2.25,
+      displayName: 'South African User',
+      avatarEmoji: '🇿🇦',
+      showOnLeaderboard: true,
+      hideCountry: false,
+      profileSetupCompleted: true
     })
-  } catch (error) {
-    res.status(500).json({ error: 'Profile fetch failed' })
+    return
   }
-})
 
-// Test ads endpoint
-app.get('/api/videos/available', (req, res) => {
+  // Videos available endpoint
+  if (req.url?.includes('videos/available')) {
+    res.json({
+      available: true,
+      videos: [
+        {
+          id: 1,
+          title: 'South Africa Tourism Ad',
+          duration: 30,
+          reward: {
+            coins: 100,
+            cashUSD: 0.10,
+            cashZAR: 1.85,
+            formatted: 'R1.85'
+          },
+          currency: 'ZAR',
+          thumbnailUrl: '/images/test-ad.jpg'
+        },
+        {
+          id: 2,
+          title: 'Local Business Promotion',
+          duration: 15,
+          reward: {
+            coins: 50,
+            cashUSD: 0.05,
+            cashZAR: 0.93,
+            formatted: 'R0.93'
+          },
+          currency: 'ZAR',
+          thumbnailUrl: '/images/test-ad-2.jpg'
+        }
+      ]
+    })
+    return
+  }
+
+  // Default response
   res.json({
-    available: true,
-    videos: [
-      {
-        id: 1,
-        title: 'Test Ad Video',
-        duration: 30,
-        reward: 100,
-        currency: 'ZAR',
-      },
-    ],
+    message: 'AdiFy API - ZAR Currency System',
+    currency: 'ZAR',
+    symbol: 'R',
+    exchangeRate: 18.5,
+    endpoints: [
+      '/api/user/currency-info',
+      '/api/user/balance',
+      '/api/user/profile',
+      '/api/videos/available',
+      '/api/health'
+    ]
   })
-})
-
-// Export as Vercel function
-export default (req: VercelRequest, res: VercelResponse) => {
-  return app(req, res)
 }
