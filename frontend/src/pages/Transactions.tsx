@@ -144,20 +144,24 @@ export default function Transactions() {
                       </p>
                     </div>
                     <div className="text-right ml-4">
-                      <p
-                        className={`text-sm font-bold ${
-                          coinsChange > 0
-                            ? 'text-yellow-500'
-                            : 'text-gray-400'
-                        }`}
-                      >
-                        {coinsChange > 0 ? '+' : ''}
-                        {tx.coinsChange} 🪙
-                      </p>
-                      {tx.coinsBalanceAfter && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          Balance: {tx.coinsBalanceAfter} 🪙
-                        </p>
+                      {coinsChange !== BigInt(0) && (
+                        <>
+                          <p
+                            className={`text-sm font-bold ${
+                              coinsChange > 0
+                                ? 'text-yellow-500'
+                                : 'text-gray-400'
+                            }`}
+                          >
+                            {coinsChange > 0 ? '+' : ''}
+                            {tx.coinsChange} 🪙
+                          </p>
+                          {tx.coinsBalanceAfter && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              Balance: {tx.coinsBalanceAfter} 🪙
+                            </p>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
