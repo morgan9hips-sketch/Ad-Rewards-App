@@ -5,7 +5,6 @@ import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 import EarningsChart from '../components/EarningsChart'
 import TierProgress from '../components/TierProgress'
-import CurrencyDisplay from '../components/CurrencyDisplay'
 import ProfileSetup from '../components/ProfileSetup'
 import ExpiryWarning from '../components/ExpiryWarning'
 import { useAuth } from '../contexts/AuthContext'
@@ -31,7 +30,7 @@ interface Transaction {
   id: number
   type: string
   coinsChange: string
-  cashChangeUsd: string
+  cashChangeLocal: string
   description: string
   createdAt: string
 }
@@ -313,7 +312,7 @@ export default function Dashboard() {
           <div className="space-y-2">
             {transactions.map((tx) => {
               const coinsChange = BigInt(tx.coinsChange)
-              const cashChange = parseFloat(tx.cashChangeUsd)
+              const cashChange = parseFloat(tx.cashChangeLocal)
 
               return (
                 <div

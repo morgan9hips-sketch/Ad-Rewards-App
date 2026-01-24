@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import { API_BASE_URL } from '../config/api'
 import Card from './Card'
-import CurrencyDisplay from './CurrencyDisplay'
 
 // Expiry configuration constants (must match backend)
 const COIN_EXPIRY_DAYS = 30
@@ -21,6 +21,7 @@ interface ExpiryStatus {
 
 export default function ExpiryWarning() {
   const { session } = useAuth()
+  const { formatAmount } = useCurrency()
   const [expiryStatus, setExpiryStatus] = useState<ExpiryStatus | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -130,12 +131,9 @@ export default function ExpiryWarning() {
                 </h3>
                 <p className="text-gray-300 mb-3">
                   You have{' '}
-                  <CurrencyDisplay
-                    amountUsd={expiryStatus.cashAmount}
-                    showBoth={true}
-                    size="sm"
-                    className="font-bold text-red-400"
-                  />{' '}
+                  <span className="font-bold text-red-400">
+                    {formatAmount(expiryStatus.cashAmount)}
+                  </span>{' '}
                   that will expire in{' '}
                   <span className="font-bold text-red-400">
                     {expiryStatus.cashDaysLeft} day

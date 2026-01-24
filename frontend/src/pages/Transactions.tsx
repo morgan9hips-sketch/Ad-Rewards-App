@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import Card from '../components/Card'
 import LoadingSpinner from '../components/LoadingSpinner'
 import EmptyState from '../components/EmptyState'
-import CurrencyDisplay from '../components/CurrencyDisplay'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 
@@ -10,9 +9,9 @@ interface Transaction {
   id: number
   type: string
   coinsChange: string
-  cashChangeUsd: string
+  cashChangeLocal: string
   coinsBalanceAfter: string | null
-  cashBalanceAfterUsd: string | null
+  cashBalanceAfterLocal: string | null
   description: string
   createdAt: string
 }
@@ -129,7 +128,7 @@ export default function Transactions() {
             <div className="space-y-3">
               {transactions.map((tx) => {
                 const coinsChange = BigInt(tx.coinsChange)
-                const cashChange = parseFloat(tx.cashChangeUsd)
+                const cashChange = parseFloat(tx.cashChangeLocal)
 
                 return (
                   <div
@@ -161,28 +160,25 @@ export default function Transactions() {
                         </p>
                       )}
                       {cashChange !== 0 && (
-                        <CurrencyDisplay
-                          amountUsd={Math.abs(cashChange)}
-                          showBoth={false}
-                          size="sm"
+                        <span
                           className={`font-bold ${
                             cashChange > 0 ? 'text-green-500' : 'text-red-500'
                           }`}
-                        />
+                        >
+                          {Math.abs(cashChange).toFixed(2)}
+                        </span>
                       )}
                       {tx.coinsBalanceAfter && (
                         <p className="text-xs text-gray-500 mt-1">
                           Balance: {tx.coinsBalanceAfter} 🪙
                         </p>
                       )}
-                      {tx.cashBalanceAfterUsd &&
-                        parseFloat(tx.cashBalanceAfterUsd) > 0 && (
-                          <CurrencyDisplay
-                            amountUsd={parseFloat(tx.cashBalanceAfterUsd)}
-                            showBoth={false}
-                            size="sm"
-                            className="text-xs text-gray-500"
-                          />
+                      {tx.cashBalanceAfterLocal &&
+                        parseFloat(tx.cashBalanceAfterLocal) > 0 && (
+                          <span className="text-xs text-gray-400">
+                            Balance:{' '}
+                            {parseFloat(tx.cashBalanceAfterLocal).toFixed(2)}
+                          </span>
                         )}
                     </div>
                   </div>

@@ -4,7 +4,6 @@ import Card from '../components/Card'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 import EmptyState from '../components/EmptyState'
-import CurrencyDisplay from '../components/CurrencyDisplay'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 
@@ -116,7 +115,7 @@ export default function Withdrawals() {
 
       if (result.success) {
         alert(
-          `Withdrawal request submitted successfully!\n\nAmount: ${result.amountLocal} ${result.currency} ($${result.amountUSD} USD)\n\nYou will receive payment within 5-7 business days.`,
+          `Withdrawal request submitted successfully!\n\nAmount: ${result.amountLocal} ${result.currency}\n\nYou will receive payment within 5-7 business days.`,
         )
         setShowForm(false)
         setPaypalEmail('')
@@ -150,7 +149,7 @@ export default function Withdrawals() {
     )
   }
 
-  const canWithdraw = balance && parseFloat(balance.cashUSD) >= 10
+  const canWithdraw = balance && parseFloat(balance.cashLocal) >= 10
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
@@ -160,18 +159,16 @@ export default function Withdrawals() {
       <Card className="mb-6">
         <h2 className="text-xl font-bold text-white mb-4">Available Balance</h2>
         <div className="text-center py-4">
-          <CurrencyDisplay
-            amountUsd={balance ? parseFloat(balance.cashUSD) : 0}
-            showBoth={true}
-            size="lg"
-            className="text-green-500"
-          />
+          <div className="text-2xl font-bold text-green-500">
+            {balance?.cashLocalFormatted || 'Loading...'}
+          </div>
         </div>
 
         {!canWithdraw && (
           <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-3 mt-4">
             <p className="text-yellow-300 text-sm text-center">
-              ⚠️ Minimum withdrawal amount is $10 USD
+              ⚠️ Minimum withdrawal amount is {balance?.currencySymbol}10{' '}
+              {balance?.displayCurrency}
             </p>
           </div>
         )}
@@ -264,12 +261,9 @@ export default function Withdrawals() {
               <div key={withdrawal.id} className="p-4 bg-gray-800 rounded-lg">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <CurrencyDisplay
-                      amountUsd={parseFloat(withdrawal.amountUsd)}
-                      showBoth={true}
-                      size="sm"
-                      className="text-white font-semibold"
-                    />
+                    <span className="text-white font-semibold">
+                      {withdrawal.amountLocal} {withdrawal.currencyCode}
+                    </span>
                   </div>
                   <span
                     className={`px-2 py-1 rounded text-xs ${getStatusColor(withdrawal.status)}`}
