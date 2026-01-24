@@ -79,7 +79,7 @@ export default function Referrals() {
   }
 
   const shareViaWhatsApp = () => {
-    const message = `Join me on Adify and earn coins! Use my referral code: ${referralCode}\n${referralLink}`
+    const message = `Join me on Adify and earn coins! ${referralLink}`
     window.open(
       `https://wa.me/?text=${encodeURIComponent(message)}`,
       '_blank'

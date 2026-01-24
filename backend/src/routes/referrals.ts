@@ -8,7 +8,9 @@ const prisma = new PrismaClient()
 
 const REFERRAL_BONUS_COINS = 1000
 const REFERRAL_BONUS_VALUE_ZAR = 10.0
-const MIN_THRESHOLD_USD = 150 / 18.5 // R150 converted to USD
+// TODO: Get min threshold from config or exchange rate service
+// For now using approximate R150 = $8.11 USD (at R18.5 per USD)
+const MIN_THRESHOLD_USD = 8.11
 
 /**
  * GET /api/referrals/my-code

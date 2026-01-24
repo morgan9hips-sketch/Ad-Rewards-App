@@ -191,7 +191,7 @@ function getDefaultValuation(countryCode: string): {
 } {
   const { currencyCode, currencySymbol } = getCurrencyForCountry(countryCode)
 
-  // Default: assume $0.01 USD per 100 coins
+  // Default: assume $1.00 USD per 100 coins
   const defaultUsdValue = 1.0
 
   // Convert to local currency
@@ -309,11 +309,14 @@ async function getExchangeRate(
 
 /**
  * Get default exchange rates (fallback)
+ * TODO: Integrate with real-time exchange rate API (e.g., exchangerate-api.com)
+ * These rates are approximate and should be updated regularly
  */
 function getDefaultExchangeRate(from: string, to: string): number {
   if (from === to) return 1
 
-  // Default exchange rates (approximate)
+  // Default exchange rates (approximate, as of implementation date)
+  // TODO: Update these rates regularly or fetch from external API
   const rates: Record<string, number> = {
     'USD-ZAR': 18.5,
     'USD-GBP': 0.79,
