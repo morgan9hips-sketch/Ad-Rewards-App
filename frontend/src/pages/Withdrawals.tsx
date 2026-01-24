@@ -84,10 +84,11 @@ export default function Withdrawals() {
       return
     }
 
-    if (!balance || parseFloat(balance.cashLocal) < (balance.minWithdrawal || 0)) {
-      alert(
-        `Minimum withdrawal amount is ${balance.minWithdrawalFormatted}`,
-      )
+    if (
+      !balance ||
+      parseFloat(balance.cashLocal) < (balance.minWithdrawal || 0)
+    ) {
+      alert(`Minimum withdrawal amount is ${balance.minWithdrawalFormatted}`)
       return
     }
 
@@ -151,7 +152,8 @@ export default function Withdrawals() {
     )
   }
 
-  const canWithdraw = balance && parseFloat(balance.cashLocal) >= (balance.minWithdrawal || 0)
+  const canWithdraw =
+    balance && parseFloat(balance.cashLocal) >= (balance.minWithdrawal || 0)
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
