@@ -77,14 +77,15 @@ export async function creditSignupBonus(userId: string): Promise<boolean> {
       })
 
       // Add cash value to backend tracking
+      const bonusValueUsd = Number(signupBonus.bonusValueZar) / 18.5
       await tx.userProfile.update({
         where: { userId },
         data: {
           cashBalanceUsd: {
-            increment: signupBonus.bonusValueZar / 18.5, // Convert ZAR to USD (approximate)
+            increment: bonusValueUsd,
           },
           totalCashEarnedUsd: {
-            increment: signupBonus.bonusValueZar / 18.5,
+            increment: bonusValueUsd,
           },
         },
       })
@@ -101,7 +102,7 @@ export async function creditSignupBonus(userId: string): Promise<boolean> {
           userId,
           type: 'signup_bonus',
           coinsChange: signupBonus.bonusCoins,
-          cashChangeUsd: signupBonus.bonusValueZar / 18.5,
+          cashChangeUsd: bonusValueUsd,
           description: `Signup bonus - User #${signupBonus.userNumberInRegion} in ${signupBonus.countryCode}`,
         },
       })
