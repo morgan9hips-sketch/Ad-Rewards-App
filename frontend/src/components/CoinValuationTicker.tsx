@@ -47,41 +47,61 @@ export default function CoinValuationTicker() {
     return null
   }
 
-  const getTrendColor = () => {
-    if (valuation.trend === 'up') return 'text-green-600'
-    if (valuation.trend === 'down') return 'text-red-600'
-    return 'text-gray-600'
+  // Calculate rate multiplier
+  const baselineValue = 1.0 // R1 per 100 coins at 1.0x
+  const multiplier = valuation.valuePer100Coins / baselineValue
+
+  const getMultiplierDisplay = () => {
+    if (multiplier > 1.0) {
+      return {
+        emoji: '🔥',
+        color: 'text-green-500',
+        bgColor: 'from-green-50 to-green-100',
+        borderColor: 'border-green-200',
+        title: 'Regional Performance',
+        message: `Ad revenue is ${((multiplier - 1) * 100).toFixed(0)}% above average!`,
+      }
+    } else if (multiplier < 1.0) {
+      return {
+        emoji: '⚠️',
+        color: 'text-yellow-500',
+        bgColor: 'from-yellow-50 to-yellow-100',
+        borderColor: 'border-yellow-200',
+        title: 'Regional Performance',
+        message: `Ad revenue is ${((1 - multiplier) * 100).toFixed(0)}% below average`,
+      }
+    } else {
+      return {
+        emoji: '⚡',
+        color: 'text-gray-500',
+        bgColor: 'from-gray-50 to-gray-100',
+        borderColor: 'border-gray-200',
+        title: 'Regional Performance',
+        message: 'Stable',
+      }
+    }
   }
 
-  const getTrendIcon = () => {
-    if (valuation.trend === 'up') return '↑'
-    if (valuation.trend === 'down') return '↓'
-    return '→'
-  }
+  const display = getMultiplierDisplay()
 
   return (
-    <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4 mb-6 animate-pulse-subtle">
+    <div className={`bg-gradient-to-r ${display.bgColor} border ${display.borderColor} rounded-lg p-4 mb-6 animate-pulse-subtle`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <div className="text-2xl">💰</div>
+          <div className="text-2xl">{display.emoji}</div>
           <div>
             <div className="text-sm text-gray-600 font-medium">
-              Live Coin Value
+              {display.title}
             </div>
-            <div className="text-lg font-bold text-gray-900">
-              100 coins ≈{' '}
-              <span className={getTrendColor()}>
-                {valuation.currencySymbol}
-                {valuation.valuePer100Coins.toFixed(2)}
-              </span>
+            <div className={`text-lg font-bold ${display.color}`}>
+              {multiplier.toFixed(1)}x
             </div>
           </div>
         </div>
-        <div className={`flex items-center space-x-1 ${getTrendColor()}`}>
-          <span className="text-2xl">{getTrendIcon()}</span>
-          <span className="font-bold">
-            {Math.abs(valuation.changePercent).toFixed(1)}%
-          </span>
+        <div className="text-right">
+          <div className="text-sm text-gray-600">
+            {display.message}
+          </div>
         </div>
       </div>
       <div className="mt-2 text-xs text-gray-500">
