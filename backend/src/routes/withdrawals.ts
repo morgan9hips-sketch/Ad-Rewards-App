@@ -115,6 +115,70 @@ router.get('/history', async (req: AuthRequest, res) => {
   }
 })
 
+// Get recent public withdrawals for social proof
+// NOTE: This must come before /:id route to avoid route conflicts
+router.get('/recent-public', async (req: AuthRequest, res) => {
+  try {
+    // Get last 20 completed withdrawals from the last 7 days
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+    const withdrawals = await prisma.withdrawal.findMany({
+      where: {
+        status: 'completed',
+        completedAt: {
+          gte: sevenDaysAgo,
+        },
+      },
+      orderBy: { completedAt: 'desc' },
+      take: 20,
+      include: {
+        user: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    })
+
+    // Get coin valuation to calculate rate multiplier
+    const coinValuation = await prisma.coinValuation.findFirst({
+      where: { isActive: true },
+      orderBy: { updatedAt: 'desc' },
+    })
+
+    // Anonymize and format withdrawals
+    const publicWithdrawals = withdrawals.map((w) => {
+      // Anonymize user ID - show only last 4 chars
+      const userId = `User${w.user.id.slice(-4)}`
+      
+      // Calculate coins withdrawn (reverse engineer from amount)
+      const baselineValue = 1.0
+      const valuePer100Coins = coinValuation ? parseFloat(coinValuation.valuePer100Coins.toString()) : 1.0
+      const rateMultiplier = valuePer100Coins / baselineValue
+      const estimatedCoins = Math.round((parseFloat(w.amountLocal.toString()) / valuePer100Coins) * 100)
+
+      return {
+        userId,
+        coins: estimatedCoins,
+        amountLocal: parseFloat(w.amountLocal.toString()),
+        currencyCode: w.currencyCode,
+        countryCode: w.currencyCode === 'ZAR' ? 'ZA' : 
+                     w.currencyCode === 'USD' ? 'US' :
+                     w.currencyCode === 'GBP' ? 'GB' :
+                     w.currencyCode === 'EUR' ? 'EU' : 'US',
+        rateMultiplier,
+        completedAt: w.completedAt?.toISOString() || w.requestedAt.toISOString(),
+      }
+    })
+
+    res.json({ withdrawals: publicWithdrawals })
+  } catch (error) {
+    console.error('Error fetching recent withdrawals:', error)
+    res.status(500).json({ error: 'Failed to fetch recent withdrawals' })
+  }
+})
+
 // Get withdrawal by ID
 router.get('/:id', async (req: AuthRequest, res) => {
   try {

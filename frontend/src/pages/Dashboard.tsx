@@ -8,6 +8,9 @@ import TierProgress from '../components/TierProgress'
 import ProfileSetup from '../components/ProfileSetup'
 import ExpiryWarning from '../components/ExpiryWarning'
 import CoinValuationTicker from '../components/CoinValuationTicker'
+import RecentWithdrawals from '../components/RecentWithdrawals'
+import PlatformStats from '../components/PlatformStats'
+import SignupBonusBadge from '../components/SignupBonusBadge'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 
@@ -160,6 +163,9 @@ export default function Dashboard() {
         <ProfileSetup onComplete={handleProfileSetupComplete} />
       )}
 
+      {/* Signup Bonus Badge */}
+      <SignupBonusBadge />
+
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-white">{getGreeting()}</h1>
         {getSubGreeting() && (
@@ -173,173 +179,184 @@ export default function Dashboard() {
       {/* Live Coin Valuation Ticker */}
       <CoinValuationTicker />
 
-      {/* Coins Balance */}
-      <Card className="mb-6">
-        <div className="p-4">
-          <h2 className="text-xl font-bold text-white mb-3">
-            🪙 Your Balance
-          </h2>
-          <p className="text-4xl font-bold text-yellow-500 mb-3">
-            {balance ? parseInt(balance.coins).toLocaleString() : '0'} Coins
-          </p>
+      {/* Main Layout with Sidebar */}
+      <div className="grid lg:grid-cols-3 gap-6 mb-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Coins Balance */}
+          <Card>
+            <div className="p-4">
+              <h2 className="text-xl font-bold text-white mb-3">
+                🪙 Your Balance
+              </h2>
+              <p className="text-4xl font-bold text-yellow-500 mb-3">
+                {balance ? parseInt(balance.coins).toLocaleString() : '0'} Coins
+              </p>
 
-          {/* Progress to conversion threshold */}
-          {balance &&
-            parseInt(balance.coins) < CONVERSION_THRESHOLD_COINS && (
+              {/* Progress to conversion threshold */}
+              {balance &&
+                parseInt(balance.coins) < CONVERSION_THRESHOLD_COINS && (
+                  <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
+                    <p className="text-xs text-gray-300 mb-2">
+                      📊 Progress to monthly conversion
+                    </p>
+                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                      <div
+                        className="bg-green-500 h-2 rounded-full transition-all"
+                        style={{
+                          width: `${Math.min(100, (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      {parseInt(balance.coins).toLocaleString()} /{' '}
+                      {CONVERSION_THRESHOLD_COINS.toLocaleString()} coins (
+                      {Math.floor(
+                        (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) *
+                          100,
+                      )}
+                      %)
+                    </p>
+                  </div>
+                )}
+
               <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
                 <p className="text-xs text-gray-300 mb-2">
-                  📊 Progress to monthly conversion
+                  💡 Coins convert to cash when we receive ad revenue (monthly,
+                  around the 25th)
                 </p>
-                <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                  <div
-                    className="bg-green-500 h-2 rounded-full transition-all"
-                    style={{
-                      width: `${Math.min(100, (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) * 100)}%`,
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-gray-400">
-                  {parseInt(balance.coins).toLocaleString()} /{' '}
-                  {CONVERSION_THRESHOLD_COINS.toLocaleString()} coins (
-                  {Math.floor(
-                    (parseInt(balance.coins) / CONVERSION_THRESHOLD_COINS) *
-                      100,
-                  )}
-                  %)
+                <p className="text-xs text-green-400 font-semibold">
+                  You always receive 85% of ad revenue!
                 </p>
               </div>
-            )}
 
-          <div className="bg-gray-800 p-3 rounded-lg mt-4 mb-4">
-            <p className="text-xs text-gray-300 mb-2">
-              💡 Coins convert to cash when we receive ad revenue (monthly,
-              around the 25th)
-            </p>
-            <p className="text-xs text-green-400 font-semibold">
-              You always receive 85% of ad revenue!
-            </p>
+              <Button
+                fullWidth
+                onClick={() => navigate('/withdrawals')}
+              >
+                Withdraw
+              </Button>
+
+              <p className="text-xs text-gray-500 mt-3 text-center">
+                Next conversion: Feb 25-28, 2026
+              </p>
+            </div>
+          </Card>
+
+          {/* Stats Overview */}
+          <div className="grid md:grid-cols-3 gap-4">
+            <Card>
+              <div className="text-center">
+                <p className="text-gray-400 text-sm mb-2">Total Coins</p>
+                <p className="text-3xl font-bold text-yellow-500">
+                  {balance ? parseInt(balance.coins).toLocaleString() : '0'}
+                </p>
+              </div>
+            </Card>
+
+            <Card>
+              <div className="text-center">
+                <p className="text-gray-400 text-sm mb-2">Ads Watched</p>
+                <p className="text-3xl font-bold text-purple-500">
+                  {profile?.adsWatched || 0}
+                </p>
+              </div>
+            </Card>
+
+            <Card>
+              <div className="text-center">
+                <p className="text-gray-400 text-sm mb-2">Current Tier</p>
+                <p className="text-3xl font-bold text-blue-500">
+                  {profile?.tier || 'Bronze'}
+                </p>
+              </div>
+            </Card>
           </div>
 
-          <Button
-            fullWidth
-            onClick={() => navigate('/withdrawals')}
-          >
-            Withdraw
-          </Button>
+          <TierProgress
+            currentTier={profile?.tier || 'Bronze'}
+            adsWatched={profile?.adsWatched || 0}
+            nextTierRequirement={50}
+            nextTier="Silver"
+          />
 
-          <p className="text-xs text-gray-500 mt-3 text-center">
-            Next conversion: Feb 25-28, 2026
-          </p>
-        </div>
-      </Card>
+          {/* Quick Actions */}
+          <Card>
+            <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <Button fullWidth onClick={() => navigate('/ads')}>
+                📺 Watch Videos (100 coins)
+              </Button>
+              <Button
+                fullWidth
+                variant="secondary"
+                onClick={() => navigate('/game')}
+              >
+                🎮 Play Game (10 coins)
+              </Button>
+            </div>
+          </Card>
 
-      {/* Stats Overview */}
-      <div className="grid md:grid-cols-3 gap-6 mb-6">
-        <Card>
-          <div className="text-center">
-            <p className="text-gray-400 text-sm mb-2">Total Coins</p>
-            <p className="text-3xl font-bold text-yellow-500">
-              {balance ? parseInt(balance.coins).toLocaleString() : '0'}
-            </p>
-          </div>
-        </Card>
+          {/* Recent Transactions */}
+          {transactions.length > 0 && (
+            <Card>
+              <h2 className="text-xl font-bold text-white mb-4">
+                Recent Transactions
+              </h2>
+              <div className="space-y-2">
+                {transactions.map((tx) => {
+                  const coinsChange = BigInt(tx.coinsChange)
 
-        <Card>
-          <div className="text-center">
-            <p className="text-gray-400 text-sm mb-2">Ads Watched</p>
-            <p className="text-3xl font-bold text-purple-500">
-              {profile?.adsWatched || 0}
-            </p>
-          </div>
-        </Card>
-
-        <Card>
-          <div className="text-center">
-            <p className="text-gray-400 text-sm mb-2">Current Tier</p>
-            <p className="text-3xl font-bold text-blue-500">
-              {profile?.tier || 'Bronze'}
-            </p>
-          </div>
-        </Card>
-      </div>
-
-      <div className="mb-6">
-        <TierProgress
-          currentTier={profile?.tier || 'Bronze'}
-          adsWatched={profile?.adsWatched || 0}
-          nextTierRequirement={50}
-          nextTier="Silver"
-        />
-      </div>
-
-      {/* Recent Transactions */}
-      {transactions.length > 0 && (
-        <Card className="mb-6">
-          <h2 className="text-xl font-bold text-white mb-4">
-            Recent Transactions
-          </h2>
-          <div className="space-y-2">
-            {transactions.map((tx) => {
-              const coinsChange = BigInt(tx.coinsChange)
-
-              return (
-                <div
-                  key={tx.id}
-                  className="flex justify-between items-center py-2 border-b border-gray-800"
-                >
-                  <div>
-                    <p className="text-white text-sm">
-                      {tx.description || tx.type}
-                    </p>
-                    <p className="text-gray-500 text-xs">
-                      {new Date(tx.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p
-                      className={`text-sm font-semibold ${coinsChange > 0 ? 'text-yellow-500' : 'text-gray-400'}`}
+                  return (
+                    <div
+                      key={tx.id}
+                      className="flex justify-between items-center py-2 border-b border-gray-800"
                     >
-                      {coinsChange > 0 ? '+' : ''}
-                      {tx.coinsChange} coins
-                    </p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-          <Button
-            fullWidth
-            variant="secondary"
-            className="mt-4"
-            onClick={() => navigate('/transactions')}
-          >
-            View All Transactions
-          </Button>
-        </Card>
-      )}
+                      <div>
+                        <p className="text-white text-sm">
+                          {tx.description || tx.type}
+                        </p>
+                        <p className="text-gray-500 text-xs">
+                          {new Date(tx.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p
+                          className={`text-sm font-semibold ${coinsChange > 0 ? 'text-yellow-500' : 'text-gray-400'}`}
+                        >
+                          {coinsChange > 0 ? '+' : ''}
+                          {tx.coinsChange} coins
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <Button
+                fullWidth
+                variant="secondary"
+                className="mt-4"
+                onClick={() => navigate('/transactions')}
+              >
+                View All Transactions
+              </Button>
+            </Card>
+          )}
 
-      <Card className="mb-6">
-        <h2 className="text-xl font-bold text-white mb-4">
-          Earnings This Week
-        </h2>
-        <EarningsChart data={earningsData} />
-      </Card>
-
-      <Card>
-        <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
-        <div className="grid sm:grid-cols-2 gap-3">
-          <Button fullWidth onClick={() => navigate('/ads')}>
-            Watch Ads & Earn Coins
-          </Button>
-          <Button
-            fullWidth
-            variant="secondary"
-            onClick={() => navigate('/withdrawals')}
-          >
-            Withdraw Earnings
-          </Button>
+          <Card>
+            <h2 className="text-xl font-bold text-white mb-4">
+              Earnings This Week
+            </h2>
+            <EarningsChart data={earningsData} />
+          </Card>
         </div>
-      </Card>
+
+        {/* Social Proof Sidebar */}
+        <div className="lg:col-span-1 space-y-6">
+          <RecentWithdrawals />
+          <PlatformStats />
+        </div>
+      </div>
     </div>
   )
 }

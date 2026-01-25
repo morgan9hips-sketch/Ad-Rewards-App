@@ -17,10 +17,12 @@ import LocationRequired from './components/LocationRequired'
 // Pages
 import Home from './pages/Home'
 import Login from './pages/Login'
+import Signup from './pages/Signup'
 import AuthCallback from './pages/AuthCallback'
 import Dashboard from './pages/Dashboard'
 import Ads from './pages/Ads'
 import WatchAd from './pages/WatchAd'
+import Game from './pages/Game'
 import Settings from './pages/Settings'
 import Withdrawals from './pages/Withdrawals'
 import Leaderboard from './pages/Leaderboard'
@@ -102,6 +104,7 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -127,6 +130,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <WatchAd />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/game"
+          element={
+            <ProtectedRoute>
+              <Game />
             </ProtectedRoute>
           }
         />
