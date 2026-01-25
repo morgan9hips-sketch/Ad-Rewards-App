@@ -354,11 +354,11 @@ router.get('/signup-bonus', async (req: AuthRequest, res) => {
 
     res.json({
       eligible: true,
-      userNumber: signupBonus.userNumber,
+      userNumber: signupBonus.userNumberInRegion,
       countryCode: profile?.country || signupBonus.countryCode,
       bonusCoins: signupBonus.bonusCoins,
-      bonusValue: parseFloat(signupBonus.bonusValue.toString()),
-      claimed: signupBonus.claimed,
+      bonusValue: parseFloat(signupBonus.bonusValueZar.toString()),
+      claimed: !!signupBonus.creditedAt,
     })
   } catch (error) {
     console.error('Error fetching signup bonus:', error)
