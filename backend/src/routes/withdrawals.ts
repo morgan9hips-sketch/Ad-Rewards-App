@@ -141,10 +141,9 @@ router.get('/recent-public', async (req: AuthRequest, res) => {
       },
     })
 
-    // Get coin valuation to calculate rate multiplier
+    // Get coin valuation to calculate rate multiplier (latest valuation)
     const coinValuation = await prisma.coinValuation.findFirst({
-      where: { isActive: true },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { calculatedAt: 'desc' },
     })
 
     // Anonymize and format withdrawals
