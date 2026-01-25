@@ -4,6 +4,7 @@ import Card from '../components/Card'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 import EmptyState from '../components/EmptyState'
+import WithdrawalSuccessModal from '../components/WithdrawalSuccessModal'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 
@@ -16,6 +17,8 @@ interface Withdrawal {
   status: string
   requestedAt: string
   completedAt: string | null
+  coinsWithdrawn?: number
+  rateMultiplier?: number
 }
 
 interface UserBalance {
@@ -29,15 +32,34 @@ interface UserBalance {
   minWithdrawalFormatted: string
 }
 
+interface CoinValuation {
+  valuePer100Coins: number
+  currencyCode: string
+  currencySymbol: string
+}
+
+interface WithdrawalResult {
+  success: boolean
+  withdrawalId: string
+  amountLocal: number
+  currency: string
+  coinsWithdrawn: number
+  rateMultiplier: number
+  transactionId: string
+  paypalEmail: string
+}
+
 export default function Withdrawals() {
   const { session } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [balance, setBalance] = useState<UserBalance | null>(null)
+  const [coinValuation, setCoinValuation] = useState<CoinValuation | null>(null)
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([])
   const [paypalEmail, setPaypalEmail] = useState('')
   const [showForm, setShowForm] = useState(false)
+  const [withdrawalResult, setWithdrawalResult] = useState<WithdrawalResult | null>(null)
 
   useEffect(() => {
     fetchData()
@@ -58,6 +80,15 @@ export default function Withdrawals() {
         setBalance(balanceData)
       }
 
+      // Fetch coin valuation
+      const valuationRes = await fetch(`${API_BASE_URL}/api/coin-valuation`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (valuationRes.ok) {
+        const valuationData = await valuationRes.json()
+        setCoinValuation(valuationData)
+      }
+
       // Fetch withdrawal history
       const withdrawalsRes = await fetch(
         `${API_BASE_URL}/api/withdrawals/history`,
@@ -76,6 +107,29 @@ export default function Withdrawals() {
     }
   }
 
+  const calculateEstimate = () => {
+    if (!balance || !coinValuation) return null
+
+    const coins = parseInt(balance.coins)
+    const baselineValue = 1.0
+    const valuePer100Coins = coinValuation.valuePer100Coins
+    const currentMultiplier = valuePer100Coins / baselineValue
+
+    // Calculate estimated value
+    const estimatedValue = (coins / 100) * valuePer100Coins
+
+    // Calculate range (±10% variance)
+    const lowEstimate = estimatedValue * 0.9
+    const highEstimate = estimatedValue * 1.1
+
+    return {
+      low: Math.round(lowEstimate),
+      high: Math.round(highEstimate),
+      multiplier: currentMultiplier,
+      symbol: coinValuation.currencySymbol,
+    }
+  }
+
   const handleWithdrawal = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -84,17 +138,17 @@ export default function Withdrawals() {
       return
     }
 
-    if (
-      !balance ||
-      parseFloat(balance.cashLocal) < (balance.minWithdrawal || 0)
-    ) {
-      alert(`Minimum withdrawal amount is ${balance?.minWithdrawalFormatted || 'required'}`)
+    const coins = balance ? parseInt(balance.coins) : 0
+    const estimate = calculateEstimate()
+    
+    if (!estimate) {
+      alert('Unable to calculate withdrawal estimate')
       return
     }
 
     if (
       !confirm(
-        `Request withdrawal of ${balance.cashLocalFormatted} to ${paypalEmail}?`,
+        `Request withdrawal of ${coins.toLocaleString()} coins?\n\nEstimated payout: ${estimate.symbol}${estimate.low} - ${estimate.symbol}${estimate.high}\n\nActual amount will be calculated at processing time based on current regional ad performance.`,
       )
     ) {
       return
@@ -117,9 +171,17 @@ export default function Withdrawals() {
       const result = await res.json()
 
       if (result.success) {
-        alert(
-          `Withdrawal request submitted successfully!\n\nAmount: ${result.amountLocal} ${result.currency}\n\nYou will receive payment within 5-7 business days.`,
-        )
+        // Show success modal with withdrawal details
+        setWithdrawalResult({
+          success: true,
+          withdrawalId: result.withdrawalId,
+          amountLocal: parseFloat(result.amountLocal),
+          currency: result.currency,
+          coinsWithdrawn: coins,
+          rateMultiplier: estimate.multiplier,
+          transactionId: result.withdrawalId,
+          paypalEmail,
+        })
         setShowForm(false)
         setPaypalEmail('')
         fetchData() // Refresh data
@@ -152,53 +214,111 @@ export default function Withdrawals() {
     )
   }
 
-  const canWithdraw =
-    balance && parseFloat(balance.cashLocal) >= (balance.minWithdrawal || 0)
+  const coins = balance ? parseInt(balance.coins) : 0
+  const estimate = calculateEstimate()
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
       <h1 className="text-3xl font-bold text-white mb-6">💸 Withdrawals</h1>
 
-      {/* Balance Card */}
+      {/* Withdrawal Success Modal */}
+      {withdrawalResult && (
+        <WithdrawalSuccessModal
+          coinsWithdrawn={withdrawalResult.coinsWithdrawn}
+          amountReceived={withdrawalResult.amountLocal}
+          currencyCode={withdrawalResult.currency}
+          rateMultiplier={withdrawalResult.rateMultiplier}
+          transactionId={withdrawalResult.transactionId}
+          paypalEmail={withdrawalResult.paypalEmail}
+          onClose={() => {
+            setWithdrawalResult(null)
+            navigate('/transactions')
+          }}
+        />
+      )}
+
+      {/* Balance Card with Estimate */}
       <Card className="mb-6">
-        <h2 className="text-xl font-bold text-white mb-4">Available Balance</h2>
-        <div className="text-center py-4">
-          <div className="text-2xl font-bold text-green-500">
-            {balance?.cashLocalFormatted || 'Loading...'}
+        <h2 className="text-xl font-bold text-white mb-4">Ready to Withdraw?</h2>
+        
+        <div className="bg-gray-800 p-4 rounded-lg mb-4">
+          <div className="text-center py-2">
+            <div className="text-sm text-gray-400 mb-1">Your Balance</div>
+            <div className="text-3xl font-bold text-yellow-500 mb-3">
+              {coins.toLocaleString()} AdCoins
+            </div>
           </div>
+
+          {estimate && coins > 0 && (
+            <>
+              <div className="border-t border-gray-700 pt-3 mt-3">
+                <div className="text-sm text-gray-400 mb-2">
+                  Estimated Payout:
+                </div>
+                <div className="text-2xl font-bold text-green-500 mb-2">
+                  {estimate.symbol}{estimate.low} - {estimate.symbol}{estimate.high}
+                </div>
+                <div className="text-xs text-gray-500">
+                  Based on current regional ad performance
+                </div>
+              </div>
+
+              <div className="border-t border-gray-700 pt-3 mt-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-400">Regional Performance:</span>
+                  <span className={`font-semibold ${
+                    estimate.multiplier > 1.0 ? 'text-green-500' : 
+                    estimate.multiplier < 1.0 ? 'text-yellow-500' : 
+                    'text-gray-400'
+                  }`}>
+                    {estimate.multiplier.toFixed(2)}x
+                    {estimate.multiplier > 1.0 && ' 🔥'}
+                    {estimate.multiplier < 1.0 && ' ⚠️'}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {estimate.multiplier > 1.0 && 
+                    `${((estimate.multiplier - 1) * 100).toFixed(0)}% above average this month`
+                  }
+                  {estimate.multiplier < 1.0 && 
+                    `${((1 - estimate.multiplier) * 100).toFixed(0)}% below average this month`
+                  }
+                  {estimate.multiplier === 1.0 && 'Stable'}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
-        {!canWithdraw && (
-          <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-3 mt-4">
-            <p className="text-yellow-300 text-sm text-center">
-              ⚠️ Minimum withdrawal amount is {balance?.minWithdrawalFormatted}
-            </p>
-          </div>
-        )}
+        <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-3 mb-4">
+          <p className="text-yellow-300 text-sm text-center">
+            ⚠️ Actual amount calculated at processing time
+          </p>
+        </div>
 
-        {!showForm && canWithdraw && (
+        {coins > 0 && !showForm && (
           <Button fullWidth className="mt-4" onClick={() => setShowForm(true)}>
-            Request Withdrawal
+            Confirm Withdrawal
           </Button>
         )}
 
-        {!canWithdraw && (
+        {coins === 0 && (
           <Button
             fullWidth
             variant="secondary"
             className="mt-4"
             onClick={() => navigate('/ads')}
           >
-            Watch Ads to Earn More
+            Watch Ads to Earn Coins
           </Button>
         )}
       </Card>
 
       {/* Withdrawal Form */}
-      {showForm && canWithdraw && (
+      {showForm && coins > 0 && (
         <Card className="mb-6">
           <h2 className="text-xl font-bold text-white mb-4">
-            Request Withdrawal
+            Enter PayPal Details
           </h2>
           <form onSubmit={handleWithdrawal} className="space-y-4">
             <div>
@@ -216,15 +336,6 @@ export default function Withdrawals() {
               <p className="text-xs text-gray-500 mt-1">
                 Make sure this email is connected to your PayPal account
               </p>
-            </div>
-
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-400">Amount:</span>
-                <span className="text-white font-semibold">
-                  {balance ? balance.cashLocalFormatted : 'Loading...'}
-                </span>
-              </div>
             </div>
 
             <div className="flex gap-3">
