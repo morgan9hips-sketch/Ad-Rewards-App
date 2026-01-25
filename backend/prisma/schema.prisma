@@ -33,453 +33,456 @@ enum NotificationEvent {
 }
 
 model UserProfile {
-  id                     String   @id @default(uuid())
-  userId                 String   @unique
-  email                  String   @unique
-  name                   String?
-  country                String?
-  countryCode            String?  @map("country_code")
-  preferredCurrency      String   @default("USD") @map("preferred_currency")
-  paypalEmail            String?  @map("paypal_email")
-  
+  id                String  @id @default(uuid())
+  userId            String  @unique
+  email             String  @unique
+  name              String?
+  country           String?
+  countryCode       String? @map("country_code")
+  preferredCurrency String  @default("USD") @map("preferred_currency")
+  paypalEmail       String? @map("paypal_email")
+
   // Legacy fields (kept for backward compatibility)
-  walletBalance          Int      @default(0) @map("wallet_balance")
-  totalEarned            Int      @default(0) @map("total_earned")
-  
+  walletBalance Int @default(0) @map("wallet_balance")
+  totalEarned   Int @default(0) @map("total_earned")
+
   // New two-wallet system fields
-  coinsBalance           BigInt   @default(0) @map("coins_balance")
-  cashBalanceUsd         Decimal  @default(0.0000) @db.Decimal(12, 4) @map("cash_balance_usd")
-  totalCoinsEarned       BigInt   @default(0) @map("total_coins_earned")
-  totalCashEarnedUsd     Decimal  @default(0.0000) @db.Decimal(12, 4) @map("total_cash_earned_usd")
-  totalWithdrawnUsd      Decimal  @default(0.0000) @db.Decimal(12, 4) @map("total_withdrawn_usd")
-  
+  coinsBalance       BigInt  @default(0) @map("coins_balance")
+  cashBalanceUsd     Decimal @default(0.0000) @map("cash_balance_usd") @db.Decimal(12, 4)
+  totalCoinsEarned   BigInt  @default(0) @map("total_coins_earned")
+  totalCashEarnedUsd Decimal @default(0.0000) @map("total_cash_earned_usd") @db.Decimal(12, 4)
+  totalWithdrawnUsd  Decimal @default(0.0000) @map("total_withdrawn_usd") @db.Decimal(12, 4)
+
   // Revenue location tracking (from AdMob - VPN-proof)
-  revenueCountry         String?  @map("revenue_country")  // Primary earning country
-  revenueCountries       String[] @default([]) @map("revenue_countries")  // All countries earned from
-  
+  revenueCountry   String?  @map("revenue_country") // Primary earning country
+  revenueCountries String[] @default([]) @map("revenue_countries") // All countries earned from
+
   // Display preferences (user-friendly)
-  displayCountry         String?  @map("display_country")
-  autoDetectCurrency     Boolean  @default(true) @map("auto_detect_currency")
-  
+  displayCountry     String? @map("display_country")
+  autoDetectCurrency Boolean @default(true) @map("auto_detect_currency")
+
   // Fraud detection
-  lastIpAddress          String?  @map("last_ip_address")
-  lastDetectedCountry    String?  @map("last_detected_country")
-  vpnSuspicionScore      Int      @default(0) @map("vpn_suspicion_score")
-  suspiciousActivity     Boolean  @default(false) @map("suspicious_activity")
-  
-  adsWatched             Int      @default(0) @map("ads_watched")
-  tier                   String   @default("Bronze")
-  role                   UserRole @default(USER)
-  
+  lastIpAddress       String? @map("last_ip_address")
+  lastDetectedCountry String? @map("last_detected_country")
+  vpnSuspicionScore   Int     @default(0) @map("vpn_suspicion_score")
+  suspiciousActivity  Boolean @default(false) @map("suspicious_activity")
+
+  adsWatched Int      @default(0) @map("ads_watched")
+  tier       String   @default("Bronze")
+  role       UserRole @default(USER)
+
   // Video cap tracking
-  dailyVideosWatched     Int      @default(0) @map("daily_videos_watched")
-  lastVideoResetAt       DateTime @default(now()) @map("last_video_reset_at")
-  forcedAdsWatched       Int      @default(0) @map("forced_ads_watched")
-  
+  dailyVideosWatched Int      @default(0) @map("daily_videos_watched")
+  lastVideoResetAt   DateTime @default(now()) @map("last_video_reset_at")
+  forcedAdsWatched   Int      @default(0) @map("forced_ads_watched")
+
   // Subscription tracking
-  subscriptionId         String?  @map("subscription_id")
-  subscriptionStatus     String?  @map("subscription_status")
-  subscriptionPlanId     String?  @map("subscription_plan_id")
-  subscriptionStartDate  DateTime? @map("subscription_start_date")
-  subscriptionEndDate    DateTime? @map("subscription_end_date")
-  
+  subscriptionId        String?   @map("subscription_id")
+  subscriptionStatus    String?   @map("subscription_status")
+  subscriptionPlanId    String?   @map("subscription_plan_id")
+  subscriptionStartDate DateTime? @map("subscription_start_date")
+  subscriptionEndDate   DateTime? @map("subscription_end_date")
+
   // Profile setup and personalization
-  displayName            String?  @unique @map("display_name")
-  avatarUrl              String?  @map("avatar_url")
-  avatarEmoji            String?  @map("avatar_emoji")
-  showOnLeaderboard      Boolean  @default(true) @map("show_on_leaderboard")
-  profileSetupCompleted  Boolean  @default(false) @map("profile_setup_completed")
-  countryBadge           String?  @map("country_badge")  // ISO country code (ZA, US, GB)
-  hideCountry            Boolean  @default(false) @map("hide_country")
-  
+  displayName           String? @unique @map("display_name")
+  avatarUrl             String? @map("avatar_url")
+  avatarEmoji           String? @map("avatar_emoji")
+  showOnLeaderboard     Boolean @default(true) @map("show_on_leaderboard")
+  profileSetupCompleted Boolean @default(false) @map("profile_setup_completed")
+  countryBadge          String? @map("country_badge") // ISO country code (ZA, US, GB)
+  hideCountry           Boolean @default(false) @map("hide_country")
+
   // Activity tracking for balance expiry
-  lastLogin              DateTime @default(now()) @map("last_login")
-  
+  lastLogin DateTime @default(now()) @map("last_login")
+
+  // Legal compliance
+  acceptedTermsAt DateTime? @map("accepted_terms_at")
+
   // Referral system
-  referralCode           String?  @unique @map("referral_code")
-  referredBy             String?  @map("referred_by")
-  
-  createdAt              DateTime @default(now()) @map("created_at")
-  updatedAt              DateTime @updatedAt @map("updated_at")
-  
-  adViews                AdView[]
-  withdrawals            Withdrawal[]
-  badges                 UserBadge[]
-  transactions           Transaction[]
-  conversionDetails      ConversionDetail[]
-  locationConversions    LocationConversion[]
-  adminActions           AdminAction[] @relation("AdminActions")
-  adImpressions          AdImpression[]
-  expiredBalances        ExpiredBalance[]
-  referralsGiven         Referral[] @relation("Referrer")
-  referralsReceived      Referral[] @relation("Referee")
-  signupBonus            SignupBonus?
-  gameSessions           GameSession[]
-  
-  @@map("user_profiles")
+  referralCode String? @unique @map("referral_code")
+  referredBy   String? @map("referred_by")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  adViews             AdView[]
+  withdrawals         Withdrawal[]
+  badges              UserBadge[]
+  transactions        Transaction[]
+  conversionDetails   ConversionDetail[]
+  locationConversions LocationConversion[]
+  adminActions        AdminAction[]        @relation("AdminActions")
+  adImpressions       AdImpression[]
+  expiredBalances     ExpiredBalance[]
+  referralsGiven      Referral[]           @relation("Referrer")
+  referralsReceived   Referral[]           @relation("Referee")
+  signupBonus         SignupBonus?
+  gameSessions        GameSession[]
+
   @@index([totalCoinsEarned(sort: Desc), showOnLeaderboard])
   @@index([lastLogin])
+  @@map("user_profiles")
 }
 
 model Ad {
-  id                Int      @id @default(autoincrement())
-  title             String
-  description       String?
-  videoUrl          String?
-  durationSeconds   Int
-  rewardCents       Int
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
-  views             AdView[]
-  
+  id              Int      @id @default(autoincrement())
+  title           String
+  description     String?
+  videoUrl        String?
+  durationSeconds Int
+  rewardCents     Int
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  views AdView[]
+
   @@map("ads")
 }
 
 model AdView {
-  id                    String   @id @default(uuid())
-  userId                String   @map("user_id")
-  user                  UserProfile @relation(fields: [userId], references: [userId])
-  adId                  Int?     @map("ad_id")
-  ad                    Ad?      @relation(fields: [adId], references: [id])
-  adUnitId              String?  @map("ad_unit_id")
-  watchedSeconds        Int      @map("watched_seconds")
-  completed             Boolean  @default(false)
-  rewardCents           Int      @map("reward_cents")
-  coinsEarned           Int      @default(0) @map("coins_earned")
-  
+  id             String      @id @default(uuid())
+  userId         String      @map("user_id")
+  user           UserProfile @relation(fields: [userId], references: [userId])
+  adId           Int?        @map("ad_id")
+  ad             Ad?         @relation(fields: [adId], references: [id])
+  adUnitId       String?     @map("ad_unit_id")
+  watchedSeconds Int         @map("watched_seconds")
+  completed      Boolean     @default(false)
+  rewardCents    Int         @map("reward_cents")
+  coinsEarned    Int         @default(0) @map("coins_earned")
+
   // AdMob impression ID - UNIQUE to prevent duplicate claims
-  admobImpressionId     String?  @unique @map("admob_impression_id")
-  
+  admobImpressionId String? @unique @map("admob_impression_id")
+
   // AdMob's REAL data (trusted - VPN-proof!)
-  countryCode           String?  @map("country_code")  // From AdMob SDK
-  estimatedEarningsUsd  Decimal? @db.Decimal(12, 6) @map("estimated_earnings_usd")  // AdMob's estimate
-  admobCurrency         String?  @map("admob_currency")
-  
+  countryCode          String?  @map("country_code") // From AdMob SDK
+  estimatedEarningsUsd Decimal? @map("estimated_earnings_usd") @db.Decimal(12, 6) // AdMob's estimate
+  admobCurrency        String?  @map("admob_currency")
+
   // Ad type tracking for revenue split
-  adType                AdType?  @map("ad_type")
-  userRevenueShare      Decimal  @default(0.8500) @db.Decimal(5, 4) @map("user_revenue_share")
-  coinsAwarded          Int      @default(0) @map("coins_awarded")
-  
+  adType           AdType? @map("ad_type")
+  userRevenueShare Decimal @default(0.8500) @map("user_revenue_share") @db.Decimal(5, 4)
+  coinsAwarded     Int     @default(0) @map("coins_awarded")
+
   // Backend revenue tracking
-  revenueUsd            Decimal  @default(0) @db.Decimal(10, 6) @map("revenue_usd")
-  userEarningsUsd       Decimal  @default(0) @db.Decimal(10, 6) @map("user_earnings_usd")
-  companyRevenueUsd     Decimal  @default(0) @db.Decimal(10, 6) @map("company_revenue_usd")
-  
+  revenueUsd        Decimal @default(0) @map("revenue_usd") @db.Decimal(10, 6)
+  userEarningsUsd   Decimal @default(0) @map("user_earnings_usd") @db.Decimal(10, 6)
+  companyRevenueUsd Decimal @default(0) @map("company_revenue_usd") @db.Decimal(10, 6)
+
   // Audit trail (NOT used for location - for comparison/fraud detection)
-  ipAddress             String?  @map("ip_address")
-  ipCountry             String?  @map("ip_country")  // Detected from IP
-  userAgent             String?  @map("user_agent")
-  
+  ipAddress String? @map("ip_address")
+  ipCountry String? @map("ip_country") // Detected from IP
+  userAgent String? @map("user_agent")
+
   // Location-based conversion tracking
-  poolId                Int?     @map("pool_id")
-  pool                  LocationRevenuePool? @relation(fields: [poolId], references: [id])
-  
+  poolId Int?                 @map("pool_id")
+  pool   LocationRevenuePool? @relation(fields: [poolId], references: [id])
+
   // Legacy conversion tracking
-  conversionBatchId     Int?     @map("conversion_batch_id")
-  converted             Boolean  @default(false)
-  
-  createdAt             DateTime @default(now()) @map("created_at")
-  viewedAt              DateTime @default(now()) @map("viewed_at")
-  
-  @@map("ad_views")
+  conversionBatchId Int?    @map("conversion_batch_id")
+  converted         Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  viewedAt  DateTime @default(now()) @map("viewed_at")
+
   @@index([userId])
   @@index([adId])
   @@index([converted])
   @@index([countryCode])
   @@index([poolId])
+  @@map("ad_views")
 }
 
 model Withdrawal {
-  id              String    @id @default(uuid())
-  userId          String    @map("user_id")
-  user            UserProfile @relation(fields: [userId], references: [userId])
-  coinsWithdrawn  Int?      @default(15000) @map("coins_withdrawn")
-  rateMultiplier  Decimal?  @db.Decimal(5, 2) @map("rate_multiplier")
-  amountUsd       Decimal   @db.Decimal(12, 4) @map("amount_usd")
-  amountLocal     Decimal?  @db.Decimal(12, 4) @map("amount_local")
-  currencyCode    String?   @map("currency_code")
-  exchangeRate    Decimal?  @db.Decimal(10, 6) @map("exchange_rate")
-  method          String
-  status          String
-  paypalEmail     String    @map("paypal_email")
-  paypalTransactionId String? @map("paypal_transaction_id")
-  transactionId   String?   @map("transaction_id")
-  requestedAt     DateTime  @default(now()) @map("requested_at")
-  processedAt     DateTime? @map("processed_at")
-  completedAt     DateTime? @map("completed_at")
-  failureReason   String?   @map("failure_reason")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  
-  @@map("withdrawals")
+  id                  String      @id @default(uuid())
+  userId              String      @map("user_id")
+  user                UserProfile @relation(fields: [userId], references: [userId])
+  coinsWithdrawn      Int?        @default(15000) @map("coins_withdrawn")
+  rateMultiplier      Decimal?    @map("rate_multiplier") @db.Decimal(5, 2)
+  amountUsd           Decimal     @map("amount_usd") @db.Decimal(12, 4)
+  amountLocal         Decimal?    @map("amount_local") @db.Decimal(12, 4)
+  currencyCode        String?     @map("currency_code")
+  exchangeRate        Decimal?    @map("exchange_rate") @db.Decimal(10, 6)
+  method              String
+  status              String
+  paypalEmail         String      @map("paypal_email")
+  paypalTransactionId String?     @map("paypal_transaction_id")
+  transactionId       String?     @map("transaction_id")
+  requestedAt         DateTime    @default(now()) @map("requested_at")
+  processedAt         DateTime?   @map("processed_at")
+  completedAt         DateTime?   @map("completed_at")
+  failureReason       String?     @map("failure_reason")
+  createdAt           DateTime    @default(now()) @map("created_at")
+
   @@index([userId])
   @@index([status])
+  @@map("withdrawals")
 }
 
 model Badge {
-  id           String   @id @default(uuid())
-  name         String   @unique
-  description  String
-  icon         String
-  requirement  Json
-  rewardCents  Int
-  
-  userBadges   UserBadge[]
-  
+  id          String @id @default(uuid())
+  name        String @unique
+  description String
+  icon        String
+  requirement Json
+  rewardCents Int
+
+  userBadges UserBadge[]
+
   @@map("badges")
 }
 
 model UserBadge {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  user      UserProfile @relation(fields: [userId], references: [userId])
-  badgeId   String   @map("badge_id")
-  badge     Badge    @relation(fields: [badgeId], references: [id])
-  earnedAt  DateTime @default(now()) @map("earned_at")
-  
-  @@map("user_badges")
+  id       String      @id @default(uuid())
+  userId   String      @map("user_id")
+  user     UserProfile @relation(fields: [userId], references: [userId])
+  badgeId  String      @map("badge_id")
+  badge    Badge       @relation(fields: [badgeId], references: [id])
+  earnedAt DateTime    @default(now()) @map("earned_at")
+
   @@unique([userId, badgeId])
+  @@map("user_badges")
 }
 
 model Transaction {
-  id                   Int      @id @default(autoincrement())
-  userId               String   @map("user_id")
-  user                 UserProfile @relation(fields: [userId], references: [userId])
-  type                 String
-  coinsChange          BigInt   @default(0) @map("coins_change")
-  cashChangeUsd        Decimal  @default(0.0000) @db.Decimal(12, 4) @map("cash_change_usd")
-  coinsBalanceAfter    BigInt?  @map("coins_balance_after")
-  cashBalanceAfterUsd  Decimal? @db.Decimal(12, 4) @map("cash_balance_after_usd")
-  description          String?
-  referenceId          Int?     @map("reference_id")
-  referenceType        String?  @map("reference_type")
-  createdAt            DateTime @default(now()) @map("created_at")
-  
-  @@map("transactions")
+  id                  Int         @id @default(autoincrement())
+  userId              String      @map("user_id")
+  user                UserProfile @relation(fields: [userId], references: [userId])
+  type                String
+  coinsChange         BigInt      @default(0) @map("coins_change")
+  cashChangeUsd       Decimal     @default(0.0000) @map("cash_change_usd") @db.Decimal(12, 4)
+  coinsBalanceAfter   BigInt?     @map("coins_balance_after")
+  cashBalanceAfterUsd Decimal?    @map("cash_balance_after_usd") @db.Decimal(12, 4)
+  description         String?
+  referenceId         Int?        @map("reference_id")
+  referenceType       String?     @map("reference_type")
+  createdAt           DateTime    @default(now()) @map("created_at")
+
   @@index([userId])
   @@index([type])
   @@index([createdAt])
+  @@map("transactions")
 }
 
 model CoinConversion {
-  id                    Int      @id @default(autoincrement())
-  conversionDate        DateTime @map("conversion_date") @db.Date
-  admobRevenueUsd       Decimal  @db.Decimal(12, 4) @map("admob_revenue_usd")
-  userRevenueShare      Decimal  @default(0.8500) @db.Decimal(5, 4) @map("user_revenue_share")
-  totalUserPayoutUsd    Decimal? @db.Decimal(12, 4) @map("total_user_payout_usd")
-  totalCoinsConverted   BigInt?  @map("total_coins_converted")
-  conversionRateUsdPerCoin Decimal? @db.Decimal(12, 8) @map("conversion_rate_usd_per_coin")
-  usersAffected         Int?     @map("users_affected")
-  status                String   @default("pending")
-  processedAt           DateTime? @map("processed_at")
-  notes                 String?
-  createdAt             DateTime @default(now()) @map("created_at")
-  
-  conversionDetails     ConversionDetail[]
-  
-  @@map("coin_conversions")
+  id                       Int       @id @default(autoincrement())
+  conversionDate           DateTime  @map("conversion_date") @db.Date
+  admobRevenueUsd          Decimal   @map("admob_revenue_usd") @db.Decimal(12, 4)
+  userRevenueShare         Decimal   @default(0.8500) @map("user_revenue_share") @db.Decimal(5, 4)
+  totalUserPayoutUsd       Decimal?  @map("total_user_payout_usd") @db.Decimal(12, 4)
+  totalCoinsConverted      BigInt?   @map("total_coins_converted")
+  conversionRateUsdPerCoin Decimal?  @map("conversion_rate_usd_per_coin") @db.Decimal(12, 8)
+  usersAffected            Int?      @map("users_affected")
+  status                   String    @default("pending")
+  processedAt              DateTime? @map("processed_at")
+  notes                    String?
+  createdAt                DateTime  @default(now()) @map("created_at")
+
+  conversionDetails ConversionDetail[]
+
   @@index([conversionDate])
   @@index([status])
+  @@map("coin_conversions")
 }
 
 model ConversionDetail {
-  id                    Int      @id @default(autoincrement())
-  conversionId          Int      @map("conversion_id")
-  conversion            CoinConversion @relation(fields: [conversionId], references: [id])
-  userId                String   @map("user_id")
-  user                  UserProfile @relation(fields: [userId], references: [userId])
-  coinsConverted        BigInt   @map("coins_converted")
-  cashReceivedUsd       Decimal  @db.Decimal(12, 4) @map("cash_received_usd")
-  conversionRateUsed    Decimal  @db.Decimal(12, 8) @map("conversion_rate_used")
-  createdAt             DateTime @default(now()) @map("created_at")
-  
-  @@map("conversion_details")
+  id                 Int            @id @default(autoincrement())
+  conversionId       Int            @map("conversion_id")
+  conversion         CoinConversion @relation(fields: [conversionId], references: [id])
+  userId             String         @map("user_id")
+  user               UserProfile    @relation(fields: [userId], references: [userId])
+  coinsConverted     BigInt         @map("coins_converted")
+  cashReceivedUsd    Decimal        @map("cash_received_usd") @db.Decimal(12, 4)
+  conversionRateUsed Decimal        @map("conversion_rate_used") @db.Decimal(12, 8)
+  createdAt          DateTime       @default(now()) @map("created_at")
+
   @@index([conversionId])
   @@index([userId])
+  @@map("conversion_details")
 }
 
 model ExchangeRate {
-  id              Int      @id @default(autoincrement())
-  baseCurrency    String   @default("USD") @map("base_currency")
-  targetCurrency  String   @map("target_currency")
-  rate            Decimal  @db.Decimal(10, 6)
-  date            DateTime @db.Date
-  createdAt       DateTime @default(now()) @map("created_at")
-  
-  @@map("exchange_rates")
+  id             Int      @id @default(autoincrement())
+  baseCurrency   String   @default("USD") @map("base_currency")
+  targetCurrency String   @map("target_currency")
+  rate           Decimal  @db.Decimal(10, 6)
+  date           DateTime @db.Date
+  createdAt      DateTime @default(now()) @map("created_at")
+
   @@unique([targetCurrency, date])
   @@index([targetCurrency])
   @@index([date])
+  @@map("exchange_rates")
 }
 
 model AdminAction {
-  id          Int      @id @default(autoincrement())
-  adminId     String   @map("admin_id")
-  admin       UserProfile @relation("AdminActions", fields: [adminId], references: [userId])
-  action      String   // "PROCESS_CONVERSION", "APPROVE_WITHDRAWAL", etc.
-  targetType  String?  @map("target_type")  // "USER", "CONVERSION", "WITHDRAWAL"
-  targetId    Int?     @map("target_id")
-  metadata    Json?    // Additional data about the action
-  ipAddress   String?  @map("ip_address")
-  createdAt   DateTime @default(now()) @map("created_at")
-  
-  @@map("admin_actions")
+  id         Int         @id @default(autoincrement())
+  adminId    String      @map("admin_id")
+  admin      UserProfile @relation("AdminActions", fields: [adminId], references: [userId])
+  action     String // "PROCESS_CONVERSION", "APPROVE_WITHDRAWAL", etc.
+  targetType String?     @map("target_type") // "USER", "CONVERSION", "WITHDRAWAL"
+  targetId   Int?        @map("target_id")
+  metadata   Json? // Additional data about the action
+  ipAddress  String?     @map("ip_address")
+  createdAt  DateTime    @default(now()) @map("created_at")
+
   @@index([adminId])
   @@index([action])
   @@index([createdAt])
+  @@map("admin_actions")
 }
 
 model LocationRevenuePool {
-  id                  Int      @id @default(autoincrement())
-  countryCode         String   @map("country_code")  // 'US', 'ZA', 'GB', etc.
-  month               DateTime @db.Date
-  admobRevenueUsd     Decimal  @db.Decimal(12, 4) @map("admob_revenue_usd")  // From AdMob dashboard (truth)
-  totalVideosWatched  Int      @default(0) @map("total_videos_watched")
-  totalCoinsIssued    BigInt   @default(0) @map("total_coins_issued")
-  userShareUsd        Decimal  @db.Decimal(12, 4) @map("user_share_usd")  // 85% of admobRevenueUsd
-  conversionRate      Decimal  @db.Decimal(12, 8) @map("conversion_rate")  // userShareUsd / totalCoinsIssued
-  status              String   @default("pending")  // 'pending', 'processing', 'completed'
-  processedAt         DateTime? @map("processed_at")
-  createdAt           DateTime @default(now()) @map("created_at")
-  
-  conversions         LocationConversion[]
-  adViews             AdView[]
-  
-  @@map("location_revenue_pools")
+  id                 Int       @id @default(autoincrement())
+  countryCode        String    @map("country_code") // 'US', 'ZA', 'GB', etc.
+  month              DateTime  @db.Date
+  admobRevenueUsd    Decimal   @map("admob_revenue_usd") @db.Decimal(12, 4) // From AdMob dashboard (truth)
+  totalVideosWatched Int       @default(0) @map("total_videos_watched")
+  totalCoinsIssued   BigInt    @default(0) @map("total_coins_issued")
+  userShareUsd       Decimal   @map("user_share_usd") @db.Decimal(12, 4) // 85% of admobRevenueUsd
+  conversionRate     Decimal   @map("conversion_rate") @db.Decimal(12, 8) // userShareUsd / totalCoinsIssued
+  status             String    @default("pending") // 'pending', 'processing', 'completed'
+  processedAt        DateTime? @map("processed_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+
+  conversions LocationConversion[]
+  adViews     AdView[]
+
   @@unique([countryCode, month])
   @@index([countryCode])
   @@index([month])
   @@index([status])
+  @@map("location_revenue_pools")
 }
 
 model LocationConversion {
-  id                Int      @id @default(autoincrement())
-  poolId            Int      @map("pool_id")
-  pool              LocationRevenuePool @relation(fields: [poolId], references: [id])
-  userId            String   @map("user_id")
-  user              UserProfile @relation(fields: [userId], references: [userId])
-  coinsConverted    BigInt   @map("coins_converted")
-  cashReceivedUsd   Decimal  @db.Decimal(12, 4) @map("cash_received_usd")
-  conversionRate    Decimal  @db.Decimal(12, 8) @map("conversion_rate")
-  createdAt         DateTime @default(now()) @map("created_at")
-  
-  @@map("location_conversions")
+  id              Int                 @id @default(autoincrement())
+  poolId          Int                 @map("pool_id")
+  pool            LocationRevenuePool @relation(fields: [poolId], references: [id])
+  userId          String              @map("user_id")
+  user            UserProfile         @relation(fields: [userId], references: [userId])
+  coinsConverted  BigInt              @map("coins_converted")
+  cashReceivedUsd Decimal             @map("cash_received_usd") @db.Decimal(12, 4)
+  conversionRate  Decimal             @map("conversion_rate") @db.Decimal(12, 8)
+  createdAt       DateTime            @default(now()) @map("created_at")
+
   @@index([poolId])
   @@index([userId])
+  @@map("location_conversions")
 }
 
 model AdImpression {
-  id                String   @id @default(uuid())
-  userId            String   @map("user_id")
+  id                String      @id @default(uuid())
+  userId            String      @map("user_id")
   user              UserProfile @relation(fields: [userId], references: [userId])
-  adType            String   @map("ad_type")  // 'rewarded', 'interstitial', 'banner'
-  adUnitId          String   @map("ad_unit_id")
-  revenueUsd        Decimal  @default(0) @db.Decimal(12, 4) @map("revenue_usd")
-  userEarningsUsd   Decimal  @default(0) @db.Decimal(12, 4) @map("user_earnings_usd")
-  companyRevenueUsd Decimal  @default(0) @db.Decimal(12, 4) @map("company_revenue_usd")
+  adType            String      @map("ad_type") // 'rewarded', 'interstitial', 'banner'
+  adUnitId          String      @map("ad_unit_id")
+  revenueUsd        Decimal     @default(0) @map("revenue_usd") @db.Decimal(12, 4)
+  userEarningsUsd   Decimal     @default(0) @map("user_earnings_usd") @db.Decimal(12, 4)
+  companyRevenueUsd Decimal     @default(0) @map("company_revenue_usd") @db.Decimal(12, 4)
   country           String
   currency          String
-  impressionDate    DateTime @default(now()) @map("impression_date")
-  
-  @@map("ad_impressions")
+  impressionDate    DateTime    @default(now()) @map("impression_date")
+
   @@index([userId])
   @@index([adType])
   @@index([impressionDate])
+  @@map("ad_impressions")
 }
 
 model ExpiredBalance {
-  id              Int      @id @default(autoincrement())
-  userId          String   @map("user_id")
-  user            UserProfile @relation(fields: [userId], references: [userId])
-  expiryType      String   @map("expiry_type")  // 'coins' or 'cash'
-  amount          Decimal  @db.Decimal(12, 4)   // Amount expired (coins or cash)
-  cashValue       Decimal  @db.Decimal(12, 4) @map("cash_value")  // Equivalent ZAR/USD value
-  reason          String   // 'coin_inactivity', 'cash_inactivity'
-  expiredAt       DateTime @default(now()) @map("expired_at")
-  
-  @@map("expired_balances")
+  id         Int         @id @default(autoincrement())
+  userId     String      @map("user_id")
+  user       UserProfile @relation(fields: [userId], references: [userId])
+  expiryType String      @map("expiry_type") // 'coins' or 'cash'
+  amount     Decimal     @db.Decimal(12, 4) // Amount expired (coins or cash)
+  cashValue  Decimal     @map("cash_value") @db.Decimal(12, 4) // Equivalent ZAR/USD value
+  reason     String // 'coin_inactivity', 'cash_inactivity'
+  expiredAt  DateTime    @default(now()) @map("expired_at")
+
   @@index([userId])
   @@index([expiredAt])
   @@index([expiryType])
+  @@map("expired_balances")
 }
 
 model CoinValuation {
-  id              Int      @id @default(autoincrement())
-  countryCode     String   @map("country_code")
-  valuePer100Coins Decimal @db.Decimal(10, 4) @map("value_per_100_coins")
-  currencyCode    String   @map("currency_code")
-  calculatedAt    DateTime @default(now()) @map("calculated_at")
-  
-  @@map("coin_valuations")
+  id               Int      @id @default(autoincrement())
+  countryCode      String   @map("country_code")
+  valuePer100Coins Decimal  @map("value_per_100_coins") @db.Decimal(10, 4)
+  currencyCode     String   @map("currency_code")
+  calculatedAt     DateTime @default(now()) @map("calculated_at")
+
   @@unique([countryCode, calculatedAt])
   @@index([countryCode])
+  @@map("coin_valuations")
 }
 
 model GameSession {
-  id              String   @id @default(uuid())
-  userId          String   @map("user_id")
-  user            UserProfile @relation(fields: [userId], references: [userId])
-  gameType        String   @default("bubble_shooter") @map("game_type")
-  score           Int      @default(0)
-  livesUsed       Int      @default(1) @map("lives_used")
-  retriesWithVideo Int     @default(0) @map("retries_with_video")
-  retriesWithWait Int      @default(0) @map("retries_with_wait")
-  coinsEarned     Int      @default(0) @map("coins_earned")
-  lastGameOverAt  DateTime? @map("last_game_over_at")
-  completedAt     DateTime? @map("completed_at")
-  createdAt       DateTime @default(now()) @map("created_at")
-  
-  @@map("game_sessions")
+  id               String      @id @default(uuid())
+  userId           String      @map("user_id")
+  user             UserProfile @relation(fields: [userId], references: [userId])
+  gameType         String      @default("bubble_shooter") @map("game_type")
+  score            Int         @default(0)
+  livesUsed        Int         @default(1) @map("lives_used")
+  retriesWithVideo Int         @default(0) @map("retries_with_video")
+  retriesWithWait  Int         @default(0) @map("retries_with_wait")
+  coinsEarned      Int         @default(0) @map("coins_earned")
+  lastGameOverAt   DateTime?   @map("last_game_over_at")
+  completedAt      DateTime?   @map("completed_at")
+  createdAt        DateTime    @default(now()) @map("created_at")
+
   @@index([userId])
   @@index([createdAt])
+  @@map("game_sessions")
 }
 
 model Referral {
-  id                String   @id @default(uuid())
-  referrerId        String   @map("referrer_id")
-  referrer          UserProfile @relation("Referrer", fields: [referrerId], references: [userId])
-  refereeId         String   @map("referee_id")
-  referee           UserProfile @relation("Referee", fields: [refereeId], references: [userId])
-  referralCode      String   @unique @map("referral_code")
-  status            String   @default("pending")
-  qualifiedAt       DateTime? @map("qualified_at")
-  paidAt            DateTime? @map("paid_at")
-  bonusCoins        Int      @default(1000) @map("bonus_coins")
-  bonusValueZar     Decimal  @default(10.00) @db.Decimal(10, 4) @map("bonus_value_zar")
-  createdAt         DateTime @default(now()) @map("created_at")
-  
-  @@map("referrals")
+  id            String      @id @default(uuid())
+  referrerId    String      @map("referrer_id")
+  referrer      UserProfile @relation("Referrer", fields: [referrerId], references: [userId])
+  refereeId     String      @map("referee_id")
+  referee       UserProfile @relation("Referee", fields: [refereeId], references: [userId])
+  referralCode  String      @unique @map("referral_code")
+  status        String      @default("pending")
+  qualifiedAt   DateTime?   @map("qualified_at")
+  paidAt        DateTime?   @map("paid_at")
+  bonusCoins    Int         @default(1000) @map("bonus_coins")
+  bonusValueZar Decimal     @default(10.00) @map("bonus_value_zar") @db.Decimal(10, 4)
+  createdAt     DateTime    @default(now()) @map("created_at")
+
   @@index([referrerId])
   @@index([refereeId])
   @@index([status])
+  @@map("referrals")
 }
 
 model SignupBonus {
-  id              Int      @id @default(autoincrement())
-  userId          String   @unique @map("user_id")
-  user            UserProfile @relation(fields: [userId], references: [userId])
-  countryCode     String   @map("country_code")
-  userNumberInRegion Int   @map("user_number_in_region")
-  bonusCoins      Int      @default(500) @map("bonus_coins")
-  bonusValueZar   Decimal  @default(50.00) @db.Decimal(10, 4) @map("bonus_value_zar")
-  eligible        Boolean  @default(true)
-  creditedAt      DateTime? @map("credited_at")
-  createdAt       DateTime @default(now()) @map("created_at")
-  
-  @@map("signup_bonuses")
+  id                 Int         @id @default(autoincrement())
+  userId             String      @unique @map("user_id")
+  user               UserProfile @relation(fields: [userId], references: [userId])
+  countryCode        String      @map("country_code")
+  userNumberInRegion Int         @map("user_number_in_region")
+  bonusCoins         Int         @default(500) @map("bonus_coins")
+  bonusValueZar      Decimal     @default(50.00) @map("bonus_value_zar") @db.Decimal(10, 4)
+  eligible           Boolean     @default(true)
+  creditedAt         DateTime?   @map("credited_at")
+  createdAt          DateTime    @default(now()) @map("created_at")
+
   @@index([countryCode])
   @@index([eligible])
+  @@map("signup_bonuses")
 }
 
 model Notification {
-  id          Int      @id @default(autoincrement())
-  event       NotificationEvent
-  data        Json
-  sentTo      String[] @map("sent_to")
-  sentAt      DateTime @default(now()) @map("sent_at")
-  
-  @@map("notifications")
+  id     Int               @id @default(autoincrement())
+  event  NotificationEvent
+  data   Json
+  sentTo String[]          @map("sent_to")
+  sentAt DateTime          @default(now()) @map("sent_at")
+
   @@index([event])
   @@index([sentAt])
+  @@map("notifications")
 }

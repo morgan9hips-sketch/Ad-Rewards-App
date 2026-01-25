@@ -11,6 +11,7 @@ import CoinValuationTicker from '../components/CoinValuationTicker'
 import RecentWithdrawals from '../components/RecentWithdrawals'
 import PlatformStats from '../components/PlatformStats'
 import SignupBonusBadge from '../components/SignupBonusBadge'
+import TermsAcceptanceModal from '../components/TermsAcceptanceModal'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 
@@ -38,6 +39,7 @@ interface UserProfile {
   tier: string
   displayName: string | null
   profileSetupCompleted: boolean
+  acceptedTermsAt: string | null
   createdAt: string
 }
 
@@ -49,6 +51,7 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [showProfileSetup, setShowProfileSetup] = useState(false)
+  const [showTermsModal, setShowTermsModal] = useState(false)
 
   useEffect(() => {
     fetchDashboardData()
@@ -79,6 +82,11 @@ export default function Dashboard() {
         // Show profile setup if not completed
         if (!profileData.profileSetupCompleted) {
           setShowProfileSetup(true)
+        }
+
+        // Show terms acceptance modal if not accepted
+        if (!profileData.acceptedTermsAt) {
+          setShowTermsModal(true)
         }
       }
 
@@ -138,6 +146,31 @@ export default function Dashboard() {
     fetchDashboardData()
   }
 
+  const handleTermsAccept = async () => {
+    try {
+      const token = session?.access_token
+      if (!token) return
+
+      const response = await fetch(`${API_BASE_URL}/api/user/accept-terms`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        setShowTermsModal(false)
+        // Refresh profile data
+        fetchDashboardData()
+      } else {
+        console.error('Failed to accept terms')
+      }
+    } catch (error) {
+      console.error('Error accepting terms:', error)
+    }
+  }
+
   const earningsData = [
     { date: 'Mon', amount: 2.5 },
     { date: 'Tue', amount: 3.2 },
@@ -158,6 +191,9 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
+      {/* Terms Acceptance Modal */}
+      {showTermsModal && <TermsAcceptanceModal onAccept={handleTermsAccept} />}
+
       {/* Profile Setup Modal */}
       {showProfileSetup && (
         <ProfileSetup onComplete={handleProfileSetupComplete} />

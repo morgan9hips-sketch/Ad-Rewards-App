@@ -1,0 +1,7 @@
+# app-ads.txt for Adify
+# Required for AdMob verification
+
+google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+
+# Replace pub-XXXXXXXXXXXXXXXX with actual AdMob Publisher ID
+# Find your Publisher ID: AdMob Console → Account → Settings → Account Information → Publisher ID

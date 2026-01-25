@@ -47,8 +47,8 @@ export default function CookieConsent() {
             </p>
             <p className="text-xs text-gray-400">
               By continuing to use this site, you agree to our use of cookies. Learn more in our{' '}
-              <Link to="/privacy" className="text-blue-400 hover:text-blue-300 underline">
-                Privacy Policy
+              <Link to="/legal/cookies" className="text-blue-400 hover:text-blue-300 underline">
+                Cookie Policy
               </Link>
               .
             </p>

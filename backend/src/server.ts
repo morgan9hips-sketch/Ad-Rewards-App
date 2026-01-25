@@ -19,6 +19,7 @@ import gameRoutes from './routes/game.js'
 import referralsRoutes from './routes/referrals.js'
 import coinValuationRoutes from './routes/coinValuation.js'
 import platformRoutes from './routes/platform.js'
+import legalRoutes from './routes/legal.js'
 
 dotenv.config()
 
@@ -52,6 +53,8 @@ app.use('/leaderboard', leaderboardRoutes)
 app.use('/api/leaderboard', leaderboardRoutes)
 app.use('/subscriptions/webhook', subscriptionsRoutes) // Webhook should be public
 app.use('/api/subscriptions/webhook', subscriptionsRoutes) // Webhook should be public
+app.use('/legal', legalRoutes) // Legal documents are public
+app.use('/api/legal', legalRoutes) // Legal documents are public
 
 // Protected routes
 app.use('/user', authenticate, userRoutes)
