@@ -37,6 +37,15 @@ import Transactions from './pages/Transactions'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 
+// Legal Pages
+import Terms from './pages/legal/Terms'
+import Privacy from './pages/legal/Privacy'
+import Cookies from './pages/legal/Cookies'
+import AdMob from './pages/legal/AdMob'
+
+// Components
+import Footer from './components/Footer'
+
 function ProtectedRoute({
   children,
   requireAdmin = false,
@@ -108,6 +117,12 @@ function AppContent() {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        
+        {/* New Legal Pages */}
+        <Route path="/legal/terms" element={<Terms />} />
+        <Route path="/legal/privacy" element={<Privacy />} />
+        <Route path="/legal/cookies" element={<Cookies />} />
+        <Route path="/legal/admob" element={<AdMob />} />
 
         <Route
           path="/dashboard"
@@ -237,6 +252,7 @@ function AppContent() {
           <BottomNavigation />
         </>
       )}
+      <Footer />
       <CookieConsent />
     </div>
   )

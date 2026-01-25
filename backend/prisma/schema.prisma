@@ -95,6 +95,9 @@ model UserProfile {
   // Activity tracking for balance expiry
   lastLogin              DateTime @default(now()) @map("last_login")
   
+  // Legal compliance
+  acceptedTermsAt        DateTime? @map("accepted_terms_at")
+  
   // Referral system
   referralCode           String?  @unique @map("referral_code")
   referredBy             String?  @map("referred_by")

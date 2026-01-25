@@ -370,4 +370,27 @@ router.get('/signup-bonus', async (req: AuthRequest, res) => {
   }
 })
 
+// Accept terms and conditions
+router.post('/accept-terms', async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id
+
+    // Update user profile with terms acceptance timestamp
+    const profile = await prisma.userProfile.update({
+      where: { userId },
+      data: {
+        acceptedTermsAt: new Date(),
+      },
+    })
+
+    res.json({
+      success: true,
+      acceptedAt: profile.acceptedTermsAt,
+    })
+  } catch (error) {
+    console.error('Error accepting terms:', error)
+    res.status(500).json({ error: 'Failed to record terms acceptance' })
+  }
+})
+
 export default router
