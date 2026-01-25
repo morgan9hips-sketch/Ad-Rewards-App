@@ -13,6 +13,25 @@ enum UserRole {
   SUPER_ADMIN
 }
 
+enum AdType {
+  OPT_IN_REWARDED
+  RETRY_REWARDED
+  FORCED_INTERSTITIAL
+  BANNER
+}
+
+enum NotificationEvent {
+  WITHDRAWAL_REQUESTED
+  ADMOB_REVENUE_RECEIVED
+  USER_REACHED_MIN_THRESHOLD
+  SIGNUP_BONUS_TRIGGERED
+  REFERRAL_QUALIFIED
+  COIN_EXPIRY
+  CASH_EXPIRY
+  ELITE_SUBSCRIPTION_PURCHASED
+  ELITE_SUBSCRIPTION_CANCELLED
+}
+
 model UserProfile {
   id                     String   @id @default(uuid())
   userId                 String   @unique
@@ -76,6 +95,10 @@ model UserProfile {
   // Activity tracking for balance expiry
   lastLogin              DateTime @default(now()) @map("last_login")
   
+  // Referral system
+  referralCode           String?  @unique @map("referral_code")
+  referredBy             String?  @map("referred_by")
+  
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
   
@@ -88,6 +111,10 @@ model UserProfile {
   adminActions           AdminAction[] @relation("AdminActions")
   adImpressions          AdImpression[]
   expiredBalances        ExpiredBalance[]
+  referralsGiven         Referral[] @relation("Referrer")
+  referralsReceived      Referral[] @relation("Referee")
+  signupBonus            SignupBonus?
+  gameSessions           GameSession[]
   
   @@map("user_profiles")
   @@index([totalCoinsEarned(sort: Desc), showOnLeaderboard])
@@ -129,6 +156,16 @@ model AdView {
   countryCode           String?  @map("country_code")  // From AdMob SDK
   estimatedEarningsUsd  Decimal? @db.Decimal(12, 6) @map("estimated_earnings_usd")  // AdMob's estimate
   admobCurrency         String?  @map("admob_currency")
+  
+  // Ad type tracking for revenue split
+  adType                AdType?  @map("ad_type")
+  userRevenueShare      Decimal  @default(0.8500) @db.Decimal(5, 4) @map("user_revenue_share")
+  coinsAwarded          Int      @default(0) @map("coins_awarded")
+  
+  // Backend revenue tracking
+  revenueUsd            Decimal  @default(0) @db.Decimal(10, 6) @map("revenue_usd")
+  userEarningsUsd       Decimal  @default(0) @db.Decimal(10, 6) @map("user_earnings_usd")
+  companyRevenueUsd     Decimal  @default(0) @db.Decimal(10, 6) @map("company_revenue_usd")
   
   // Audit trail (NOT used for location - for comparison/fraud detection)
   ipAddress             String?  @map("ip_address")
@@ -363,4 +400,84 @@ model ExpiredBalance {
   @@index([userId])
   @@index([expiredAt])
   @@index([expiryType])
+}
+
+model CoinValuation {
+  id              Int      @id @default(autoincrement())
+  countryCode     String   @map("country_code")
+  valuePer100Coins Decimal @db.Decimal(10, 4) @map("value_per_100_coins")
+  currencyCode    String   @map("currency_code")
+  calculatedAt    DateTime @default(now()) @map("calculated_at")
+  
+  @@map("coin_valuations")
+  @@unique([countryCode, calculatedAt])
+  @@index([countryCode])
+}
+
+model GameSession {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  user            UserProfile @relation(fields: [userId], references: [userId])
+  gameType        String   @default("bubble_shooter") @map("game_type")
+  score           Int      @default(0)
+  livesUsed       Int      @default(1) @map("lives_used")
+  retriesWithVideo Int     @default(0) @map("retries_with_video")
+  retriesWithWait Int      @default(0) @map("retries_with_wait")
+  coinsEarned     Int      @default(0) @map("coins_earned")
+  lastGameOverAt  DateTime? @map("last_game_over_at")
+  completedAt     DateTime? @map("completed_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  @@map("game_sessions")
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Referral {
+  id                String   @id @default(uuid())
+  referrerId        String   @map("referrer_id")
+  referrer          UserProfile @relation("Referrer", fields: [referrerId], references: [userId])
+  refereeId         String   @map("referee_id")
+  referee           UserProfile @relation("Referee", fields: [refereeId], references: [userId])
+  referralCode      String   @unique @map("referral_code")
+  status            String   @default("pending")
+  qualifiedAt       DateTime? @map("qualified_at")
+  paidAt            DateTime? @map("paid_at")
+  bonusCoins        Int      @default(1000) @map("bonus_coins")
+  bonusValueZar     Decimal  @default(10.00) @db.Decimal(10, 4) @map("bonus_value_zar")
+  createdAt         DateTime @default(now()) @map("created_at")
+  
+  @@map("referrals")
+  @@index([referrerId])
+  @@index([refereeId])
+  @@index([status])
+}
+
+model SignupBonus {
+  id              Int      @id @default(autoincrement())
+  userId          String   @unique @map("user_id")
+  user            UserProfile @relation(fields: [userId], references: [userId])
+  countryCode     String   @map("country_code")
+  userNumberInRegion Int   @map("user_number_in_region")
+  bonusCoins      Int      @default(500) @map("bonus_coins")
+  bonusValueZar   Decimal  @default(50.00) @db.Decimal(10, 4) @map("bonus_value_zar")
+  eligible        Boolean  @default(true)
+  creditedAt      DateTime? @map("credited_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  @@map("signup_bonuses")
+  @@index([countryCode])
+  @@index([eligible])
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  event       NotificationEvent
+  data        Json
+  sentTo      String[] @map("sent_to")
+  sentAt      DateTime @default(now()) @map("sent_at")
+  
+  @@map("notifications")
+  @@index([event])
+  @@index([sentAt])
 }

@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import { authenticate } from './middleware/auth.js'
 import { scheduleExpiryJob } from './jobs/expireBalances.js'
+import { scheduleCoinValuationJob } from './jobs/updateCoinValuations.js'
 
 // Import routes
 import userRoutes from './routes/user.js'
@@ -14,6 +15,9 @@ import adminRoutes from './routes/admin.js'
 import videosRoutes from './routes/videos.js'
 import subscriptionsRoutes from './routes/subscriptions.js'
 import payoutsRoutes from './routes/payouts.js'
+import gameRoutes from './routes/game.js'
+import referralsRoutes from './routes/referrals.js'
+import coinValuationRoutes from './routes/coinValuation.js'
 
 dotenv.config()
 
@@ -65,6 +69,12 @@ app.use('/subscriptions', authenticate, subscriptionsRoutes)
 app.use('/api/subscriptions', authenticate, subscriptionsRoutes)
 app.use('/payouts', authenticate, payoutsRoutes)
 app.use('/api/payouts', authenticate, payoutsRoutes)
+app.use('/game', authenticate, gameRoutes)
+app.use('/api/game', authenticate, gameRoutes)
+app.use('/referrals', authenticate, referralsRoutes)
+app.use('/api/referrals', authenticate, referralsRoutes)
+app.use('/coin-valuation', authenticate, coinValuationRoutes)
+app.use('/api/coin-valuation', authenticate, coinValuationRoutes)
 
 // Error handler
 app.use(
@@ -91,6 +101,9 @@ if (process.env.VERCEL !== '1') {
     // NOTE: This will not run in Vercel's serverless environment
     // For Vercel, you'll need to create a separate Vercel Cron Job endpoint
     scheduleExpiryJob()
+    
+    // Start coin valuation update job (every 6 hours)
+    scheduleCoinValuationJob()
   })
 }
 

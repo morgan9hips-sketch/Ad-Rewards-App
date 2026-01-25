@@ -13,29 +13,27 @@ const prisma = new PrismaClient()
 
 /**
  * POST /api/subscriptions/create
- * Create a new subscription
+ * Create a new subscription (Elite tier only)
  */
 router.post('/create', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
-    const { tier } = req.body // 'Silver' or 'Gold'
+    const { tier } = req.body // 'Elite'
 
-    if (!['Silver', 'Gold'].includes(tier)) {
+    if (tier !== 'Elite') {
       return res.status(400).json({
         success: false,
-        error: 'Invalid tier. Must be Silver or Gold.',
+        error: 'Invalid tier. Only Elite subscription is available.',
       })
     }
 
-    // Get the plan ID from environment
-    const planId = tier === 'Silver' 
-      ? process.env.PAYPAL_SILVER_PLAN_ID 
-      : process.env.PAYPAL_GOLD_PLAN_ID
+    // Get the Elite plan ID from environment
+    const planId = process.env.PAYPAL_ELITE_PLAN_ID
 
     if (!planId) {
       return res.status(500).json({
         success: false,
-        error: `${tier} plan not configured. Please contact support.`,
+        error: 'Elite plan not configured. Please contact support.',
       })
     }
 
@@ -56,7 +54,7 @@ router.post('/create', async (req: AuthRequest, res) => {
       success: true,
       subscriptionId,
       approvalUrl,
-      message: 'Subscription created. Please complete payment.',
+      message: 'Elite subscription created. Please complete payment.',
     })
   } catch (error: any) {
     console.error('Error creating subscription:', error)

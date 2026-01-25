@@ -2,11 +2,14 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-// Tier-based video limits
+// Tier-based video limits - All users get 20 videos per day
 export const VIDEO_LIMITS = {
-  Bronze: 30,
-  Silver: 30,
-  Gold: 40,
+  Free: 20,
+  Elite: 20,
+  // Legacy tiers (for backward compatibility during migration)
+  Bronze: 20,
+  Silver: 20,
+  Gold: 20,
 }
 
 // Free tier interstitial settings
