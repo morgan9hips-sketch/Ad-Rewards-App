@@ -18,10 +18,26 @@ router.post('/request', async (req: AuthRequest, res) => {
     // Get user profile
     const profile = await prisma.userProfile.findUnique({
       where: { userId },
+      select: {
+        coinsBalance: true,
+        cashBalanceUsd: true,
+        preferredCurrency: true,
+      },
     })
 
     if (!profile) {
       return res.status(404).json({ error: 'Profile not found' })
+    }
+
+    // Check minimum coins (15,000)
+    const coinsBalance = Number(profile.coinsBalance)
+    const MIN_COINS = 15000
+
+    if (coinsBalance < MIN_COINS) {
+      return res.status(400).json({
+        error: `Minimum withdrawal is ${MIN_COINS.toLocaleString()} coins`,
+        currentBalance: coinsBalance,
+      })
     }
 
     // Get user's cash balance in USD
@@ -45,12 +61,19 @@ router.post('/request', async (req: AuthRequest, res) => {
     const exchangeRate = await getExchangeRate(currency)
     const amountLocal = await convertFromUSD(cashBalanceUsd, currency)
 
+    // Calculate rate multiplier
+    const baselineValue = 1.0 // R1 per 100 coins at 1.0x
+    const valuePer100Coins = (amountLocal / coinsBalance) * 100
+    const rateMultiplier = valuePer100Coins / baselineValue
+
     // Create withdrawal within transaction
     const withdrawal = await prisma.$transaction(async (tx) => {
-      // Create withdrawal record
+      // Create withdrawal record with coins and rate
       const newWithdrawal = await tx.withdrawal.create({
         data: {
           userId,
+          coinsWithdrawn: coinsBalance,
+          rateMultiplier: rateMultiplier,
           amountUsd: cashBalanceUsd,
           amountLocal: amountLocal,
           currencyCode: currency,
@@ -70,9 +93,11 @@ router.post('/request', async (req: AuthRequest, res) => {
     res.json({
       success: true,
       withdrawalId: withdrawal.id,
+      coinsWithdrawn: coinsBalance,
       amountUSD: cashBalanceUsd.toFixed(2),
       amountLocal: amountLocal.toFixed(2),
       currency,
+      rateMultiplier: Number(rateMultiplier.toFixed(2)),
       status: 'pending',
       message: 'Withdrawal request submitted successfully',
     })

@@ -195,6 +195,8 @@ model Withdrawal {
   id              String    @id @default(uuid())
   userId          String    @map("user_id")
   user            UserProfile @relation(fields: [userId], references: [userId])
+  coinsWithdrawn  Int?      @default(15000) @map("coins_withdrawn")
+  rateMultiplier  Decimal?  @db.Decimal(5, 2) @map("rate_multiplier")
   amountUsd       Decimal   @db.Decimal(12, 4) @map("amount_usd")
   amountLocal     Decimal?  @db.Decimal(12, 4) @map("amount_local")
   currencyCode    String?   @map("currency_code")

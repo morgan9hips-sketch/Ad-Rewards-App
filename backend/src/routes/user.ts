@@ -99,6 +99,10 @@ router.get('/profile', async (req: AuthRequest, res) => {
           preferredCurrency: currency || 'ZAR', // Default to ZAR
         },
       })
+
+      // NEW: Check signup bonus eligibility for new users
+      const { checkSignupBonusEligibility } = await import('../services/signupBonusService.js')
+      await checkSignupBonusEligibility(userId, countryCode || 'ZA')
     } else {
       // Update lastLogin
       await prisma.userProfile.update({

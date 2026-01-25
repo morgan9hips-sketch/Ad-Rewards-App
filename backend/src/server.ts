@@ -50,6 +50,8 @@ app.get('/health', (req, res) => {
 // Public routes
 app.use('/leaderboard', leaderboardRoutes)
 app.use('/api/leaderboard', leaderboardRoutes)
+app.use('/api/withdrawals/recent-public', withdrawalRoutes)
+app.use('/api/referrals/lookup', referralsRoutes)
 app.use('/subscriptions/webhook', subscriptionsRoutes) // Webhook should be public
 app.use('/api/subscriptions/webhook', subscriptionsRoutes) // Webhook should be public
 

@@ -224,6 +224,43 @@ router.get('/info/:code', async (req: AuthRequest, res) => {
 })
 
 /**
+ * GET /api/referrals/lookup/:code
+ * Get referrer display name by referral code
+ * PUBLIC endpoint (no auth required)
+ */
+router.get('/lookup/:code', async (req, res) => {
+  try {
+    const { code } = req.params
+
+    const profile = await prisma.userProfile.findUnique({
+      where: { referralCode: code },
+      select: {
+        displayName: true,
+        email: true,
+      },
+    })
+
+    if (!profile) {
+      return res.status(404).json({
+        success: false,
+        error: 'Invalid referral code',
+      })
+    }
+
+    res.json({
+      success: true,
+      displayName: profile.displayName || profile.email.split('@')[0],
+    })
+  } catch (error: any) {
+    console.error('Error looking up referral code:', error)
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    })
+  }
+})
+
+/**
  * Check if user qualifies for referral bonus
  * Called automatically when user reaches threshold
  */
