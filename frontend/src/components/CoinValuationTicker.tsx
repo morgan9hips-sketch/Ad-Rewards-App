@@ -18,8 +18,8 @@ export default function CoinValuationTicker() {
 
   useEffect(() => {
     fetchValuation()
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchValuation, 30000)
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchValuation, 60000)
     return () => clearInterval(interval)
   }, [session])
 
@@ -34,7 +34,15 @@ export default function CoinValuationTicker() {
 
       if (res.ok) {
         const data = await res.json()
-        setValuation(data)
+        // API returns fields directly, not nested
+        setValuation({
+          valuePer100Coins: data.valuePer100Coins,
+          currencyCode: data.currencyCode,
+          currencySymbol: data.currencySymbol,
+          trend: data.trend,
+          changePercent: data.changePercent,
+          lastUpdated: data.lastUpdated,
+        })
       }
     } catch (error) {
       console.error('Error fetching coin valuation:', error)
@@ -51,62 +59,49 @@ export default function CoinValuationTicker() {
   const baselineValue = 1.0 // R1 per 100 coins at 1.0x
   const multiplier = valuation.valuePer100Coins / baselineValue
 
-  const getMultiplierDisplay = () => {
-    if (multiplier > 1.0) {
-      return {
-        emoji: '🔥',
-        color: 'text-green-500',
-        bgColor: 'from-green-50 to-green-100',
-        borderColor: 'border-green-200',
-        title: 'Regional Performance',
-        message: `Ad revenue is ${((multiplier - 1) * 100).toFixed(0)}% above average!`,
-      }
-    } else if (multiplier < 1.0) {
-      return {
-        emoji: '⚠️',
-        color: 'text-yellow-500',
-        bgColor: 'from-yellow-50 to-yellow-100',
-        borderColor: 'border-yellow-200',
-        title: 'Regional Performance',
-        message: `Ad revenue is ${((1 - multiplier) * 100).toFixed(0)}% below average`,
-      }
+  const getColorClass = (): string => {
+    if (multiplier >= 1.05) return 'from-green-600 to-green-700'
+    if (multiplier <= 0.95) return 'from-yellow-600 to-yellow-700'
+    return 'from-blue-600 to-blue-700'
+  }
+
+  const getEmoji = (): string => {
+    if (multiplier >= 1.05) return '🔥'
+    if (multiplier <= 0.95) return '⚠️'
+    return '⚡'
+  }
+
+  const getMessage = (): string => {
+    if (multiplier >= 1.05) {
+      const percent = ((multiplier - 1) * 100).toFixed(0)
+      return `Regional ad revenue is ${percent}% above average!`
+    } else if (multiplier <= 0.95) {
+      const percent = ((1 - multiplier) * 100).toFixed(0)
+      return `Regional ad revenue is ${percent}% below average this month`
     } else {
-      return {
-        emoji: '⚡',
-        color: 'text-gray-500',
-        bgColor: 'from-gray-50 to-gray-100',
-        borderColor: 'border-gray-200',
-        title: 'Regional Performance',
-        message: 'Stable',
-      }
+      return 'Stable regional ad performance'
     }
   }
 
-  const display = getMultiplierDisplay()
-
   return (
-    <div className={`bg-gradient-to-r ${display.bgColor} border ${display.borderColor} rounded-lg p-4 mb-6 animate-pulse-subtle`}>
+    <div className={`bg-gradient-to-r ${getColorClass()} rounded-lg p-4 mb-4 shadow-lg border-2 border-opacity-50`}>
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="text-2xl">{display.emoji}</div>
+        <div className="flex items-center space-x-3">
+          <span className="text-3xl animate-pulse">{getEmoji()}</span>
           <div>
-            <div className="text-sm text-gray-600 font-medium">
-              {display.title}
+            <div className="text-white font-bold text-lg">
+              Regional Performance: {multiplier.toFixed(1)}x
             </div>
-            <div className={`text-lg font-bold ${display.color}`}>
-              {multiplier.toFixed(1)}x
+            <div className="text-white text-sm opacity-90">
+              {getMessage()}
             </div>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-sm text-gray-600">
-            {display.message}
+          <div className="text-xs text-white opacity-75">
+            Updated: {new Date(valuation.lastUpdated).toLocaleTimeString()}
           </div>
         </div>
-      </div>
-      <div className="mt-2 text-xs text-gray-500">
-        Updates every 6 hours • Last updated:{' '}
-        {new Date(valuation.lastUpdated).toLocaleTimeString()}
       </div>
     </div>
   )

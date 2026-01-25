@@ -8,6 +8,7 @@ const router = Router()
 const prisma = new PrismaClient()
 
 const MINIMUM_WITHDRAWAL_USD = parseFloat(process.env.MINIMUM_WITHDRAWAL_USD || '10.00')
+const BASELINE_RATE_VALUE = 1.0 // R1 per 100 coins at 1.0x multiplier
 
 // Create withdrawal request
 router.post('/request', async (req: AuthRequest, res) => {
@@ -18,10 +19,26 @@ router.post('/request', async (req: AuthRequest, res) => {
     // Get user profile
     const profile = await prisma.userProfile.findUnique({
       where: { userId },
+      select: {
+        coinsBalance: true,
+        cashBalanceUsd: true,
+        preferredCurrency: true,
+      },
     })
 
     if (!profile) {
       return res.status(404).json({ error: 'Profile not found' })
+    }
+
+    // Check minimum coins (15,000)
+    const coinsBalance = Number(profile.coinsBalance)
+    const MIN_COINS = 15000
+
+    if (coinsBalance < MIN_COINS) {
+      return res.status(400).json({
+        error: `Minimum withdrawal is ${MIN_COINS.toLocaleString()} coins`,
+        currentBalance: coinsBalance,
+      })
     }
 
     // Get user's cash balance in USD
@@ -45,12 +62,23 @@ router.post('/request', async (req: AuthRequest, res) => {
     const exchangeRate = await getExchangeRate(currency)
     const amountLocal = await convertFromUSD(cashBalanceUsd, currency)
 
+    // Calculate rate multiplier
+    if (coinsBalance <= 0) {
+      return res.status(400).json({
+        error: 'Invalid coin balance',
+      })
+    }
+    const valuePer100Coins = (amountLocal / coinsBalance) * 100
+    const rateMultiplier = valuePer100Coins / BASELINE_RATE_VALUE
+
     // Create withdrawal within transaction
     const withdrawal = await prisma.$transaction(async (tx) => {
-      // Create withdrawal record
+      // Create withdrawal record with coins and rate
       const newWithdrawal = await tx.withdrawal.create({
         data: {
           userId,
+          coinsWithdrawn: coinsBalance,
+          rateMultiplier: rateMultiplier,
           amountUsd: cashBalanceUsd,
           amountLocal: amountLocal,
           currencyCode: currency,
@@ -70,9 +98,11 @@ router.post('/request', async (req: AuthRequest, res) => {
     res.json({
       success: true,
       withdrawalId: withdrawal.id,
+      coinsWithdrawn: coinsBalance,
       amountUSD: cashBalanceUsd.toFixed(2),
       amountLocal: amountLocal.toFixed(2),
       currency,
+      rateMultiplier: Number(rateMultiplier.toFixed(2)),
       status: 'pending',
       message: 'Withdrawal request submitted successfully',
     })
@@ -117,7 +147,7 @@ router.get('/history', async (req: AuthRequest, res) => {
 
 // Get recent public withdrawals for social proof
 // NOTE: This must come before /:id route to avoid route conflicts
-router.get('/recent-public', async (req: AuthRequest, res) => {
+router.get('/recent-public', async (req, res) => {
   try {
     // Get last 20 completed withdrawals from the last 7 days
     const sevenDaysAgo = new Date()
@@ -152,9 +182,8 @@ router.get('/recent-public', async (req: AuthRequest, res) => {
       const userId = `User${w.user.id.slice(-4)}`
       
       // Calculate coins withdrawn (reverse engineer from amount)
-      const baselineValue = 1.0
-      const valuePer100Coins = coinValuation ? parseFloat(coinValuation.valuePer100Coins.toString()) : 1.0
-      const rateMultiplier = valuePer100Coins / baselineValue
+      const valuePer100Coins = coinValuation ? parseFloat(coinValuation.valuePer100Coins.toString()) : BASELINE_RATE_VALUE
+      const rateMultiplier = valuePer100Coins / BASELINE_RATE_VALUE
       const estimatedCoins = Math.round((parseFloat(w.amountLocal.toString()) / valuePer100Coins) * 100)
 
       return {

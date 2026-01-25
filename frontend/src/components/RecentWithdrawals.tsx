@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 
 interface RecentWithdrawal {
@@ -25,7 +24,6 @@ const FLAG_EMOJIS: Record<string, string> = {
 }
 
 export default function RecentWithdrawals() {
-  const { session } = useAuth()
   const [withdrawals, setWithdrawals] = useState<RecentWithdrawal[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -34,16 +32,12 @@ export default function RecentWithdrawals() {
     // Refresh every 30 seconds
     const interval = setInterval(fetchWithdrawals, 30000)
     return () => clearInterval(interval)
-  }, [session])
+  }, [])
 
   const fetchWithdrawals = async () => {
     try {
-      const token = session?.access_token
-      if (!token) return
-
-      const res = await fetch(`${API_BASE_URL}/api/withdrawals/recent-public`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      // This is a public endpoint - no auth required
+      const res = await fetch(`${API_BASE_URL}/api/withdrawals/recent-public`)
 
       if (res.ok) {
         const data = await res.json()

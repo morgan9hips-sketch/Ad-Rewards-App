@@ -41,8 +41,8 @@ export default function Signup() {
 
   const fetchReferrerInfo = async (code: string) => {
     try {
-      // This endpoint would need to be created in backend
-      const res = await fetch(`${API_BASE_URL}/api/referrals/info/${code}`)
+      // Use the new public lookup endpoint
+      const res = await fetch(`${API_BASE_URL}/api/referrals/lookup/${code}`)
       if (res.ok) {
         const data = await res.json()
         setReferrerName(data.displayName || 'A friend')

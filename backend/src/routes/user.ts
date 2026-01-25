@@ -14,6 +14,7 @@ import {
   getUserLocationInfoFromCoordinates,
   getUserLocationInfo,
 } from '../services/geoService.js'
+import { checkSignupBonusEligibility } from '../services/signupBonusService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -99,6 +100,9 @@ router.get('/profile', async (req: AuthRequest, res) => {
           preferredCurrency: currency || 'ZAR', // Default to ZAR
         },
       })
+
+      // NEW: Check signup bonus eligibility for new users
+      await checkSignupBonusEligibility(userId, countryCode || 'ZA')
     } else {
       // Update lastLogin
       await prisma.userProfile.update({
