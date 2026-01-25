@@ -18,6 +18,7 @@ import payoutsRoutes from './routes/payouts.js'
 import gameRoutes from './routes/game.js'
 import referralsRoutes from './routes/referrals.js'
 import coinValuationRoutes from './routes/coinValuation.js'
+import platformRoutes from './routes/platform.js'
 
 dotenv.config()
 
@@ -75,6 +76,8 @@ app.use('/referrals', authenticate, referralsRoutes)
 app.use('/api/referrals', authenticate, referralsRoutes)
 app.use('/coin-valuation', authenticate, coinValuationRoutes)
 app.use('/api/coin-valuation', authenticate, coinValuationRoutes)
+app.use('/platform', authenticate, platformRoutes)
+app.use('/api/platform', authenticate, platformRoutes)
 
 // Error handler
 app.use(

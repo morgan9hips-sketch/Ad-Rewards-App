@@ -330,4 +330,40 @@ router.get('/detect-country', async (req: AuthRequest, res) => {
   }
 })
 
+// Get user signup bonus information
+router.get('/signup-bonus', async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id
+
+    // Check if user has a signup bonus
+    const signupBonus = await prisma.signupBonus.findUnique({
+      where: { userId },
+    })
+
+    if (!signupBonus) {
+      return res.json({
+        eligible: false,
+      })
+    }
+
+    // Get user profile for country info
+    const profile = await prisma.userProfile.findUnique({
+      where: { userId },
+      select: { country: true },
+    })
+
+    res.json({
+      eligible: true,
+      userNumber: signupBonus.userNumber,
+      countryCode: profile?.country || signupBonus.countryCode,
+      bonusCoins: signupBonus.bonusCoins,
+      bonusValue: parseFloat(signupBonus.bonusValue.toString()),
+      claimed: signupBonus.claimed,
+    })
+  } catch (error) {
+    console.error('Error fetching signup bonus:', error)
+    res.status(500).json({ error: 'Failed to fetch signup bonus information' })
+  }
+})
+
 export default router
