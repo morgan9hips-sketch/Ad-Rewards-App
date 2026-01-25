@@ -17,7 +17,6 @@ interface Bubble {
 export default function GameCanvas({
   onGameOver,
   onScoreChange,
-  lives,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [score, setScore] = useState(0)
@@ -44,8 +43,6 @@ export default function GameCanvas({
     // Set canvas size
     canvas.width = CANVAS_WIDTH
     canvas.height = CANVAS_HEIGHT
-
-    let lastTime = 0
 
     const spawnBubble = (currentTime: number) => {
       if (currentTime - lastSpawnTimeRef.current > SPAWN_INTERVAL) {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 import { API_BASE_URL } from '../config/api'
 import Button from '../components/Button'
 import PasswordInput from '../components/PasswordInput'
@@ -8,7 +9,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function Signup() {
   const navigate = useNavigate()
-  const { signUp, session } = useAuth()
+  const { session } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -90,17 +91,20 @@ export default function Signup() {
     try {
       setLoading(true)
 
-      // Sign up the user
-      const result = await signUp(email, password)
+      // Sign up the user using Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      })
 
-      if (result.error) {
-        setError(result.error.message)
+      if (error) {
+        setError(error.message)
         return
       }
 
       // If signup successful and there's a referral code, track it
-      if (result.session?.access_token && referralCode) {
-        await trackReferral(result.session.access_token, referralCode)
+      if (data.session?.access_token && referralCode) {
+        await trackReferral(data.session.access_token, referralCode)
       }
 
       // Navigate to dashboard

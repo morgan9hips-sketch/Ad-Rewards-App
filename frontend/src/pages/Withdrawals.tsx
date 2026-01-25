@@ -340,7 +340,6 @@ export default function Withdrawals() {
 
             <div className="flex gap-3">
               <Button
-                type="button"
                 variant="secondary"
                 fullWidth
                 onClick={() => {
@@ -350,9 +349,13 @@ export default function Withdrawals() {
               >
                 Cancel
               </Button>
-              <Button type="submit" fullWidth disabled={processing}>
+              <button
+                type="submit"
+                disabled={processing}
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 {processing ? 'Processing...' : 'Submit Request'}
-              </Button>
+              </button>
             </div>
           </form>
         </Card>
