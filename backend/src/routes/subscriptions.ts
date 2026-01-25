@@ -150,7 +150,7 @@ router.post('/cancel', async (req: AuthRequest, res) => {
       where: { userId },
       data: {
         subscriptionStatus: 'CANCELLED',
-        tier: 'Bronze',
+        tier: 'Free',
       },
     })
 
@@ -240,12 +240,12 @@ async function handleSubscriptionActivated(resource: any) {
   const subscriptionId = resource.id
   const planId = resource.plan_id
   
-  // Determine tier from plan ID
-  let tier = 'Bronze'
-  if (planId === process.env.PAYPAL_SILVER_PLAN_ID) {
-    tier = 'Silver'
-  } else if (planId === process.env.PAYPAL_GOLD_PLAN_ID) {
-    tier = 'Gold'
+  // Determine tier from plan ID - map to new UserTier enum
+  let tier: 'Free' | 'Elite' = 'Free'
+  if (planId === process.env.PAYPAL_ELITE_PLAN_ID || 
+      planId === process.env.PAYPAL_SILVER_PLAN_ID || 
+      planId === process.env.PAYPAL_GOLD_PLAN_ID) {
+    tier = 'Elite'
   }
 
   // Update user profile
@@ -267,7 +267,7 @@ async function handleSubscriptionCancelled(resource: any) {
   await prisma.userProfile.updateMany({
     where: { subscriptionId },
     data: {
-      tier: 'Bronze',
+      tier: 'Free',
       subscriptionStatus: 'CANCELLED',
       subscriptionEndDate: new Date(),
     },

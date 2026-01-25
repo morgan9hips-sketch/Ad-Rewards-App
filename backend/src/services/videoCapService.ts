@@ -58,7 +58,7 @@ export async function getUserVideoCapStatus(userId: string) {
 
   // Check if Free tier needs interstitial
   let needsInterstitial = false
-  if (profile.tier === 'Bronze' && remaining > 0) {
+  if (profile.tier === 'Free' && remaining > 0) {
     const videosSinceLastInterstitial = profile.dailyVideosWatched - (profile.forcedAdsWatched * FREE_TIER_INTERSTITIAL_INTERVAL)
     needsInterstitial = videosSinceLastInterstitial >= FREE_TIER_INTERSTITIAL_INTERVAL
   }
