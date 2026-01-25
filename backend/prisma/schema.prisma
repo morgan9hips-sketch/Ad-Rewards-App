@@ -20,6 +20,11 @@ enum AdType {
   BANNER
 }
 
+enum UserTier {
+  Free
+  Elite
+}
+
 enum NotificationEvent {
   WITHDRAWAL_REQUESTED
   ADMOB_REVENUE_RECEIVED
@@ -53,9 +58,20 @@ model UserProfile {
   totalCashEarnedUsd Decimal @default(0.0000) @map("total_cash_earned_usd") @db.Decimal(12, 4)
   totalWithdrawnUsd  Decimal @default(0.0000) @map("total_withdrawn_usd") @db.Decimal(12, 4)
 
+  // Earnings breakdown by ad type
+  rewardedAdEarningsUsd Decimal @default(0.0000) @map("rewarded_ad_earnings_usd") @db.Decimal(12, 4)
+  retryAdEarningsUsd    Decimal @default(0.0000) @map("retry_ad_earnings_usd") @db.Decimal(12, 4)
+  signUpBonusUsd        Decimal @default(0.0000) @map("sign_up_bonus_usd") @db.Decimal(12, 4)
+  totalEarningsUsd      Decimal @default(0.0000) @map("total_earnings_usd") @db.Decimal(12, 4)
+
+  // Cash wallet activation tracking
+  cashWalletUsd         Decimal   @default(0.0000) @map("cash_wallet_usd") @db.Decimal(12, 4)
+  cashWalletActivatedAt DateTime? @map("cash_wallet_activated_at")
+
   // Revenue location tracking (from AdMob - VPN-proof)
   revenueCountry   String?  @map("revenue_country") // Primary earning country
   revenueCountries String[] @default([]) @map("revenue_countries") // All countries earned from
+  signupCountry    String?  @map("signup_country") @db.Char(2) // Country at signup
 
   // Display preferences (user-friendly)
   displayCountry     String? @map("display_country")
@@ -68,19 +84,26 @@ model UserProfile {
   suspiciousActivity  Boolean @default(false) @map("suspicious_activity")
 
   adsWatched Int      @default(0) @map("ads_watched")
-  tier       String   @default("Bronze")
+  tier       UserTier @default(Free)
   role       UserRole @default(USER)
 
   // Video cap tracking
-  dailyVideosWatched Int      @default(0) @map("daily_videos_watched")
-  lastVideoResetAt   DateTime @default(now()) @map("last_video_reset_at")
-  forcedAdsWatched   Int      @default(0) @map("forced_ads_watched")
+  dailyVideosWatched              Int       @default(0) @map("daily_videos_watched")
+  lastVideoResetAt                DateTime  @default(now()) @map("last_video_reset_at")
+  timezone                        String?   @default("UTC")
+  forcedAdsWatched                Int       @default(0) @map("forced_ads_watched")
+  actionsSinceLastInterstitial    Int       @default(0) @map("actions_since_last_interstitial")
+  totalForcedInterstitialsWatched Int       @default(0) @map("total_forced_interstitials_watched")
+  lastForcedInterstitialAt        DateTime? @map("last_forced_interstitial_at")
 
   // Subscription tracking
   subscriptionId        String?   @map("subscription_id")
   subscriptionStatus    String?   @map("subscription_status")
   subscriptionPlanId    String?   @map("subscription_plan_id")
+  subscriptionCurrency  String?   @map("subscription_currency") @db.VarChar(3)
+  subscriptionAmount    Decimal?  @map("subscription_amount") @db.Decimal(10, 2)
   subscriptionStartDate DateTime? @map("subscription_start_date")
+  subscriptionStartedAt DateTime? @map("subscription_started_at")
   subscriptionEndDate   DateTime? @map("subscription_end_date")
 
   // Profile setup and personalization
@@ -93,14 +116,19 @@ model UserProfile {
   hideCountry           Boolean @default(false) @map("hide_country")
 
   // Activity tracking for balance expiry
-  lastLogin DateTime @default(now()) @map("last_login")
+  lastLogin   DateTime @default(now()) @map("last_login")
+  lastLoginAt DateTime @default(now()) @map("last_login_at")
 
   // Legal compliance
   acceptedTermsAt DateTime? @map("accepted_terms_at")
 
   // Referral system
-  referralCode String? @unique @map("referral_code")
+  referralCode String? @unique @map("referral_code") @db.VarChar(8)
   referredBy   String? @map("referred_by")
+
+  // Signup bonus eligibility
+  isEligibleForSignupBonus Boolean @default(false) @map("is_eligible_for_signup_bonus")
+  hasRedeemedSignupBonus   Boolean @default(false) @map("has_redeemed_signup_bonus")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -121,6 +149,10 @@ model UserProfile {
 
   @@index([totalCoinsEarned(sort: Desc), showOnLeaderboard])
   @@index([lastLogin])
+  @@index([revenueCountry])
+  @@index([lastLoginAt])
+  @@index([tier])
+  @@index([referralCode])
   @@map("user_profiles")
 }
 
@@ -179,6 +211,10 @@ model AdView {
   poolId Int?                 @map("pool_id")
   pool   LocationRevenuePool? @relation(fields: [poolId], references: [id])
 
+  // Game session tracking
+  gameSessionId String?      @map("game_session_id")
+  gameSession   GameSession? @relation(fields: [gameSessionId], references: [id])
+
   // Legacy conversion tracking
   conversionBatchId Int?    @map("conversion_batch_id")
   converted         Boolean @default(false)
@@ -191,6 +227,9 @@ model AdView {
   @@index([converted])
   @@index([countryCode])
   @@index([poolId])
+  @@index([countryCode, createdAt])
+  @@index([userId, converted])
+  @@index([gameSessionId])
   @@map("ad_views")
 }
 
@@ -353,6 +392,7 @@ model LocationRevenuePool {
   @@index([countryCode])
   @@index([month])
   @@index([status])
+  @@index([countryCode, month])
   @@map("location_revenue_pools")
 }
 
@@ -432,6 +472,8 @@ model GameSession {
   lastGameOverAt   DateTime?   @map("last_game_over_at")
   completedAt      DateTime?   @map("completed_at")
   createdAt        DateTime    @default(now()) @map("created_at")
+
+  adViews AdView[]
 
   @@index([userId])
   @@index([createdAt])
