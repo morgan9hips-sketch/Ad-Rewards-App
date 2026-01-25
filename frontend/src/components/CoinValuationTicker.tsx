@@ -34,7 +34,15 @@ export default function CoinValuationTicker() {
 
       if (res.ok) {
         const data = await res.json()
-        setValuation(data.valuation || data)
+        // API returns fields directly, not nested
+        setValuation({
+          valuePer100Coins: data.valuePer100Coins,
+          currencyCode: data.currencyCode,
+          currencySymbol: data.currencySymbol,
+          trend: data.trend,
+          changePercent: data.changePercent,
+          lastUpdated: data.lastUpdated,
+        })
       }
     } catch (error) {
       console.error('Error fetching coin valuation:', error)

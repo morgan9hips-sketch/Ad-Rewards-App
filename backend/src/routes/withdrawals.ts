@@ -8,6 +8,7 @@ const router = Router()
 const prisma = new PrismaClient()
 
 const MINIMUM_WITHDRAWAL_USD = parseFloat(process.env.MINIMUM_WITHDRAWAL_USD || '10.00')
+const BASELINE_RATE_VALUE = 1.0 // R1 per 100 coins at 1.0x multiplier
 
 // Create withdrawal request
 router.post('/request', async (req: AuthRequest, res) => {
@@ -62,9 +63,8 @@ router.post('/request', async (req: AuthRequest, res) => {
     const amountLocal = await convertFromUSD(cashBalanceUsd, currency)
 
     // Calculate rate multiplier
-    const baselineValue = 1.0 // R1 per 100 coins at 1.0x
     const valuePer100Coins = (amountLocal / coinsBalance) * 100
-    const rateMultiplier = valuePer100Coins / baselineValue
+    const rateMultiplier = valuePer100Coins / BASELINE_RATE_VALUE
 
     // Create withdrawal within transaction
     const withdrawal = await prisma.$transaction(async (tx) => {
