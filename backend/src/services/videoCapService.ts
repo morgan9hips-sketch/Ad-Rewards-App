@@ -43,17 +43,17 @@ export async function getUserVideoCapStatus(userId: string) {
     await resetDailyVideos(userId)
     return {
       tier: profile.tier,
-      dailyLimit: VIDEO_LIMITS[profile.tier as keyof typeof VIDEO_LIMITS] || VIDEO_LIMITS.Bronze,
+      dailyLimit: VIDEO_LIMITS[profile.tier] || VIDEO_LIMITS.Free,
       videosWatched: 0,
       forcedAdsWatched: 0,
-      remaining: VIDEO_LIMITS[profile.tier as keyof typeof VIDEO_LIMITS] || VIDEO_LIMITS.Bronze,
+      remaining: VIDEO_LIMITS[profile.tier] || VIDEO_LIMITS.Free,
       canWatchVideo: true,
       needsInterstitial: false,
       resetAt: now,
     }
   }
 
-  const dailyLimit = VIDEO_LIMITS[profile.tier as keyof typeof VIDEO_LIMITS] || VIDEO_LIMITS.Bronze
+  const dailyLimit = VIDEO_LIMITS[profile.tier] || VIDEO_LIMITS.Free
   const remaining = Math.max(0, dailyLimit - profile.dailyVideosWatched)
 
   // Check if Free tier needs interstitial

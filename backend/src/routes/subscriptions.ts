@@ -241,12 +241,14 @@ async function handleSubscriptionActivated(resource: any) {
   const planId = resource.plan_id
   
   // Determine tier from plan ID - map to new UserTier enum
-  let tier: 'Free' | 'Elite' = 'Free'
-  if (planId === process.env.PAYPAL_ELITE_PLAN_ID || 
-      planId === process.env.PAYPAL_SILVER_PLAN_ID || 
-      planId === process.env.PAYPAL_GOLD_PLAN_ID) {
-    tier = 'Elite'
-  }
+  // Any paid subscription plan gets Elite tier
+  const elitePlanIds = [
+    process.env.PAYPAL_ELITE_PLAN_ID,
+    process.env.PAYPAL_SILVER_PLAN_ID,
+    process.env.PAYPAL_GOLD_PLAN_ID,
+  ].filter(Boolean) // Remove undefined values
+  
+  const tier: 'Free' | 'Elite' = elitePlanIds.includes(planId) ? 'Elite' : 'Free'
 
   // Update user profile
   await prisma.userProfile.updateMany({

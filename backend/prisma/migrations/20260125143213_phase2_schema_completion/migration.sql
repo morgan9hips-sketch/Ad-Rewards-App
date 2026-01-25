@@ -19,10 +19,10 @@ ALTER TABLE "user_profiles" ADD COLUMN IF NOT EXISTS "last_forced_interstitial_a
 ALTER TABLE "user_profiles" ADD COLUMN IF NOT EXISTS "tier_new" "UserTier" DEFAULT 'Free';
 
 -- Update existing values (map old tier names to new enum values)
--- Assuming current values might be 'Bronze', 'Silver', 'Gold', 'Elite', etc.
+-- Using exact string matches to avoid false positives
 UPDATE "user_profiles" 
 SET "tier_new" = CASE 
-  WHEN "tier" ILIKE '%elite%' OR "tier" ILIKE '%gold%' OR "tier" ILIKE '%premium%' THEN 'Elite'::"UserTier"
+  WHEN "tier" IN ('Elite', 'Gold', 'Premium', 'Silver') THEN 'Elite'::"UserTier"
   ELSE 'Free'::"UserTier"
 END;
 
