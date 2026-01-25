@@ -15,6 +15,21 @@ export interface AuthRequest extends Request {
 
 export async function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
   try {
+    // List of public routes that don't require authentication
+    const publicRoutes = [
+      '/api/withdrawals/recent-public',
+      '/withdrawals/recent-public',
+      '/api/referrals/lookup',
+      '/referrals/lookup',
+    ]
+    
+    // Check if this is a public route
+    const isPublicRoute = publicRoutes.some(route => req.path.startsWith(route))
+    
+    if (isPublicRoute) {
+      return next()
+    }
+
     const authHeader = req.headers.authorization
     if (!authHeader?.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'No token provided' })

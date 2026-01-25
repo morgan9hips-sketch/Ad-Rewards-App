@@ -232,6 +232,14 @@ router.get('/lookup/:code', async (req, res) => {
   try {
     const { code } = req.params
 
+    // Validate referral code format (alphanumeric, max 20 chars)
+    if (!code || !/^[A-Za-z0-9_-]+$/.test(code) || code.length > 20) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid referral code format',
+      })
+    }
+
     const profile = await prisma.userProfile.findUnique({
       where: { referralCode: code },
       select: {
