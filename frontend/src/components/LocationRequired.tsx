@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Button from './Button'
 import Card from './Card'
 import { useCurrency } from '../contexts/CurrencyContext'
@@ -6,11 +7,15 @@ import { useCurrency } from '../contexts/CurrencyContext'
 export default function LocationRequired() {
   const { requestLocationPermission } = useCurrency()
   const [requesting, setRequesting] = useState(false)
+  const navigate = useNavigate()
 
   const handleEnableLocation = async () => {
     setRequesting(true)
     try {
-      await requestLocationPermission()
+      const success = await requestLocationPermission()
+      if (success) {
+        navigate('/dashboard')
+      }
     } catch (error) {
       console.error('Failed to enable location:', error)
     } finally {
