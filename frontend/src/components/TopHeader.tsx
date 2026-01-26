@@ -12,15 +12,19 @@ export default function TopHeader() {
     navigate('/login')
   }
 
+  const handleLogoClick = () => {
+    navigate(isAuthenticated ? '/dashboard' : '/')
+  }
+
   return (
     <header className="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Responsive logo display: Full logo for desktop (≥640px), Icon for mobile (<640px) */}
         {/* Using separate instances for cleaner code than internal media queries */}
-        <div className="hidden sm:block">
+        <div className="hidden sm:block cursor-pointer" onClick={handleLogoClick}>
           <Logo size="md" variant="full" />
         </div>
-        <div className="block sm:hidden">
+        <div className="block sm:hidden cursor-pointer" onClick={handleLogoClick}>
           <Logo size="sm" variant="icon" />
         </div>
         
