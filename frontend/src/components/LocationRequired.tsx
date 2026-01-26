@@ -18,7 +18,7 @@ export default function LocationRequired() {
       if (success) {
         navigate('/dashboard')
       } else {
-        setError('Location permission was denied. Please enable location access in your browser settings to continue.')
+        setError('Location access denied. Please enable it in your browser settings.')
       }
     } catch (error) {
       console.error('Failed to enable location:', error)

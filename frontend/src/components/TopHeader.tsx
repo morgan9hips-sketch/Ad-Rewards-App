@@ -34,7 +34,7 @@ export default function TopHeader() {
           onKeyDown={handleLogoKeyDown}
           role="button"
           tabIndex={0}
-          aria-label="Go to home"
+          aria-label={isAuthenticated ? 'Go to dashboard' : 'Go to home'}
         >
           <Logo size="md" variant="full" />
         </div>
@@ -44,7 +44,7 @@ export default function TopHeader() {
           onKeyDown={handleLogoKeyDown}
           role="button"
           tabIndex={0}
-          aria-label="Go to home"
+          aria-label={isAuthenticated ? 'Go to dashboard' : 'Go to home'}
         >
           <Logo size="sm" variant="icon" />
         </div>
