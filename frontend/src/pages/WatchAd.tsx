@@ -145,7 +145,7 @@ export default function WatchAd() {
                   {totalCoins.toLocaleString()}
                 </p>
                 <img 
-                  src="/images/branding/Adcoin medium 256x256.png" 
+                  src="/images/branding/Adcoin small 128x128.png" 
                   alt="AdCoin" 
                   className="w-12 h-12"
                 />
