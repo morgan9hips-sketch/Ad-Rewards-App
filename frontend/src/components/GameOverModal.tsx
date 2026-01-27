@@ -129,8 +129,14 @@ export default function GameOverModal({
             Your Score: <span className="text-yellow-500 font-bold">{score.toLocaleString()}</span>
           </div>
           {completed && (
-            <div className="mt-2 text-green-400 font-semibold">
-              You earned 10 coins! 🪙
+            <div className="mt-2 text-green-400 font-semibold flex items-center justify-center gap-2">
+              <span>You earned</span>
+              <img 
+                src="/images/branding/Adcoin small 128x128.png" 
+                alt="AdCoin" 
+                className="w-6 h-6 inline"
+              />
+              <span>10!</span>
             </div>
           )}
         </div>

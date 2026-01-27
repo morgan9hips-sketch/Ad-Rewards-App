@@ -256,13 +256,20 @@ export default function Ads() {
             Rewarded Video Ad
           </h2>
           <p className="text-gray-400 mb-6">
-            Watch a video ad and earn 100 coins!
+            Watch a video ad and earn coins!
           </p>
 
           <div className="bg-gray-800 rounded-lg p-4 mb-6 max-w-md mx-auto">
             <div className="flex items-center justify-center space-x-4">
               <div className="text-center">
-                <div className="text-yellow-400 font-bold text-2xl">100</div>
+                <div className="flex items-center justify-center gap-2">
+                  <img 
+                    src="/images/branding/Adcoin medium 256x256.png" 
+                    alt="AdCoin" 
+                    className="w-8 h-8"
+                  />
+                  <div className="text-yellow-400 font-bold text-2xl">100</div>
+                </div>
                 <div className="text-gray-400 text-sm">Coins</div>
               </div>
               <div className="text-gray-500 text-xl">+</div>
