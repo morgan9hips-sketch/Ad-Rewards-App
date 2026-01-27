@@ -125,14 +125,31 @@ export default function WatchAd() {
       {completed && (
         <Card>
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-white mb-2">
-              🎉 You earned {coinsEarned} Coins!
-            </h2>
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <h2 className="text-2xl font-bold text-white">
+                🎉 You earned
+              </h2>
+              <img 
+                src="/images/branding/Adcoin medium 256x256.png" 
+                alt="AdCoin" 
+                className="w-12 h-12"
+              />
+              <h2 className="text-2xl font-bold text-yellow-500">
+                {coinsEarned}!
+              </h2>
+            </div>
             <div className="bg-gray-800 p-4 rounded-lg my-4">
               <p className="text-gray-400 text-sm mb-2">Total Coins:</p>
-              <p className="text-4xl font-bold text-yellow-500">
-                {totalCoins.toLocaleString()} 🪙
-              </p>
+              <div className="flex items-center justify-center gap-3">
+                <p className="text-4xl font-bold text-yellow-500">
+                  {totalCoins.toLocaleString()}
+                </p>
+                <img 
+                  src="/images/branding/Adcoin medium 256x256.png" 
+                  alt="AdCoin" 
+                  className="w-12 h-12"
+                />
+              </div>
             </div>
             <p className="text-gray-400 text-sm mb-4">
               💡 Your coins will convert to cash when we receive ad revenue

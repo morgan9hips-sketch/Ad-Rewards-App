@@ -54,7 +54,7 @@ export default function Transactions() {
 
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-      coin_earned: '🪙 Coins Earned',
+      coin_earned: 'Coins Earned',
       coin_conversion: '💱 Coin Conversion',
       withdrawal: '💸 Withdrawal',
       admin_adjustment: '⚙️ Admin Adjustment',
@@ -132,33 +132,54 @@ export default function Transactions() {
                     key={tx.id}
                     className="flex justify-between items-start p-3 bg-gray-800 rounded-lg"
                   >
-                    <div className="flex-1">
-                      <p className={`font-semibold ${getTypeColor(tx.type)}`}>
-                        {getTypeLabel(tx.type)}
-                      </p>
-                      <p className="text-sm text-gray-400 mt-1">
-                        {tx.description || 'No description'}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(tx.createdAt).toLocaleString()}
-                      </p>
-                    </div>
+                     <div className="flex-1">
+                       <div className="flex items-center gap-2">
+                         {tx.type === 'coin_earned' && (
+                           <img 
+                             src="/images/branding/Adcoin tiny 64x64.png" 
+                             alt="AdCoin" 
+                             className="w-5 h-5"
+                           />
+                         )}
+                         <p className={`font-semibold ${getTypeColor(tx.type)}`}>
+                           {getTypeLabel(tx.type)}
+                         </p>
+                       </div>
+                       <p className="text-sm text-gray-400 mt-1">
+                         {tx.description || 'No description'}
+                       </p>
+                       <p className="text-xs text-gray-500 mt-1">
+                         {new Date(tx.createdAt).toLocaleString()}
+                       </p>
+                     </div>
                     <div className="text-right ml-4">
                       {coinsChange !== BigInt(0) && (
                         <>
                           <p
-                            className={`text-sm font-bold ${
+                            className={`text-sm font-bold flex items-center gap-1 justify-end ${
                               coinsChange > 0
                                 ? 'text-yellow-500'
                                 : 'text-gray-400'
                             }`}
                           >
-                            {coinsChange > 0 ? '+' : ''}
-                            {tx.coinsChange} 🪙
+                            <span>
+                              {coinsChange > 0 ? '+' : ''}
+                              {tx.coinsChange}
+                            </span>
+                            <img 
+                              src="/images/branding/Adcoin tiny 64x64.png" 
+                              alt="AdCoin" 
+                              className="w-4 h-4"
+                            />
                           </p>
                           {tx.coinsBalanceAfter && (
-                            <p className="text-xs text-gray-500 mt-1">
-                              Balance: {tx.coinsBalanceAfter} 🪙
+                            <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 justify-end">
+                              <span>Balance: {tx.coinsBalanceAfter}</span>
+                              <img 
+                                src="/images/branding/Adcoin tiny 64x64.png" 
+                                alt="AdCoin" 
+                                className="w-3 h-3"
+                              />
                             </p>
                           )}
                         </>
