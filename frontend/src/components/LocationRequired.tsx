@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Button from './Button'
 import Card from './Card'
 import { useCurrency } from '../contexts/CurrencyContext'
@@ -6,13 +7,22 @@ import { useCurrency } from '../contexts/CurrencyContext'
 export default function LocationRequired() {
   const { requestLocationPermission } = useCurrency()
   const [requesting, setRequesting] = useState(false)
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
 
   const handleEnableLocation = async () => {
     setRequesting(true)
+    setError('')
     try {
-      await requestLocationPermission()
+      const success = await requestLocationPermission()
+      if (success) {
+        navigate('/dashboard')
+      } else {
+        setError('Location access denied. Please enable it in your browser settings.')
+      }
     } catch (error) {
       console.error('Failed to enable location:', error)
+      setError('Failed to detect location. Please try again.')
     } finally {
       setRequesting(false)
     }
@@ -31,6 +41,12 @@ export default function LocationRequired() {
           To provide accurate currency conversion and ensure fair earnings, we
           need to detect your location.
         </p>
+
+        {error && (
+          <div className="bg-red-500/10 border border-red-500 text-red-400 p-3 rounded mb-4 text-sm">
+            {error}
+          </div>
+        )}
 
         <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
           <h3 className="text-blue-300 font-semibold mb-2">
