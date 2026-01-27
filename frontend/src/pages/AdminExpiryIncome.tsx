@@ -202,13 +202,24 @@ export default function AdminExpiryIncome() {
                       </td>
                       <td className="py-3 px-2">
                         <span
-                          className={`px-2 py-1 rounded text-xs font-semibold ${
+                          className={`px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 ${
                             balance.type === 'coins'
                               ? 'bg-yellow-900/30 text-yellow-400'
                               : 'bg-red-900/30 text-red-400'
                           }`}
                         >
-                          {balance.type === 'coins' ? '🪙 Coins' : '💵 Cash'}
+                          {balance.type === 'coins' ? (
+                            <>
+                              <img 
+                                src="/images/branding/Adcoin tiny 64x64.png" 
+                                alt="AdCoin" 
+                                className="w-4 h-4"
+                              />
+                              <span>Coins</span>
+                            </>
+                          ) : (
+                            '💵 Cash'
+                          )}
                         </span>
                       </td>
                       <td className="py-3 px-2 text-right text-gray-300">

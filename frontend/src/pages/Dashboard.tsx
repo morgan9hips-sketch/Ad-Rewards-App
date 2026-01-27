@@ -222,9 +222,16 @@ export default function Dashboard() {
           {/* Coins Balance */}
           <Card>
             <div className="p-4">
-              <h2 className="text-xl font-bold text-white mb-3">
-                🪙 Your Balance
-              </h2>
+              <div className="flex items-center gap-2 mb-3">
+                <img 
+                  src="/images/branding/Adcoin medium 256x256.png" 
+                  alt="AdCoin" 
+                  className="w-8 h-8"
+                />
+                <h2 className="text-xl font-bold text-white">
+                  Your Balance
+                </h2>
+              </div>
               <p className="text-4xl font-bold text-yellow-500 mb-3">
                 {balance ? parseInt(balance.coins).toLocaleString() : '0'} Coins
               </p>
@@ -321,14 +328,34 @@ export default function Dashboard() {
             <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
             <div className="grid sm:grid-cols-2 gap-3">
               <Button fullWidth onClick={() => navigate('/ads')}>
-                📺 Watch Videos (100 coins)
+                <span className="flex items-center justify-center gap-2">
+                  <span>📺 Watch Videos</span>
+                  <span className="flex items-center gap-1">
+                    <img 
+                      src="/images/branding/Adcoin tiny 64x64.png" 
+                      alt="AdCoin" 
+                      className="w-5 h-5 inline"
+                    />
+                    <span>100</span>
+                  </span>
+                </span>
               </Button>
               <Button
                 fullWidth
                 variant="secondary"
                 onClick={() => navigate('/game')}
               >
-                🎮 Play Game (10 coins)
+                <span className="flex items-center justify-center gap-2">
+                  <span>🎮 Play Game</span>
+                  <span className="flex items-center gap-1">
+                    <img 
+                      src="/images/branding/Adcoin tiny 64x64.png" 
+                      alt="AdCoin" 
+                      className="w-5 h-5 inline"
+                    />
+                    <span>10</span>
+                  </span>
+                </span>
               </Button>
             </div>
           </Card>
@@ -358,10 +385,17 @@ export default function Dashboard() {
                       </div>
                       <div className="text-right">
                         <p
-                          className={`text-sm font-semibold ${coinsChange > 0 ? 'text-yellow-500' : 'text-gray-400'}`}
+                          className={`text-sm font-semibold flex items-center gap-1 justify-end ${coinsChange > 0 ? 'text-yellow-500' : 'text-gray-400'}`}
                         >
-                          {coinsChange > 0 ? '+' : ''}
-                          {tx.coinsChange} coins
+                          <span>
+                            {coinsChange > 0 ? '+' : ''}
+                            {tx.coinsChange}
+                          </span>
+                          <img 
+                            src="/images/branding/Adcoin tiny 64x64.png" 
+                            alt="AdCoin" 
+                            className="w-4 h-4 inline"
+                          />
                         </p>
                       </div>
                     </div>
