@@ -107,7 +107,7 @@ export default function Transactions() {
               {filterType === 'all'
                 ? 'All'
                 : getTypeLabel(filterType)
-                    .replace(/[🪙💱💸⚙️🏆]/g, '')
+                    .replace(/[\u{1F300}-\u{1F9FF}]/gu, '')
                     .trim()}
             </button>
           ),
