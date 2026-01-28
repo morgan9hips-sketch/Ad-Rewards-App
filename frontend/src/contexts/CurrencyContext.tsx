@@ -7,6 +7,7 @@ import {
 } from 'react'
 // import { useAuth } from './AuthContext'  // Unused for now
 import { API_BASE_URL } from '../config/api'
+import { supabase } from '../lib/supabase'
 
 interface CurrencyInfo {
   displayCurrency: string
@@ -93,12 +94,26 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true)
       
+      // Get the current user session
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.access_token) {
+        console.error('No authentication session - user must be logged in')
+        setLocationError(true)
+        setLoading(false)
+        return
+      }
+      
       let url = `${API_BASE_URL}/api/user/currency-info`
       if (lat && lng) {
         url += `?lat=${lat}&lng=${lng}`
       }
 
-      const response = await fetch(url)
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
 
       if (response.ok) {
         const data = await response.json()
