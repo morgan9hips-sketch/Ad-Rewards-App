@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import { PrismaClient } from '@prisma/client'
 import { authenticate } from './middleware/auth.js'
 import { scheduleExpiryJob } from './jobs/expireBalances.js'
 import { scheduleCoinValuationJob } from './jobs/updateCoinValuations.js'
@@ -25,6 +26,55 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 4000
+const prisma = new PrismaClient()
+
+// Initialize exchange rates on startup
+async function initializeExchangeRates() {
+  try {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    await prisma.exchangeRate.upsert({
+      where: {
+        targetCurrency_date: {
+          targetCurrency: 'ZAR',
+          date: today,
+        },
+      },
+      update: {
+        rate: 18.50,
+      },
+      create: {
+        baseCurrency: 'USD',
+        targetCurrency: 'ZAR',
+        rate: 18.50,
+        date: today,
+      },
+    })
+
+    await prisma.exchangeRate.upsert({
+      where: {
+        targetCurrency_date: {
+          targetCurrency: 'USD',
+          date: today,
+        },
+      },
+      update: {
+        rate: 0.054,
+      },
+      create: {
+        baseCurrency: 'ZAR',
+        targetCurrency: 'USD',
+        rate: 0.054,
+        date: today,
+      },
+    })
+
+    console.log('✅ Exchange rates initialized')
+  } catch (error) {
+    console.error('⚠️  Warning: Failed to initialize exchange rates:', error)
+  }
+}
 
 // Middleware
 app.use(
@@ -99,9 +149,12 @@ app.use(
 
 // Only start server if not in Vercel (Vercel handles this automatically)
 if (process.env.VERCEL !== '1') {
-  app.listen(Number(PORT), () => {
+  app.listen(Number(PORT), async () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`)
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
+
+    // Initialize exchange rates on startup
+    await initializeExchangeRates()
 
     // Start balance expiry cron job
     // NOTE: This will not run in Vercel's serverless environment
@@ -111,6 +164,9 @@ if (process.env.VERCEL !== '1') {
     // Start coin valuation update job (every 6 hours)
     scheduleCoinValuationJob()
   })
+} else {
+  // Initialize exchange rates for serverless environments on first request
+  initializeExchangeRates().catch(console.error)
 }
 
 export default app

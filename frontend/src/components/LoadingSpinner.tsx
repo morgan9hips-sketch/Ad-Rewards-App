@@ -20,11 +20,9 @@ export default function LoadingSpinner({ size = 'medium', color = 'border-blue-6
   if (withLogo) {
     return (
       <div className="flex flex-col justify-center items-center gap-4">
-        <img 
-          src="/images/branding/logo-icon.png" 
-          alt="Loading..." 
-          className={`loading-logo ${logoSizeClasses[size]}`}
-        />
+        <div className={`loading-logo ${logoSizeClasses[size]} flex items-center justify-center text-4xl`}>
+          📺
+        </div>
         <p className="text-gray-400 text-sm">Loading...</p>
       </div>
     )

@@ -135,11 +135,9 @@ export default function Transactions() {
                      <div className="flex-1">
                        <div className="flex items-center gap-2">
                          {tx.type === 'coin_earned' && (
-                           <img 
-                             src="/images/branding/Adcoin tiny 64x64.png" 
-                             alt="AdCoin" 
-                             className="w-5 h-5"
-                           />
+                           <span className="text-lg" role="img" aria-label="Coin">
+                             🪙
+                           </span>
                          )}
                          <p className={`font-semibold ${getTypeColor(tx.type)}`}>
                            {getTypeLabel(tx.type)}
@@ -166,20 +164,16 @@ export default function Transactions() {
                               {coinsChange > 0 ? '+' : ''}
                               {tx.coinsChange}
                             </span>
-                            <img 
-                              src="/images/branding/Adcoin tiny 64x64.png" 
-                              alt="AdCoin" 
-                              className="w-4 h-4"
-                            />
+                            <span className="text-base" role="img" aria-label="Coin">
+                              🪙
+                            </span>
                           </p>
                           {tx.coinsBalanceAfter && (
                             <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 justify-end">
                               <span>Balance: {tx.coinsBalanceAfter}</span>
-                              <img 
-                                src="/images/branding/Adcoin tiny 64x64.png" 
-                                alt="AdCoin" 
-                                className="w-3 h-3"
-                              />
+                              <span className="text-sm" role="img" aria-label="Coin">
+                                🪙
+                              </span>
                             </p>
                           )}
                         </>

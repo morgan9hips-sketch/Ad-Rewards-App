@@ -111,7 +111,13 @@ router.get('/profile', async (req: AuthRequest, res) => {
       })
     }
 
-    res.json(profile)
+    res.json({
+      ...profile,
+      coinsBalance: profile.coinsBalance.toString(),
+      totalCoinsEarned: profile.totalCoinsEarned.toString(),
+      walletBalance: profile.walletBalance.toString(),
+      totalEarned: profile.totalEarned.toString(),
+    })
   } catch (error) {
     console.error('Error fetching profile:', error)
     res.status(500).json({ error: 'Failed to fetch profile' })
