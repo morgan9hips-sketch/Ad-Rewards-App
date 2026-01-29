@@ -6,9 +6,9 @@ import {
 } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { CurrencyProvider } from './contexts/CurrencyContext'
+import CookieConsent from './components/CookieConsent'
 import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
-import CookieConsent from './components/CookieConsent'
 import BetaBanner from './components/BetaBanner'
 import AdBanner from './components/AdBanner'
 import LoadingSpinner from './components/LoadingSpinner'
@@ -101,6 +101,7 @@ function AppContent() {
     <div className="min-h-screen bg-black">
       <BetaBanner />
       <TopHeader />
+      <CookieConsent />
 
       <Routes>
         <Route path="/" element={<Home />} />

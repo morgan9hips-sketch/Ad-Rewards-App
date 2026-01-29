@@ -10,9 +10,9 @@ export default function Logo({
   variant = 'full',
 }: LogoProps) {
   const sizeClasses = {
-    sm: { full: 'h-8', icon: 'h-8 w-8' },
-    md: { full: 'h-12', icon: 'h-10 w-10' },
-    lg: { full: 'h-16', icon: 'h-16 w-16' },
+    sm: { full: 'h-10', icon: 'h-10 w-10' },
+    md: { full: 'h-16', icon: 'h-14 w-14' },
+    lg: { full: 'h-24', icon: 'h-20 w-20' },
   }
 
   // Use icon variant for mobile when showText is false or explicitly requested
