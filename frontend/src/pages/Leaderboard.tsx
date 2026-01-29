@@ -110,7 +110,7 @@ export default function Leaderboard() {
                       <p className="text-yellow-500 font-bold text-lg">
                         {formatCoins(entry.coins)}
                       </p>
-                      <span className="text-xl" role="img" aria-label="Coin">
+                      <span className="text-xl" role="img" aria-label="AdCoins">
                         🪙
                       </span>
                     </div>
@@ -131,7 +131,7 @@ export default function Leaderboard() {
                   <p className="text-yellow-500 text-lg">
                     {formatCoins(data.currentUser.coins)}
                   </p>
-                  <span className="text-2xl" role="img" aria-label="Coin">
+                  <span className="text-2xl" role="img" aria-label="Your AdCoins balance">
                     🪙
                   </span>
                 </div>

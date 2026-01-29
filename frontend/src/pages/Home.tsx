@@ -11,7 +11,7 @@ export default function Home() {
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-3">
-              <span className="text-6xl" role="img" aria-label="TV">
+              <span className="text-6xl" role="img" aria-label="Adify logo">
                 📺
               </span>
               <h1 className="text-5xl font-bold text-white">Adify</h1>

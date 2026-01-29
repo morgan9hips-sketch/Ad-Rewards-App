@@ -28,6 +28,10 @@ const app = express()
 const PORT = process.env.PORT || 4000
 const prisma = new PrismaClient()
 
+// Exchange rate defaults (can be overridden via environment variables)
+const USD_TO_ZAR_RATE = parseFloat(process.env.USD_TO_ZAR_RATE || '18.50')
+const ZAR_TO_USD_RATE = parseFloat(process.env.ZAR_TO_USD_RATE || '0.054')
+
 // Initialize exchange rates on startup
 async function initializeExchangeRates() {
   try {
@@ -42,12 +46,12 @@ async function initializeExchangeRates() {
         },
       },
       update: {
-        rate: 18.50,
+        rate: USD_TO_ZAR_RATE,
       },
       create: {
         baseCurrency: 'USD',
         targetCurrency: 'ZAR',
-        rate: 18.50,
+        rate: USD_TO_ZAR_RATE,
         date: today,
       },
     })
@@ -60,12 +64,12 @@ async function initializeExchangeRates() {
         },
       },
       update: {
-        rate: 0.054,
+        rate: ZAR_TO_USD_RATE,
       },
       create: {
         baseCurrency: 'ZAR',
         targetCurrency: 'USD',
-        rate: 0.054,
+        rate: ZAR_TO_USD_RATE,
         date: today,
       },
     })

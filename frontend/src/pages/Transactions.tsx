@@ -135,7 +135,7 @@ export default function Transactions() {
                      <div className="flex-1">
                        <div className="flex items-center gap-2">
                          {tx.type === 'coin_earned' && (
-                           <span className="text-lg" role="img" aria-label="Coin">
+                           <span className="text-lg" role="img" aria-label="AdCoin earned">
                              🪙
                            </span>
                          )}
@@ -164,14 +164,14 @@ export default function Transactions() {
                               {coinsChange > 0 ? '+' : ''}
                               {tx.coinsChange}
                             </span>
-                            <span className="text-base" role="img" aria-label="Coin">
+                            <span className="text-base" role="img" aria-label="AdCoins change">
                               🪙
                             </span>
                           </p>
                           {tx.coinsBalanceAfter && (
                             <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 justify-end">
                               <span>Balance: {tx.coinsBalanceAfter}</span>
-                              <span className="text-sm" role="img" aria-label="Coin">
+                              <span className="text-sm" role="img" aria-label="AdCoins balance">
                                 🪙
                               </span>
                             </p>

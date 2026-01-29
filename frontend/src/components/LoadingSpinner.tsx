@@ -20,7 +20,7 @@ export default function LoadingSpinner({ size = 'medium', color = 'border-blue-6
   if (withLogo) {
     return (
       <div className="flex flex-col justify-center items-center gap-4">
-        <div className={`loading-logo ${logoSizeClasses[size]} flex items-center justify-center text-4xl`}>
+        <div className={`loading-logo ${logoSizeClasses[size]} flex items-center justify-center text-4xl`} role="img" aria-label="Adify logo - Loading">
           📺
         </div>
         <p className="text-gray-400 text-sm">Loading...</p>

@@ -23,7 +23,7 @@ export default function Logo({ size = 'md', showText = true, variant = 'full' }:
   if (shouldShowIcon) {
     return (
       <div className="flex items-center justify-center">
-        <span className={`${sizeClasses[size]}`} role="img" aria-label="Adify">
+        <span className={`${sizeClasses[size]}`} role="img" aria-label="Adify logo">
           📺
         </span>
       </div>
@@ -32,7 +32,7 @@ export default function Logo({ size = 'md', showText = true, variant = 'full' }:
 
   return (
     <div className="flex items-center gap-2">
-      <span className={`${sizeClasses[size]}`} role="img" aria-label="TV">
+      <span className={`${sizeClasses[size]}`} role="img" aria-label="Adify logo">
         📺
       </span>
       {showText && (
