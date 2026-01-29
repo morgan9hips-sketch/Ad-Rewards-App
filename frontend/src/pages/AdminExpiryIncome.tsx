@@ -210,11 +210,9 @@ export default function AdminExpiryIncome() {
                         >
                           {balance.type === 'coins' ? (
                             <>
-                              <img 
-                                src="/images/branding/Adcoin tiny 64x64.png" 
-                                alt="AdCoin" 
-                                className="w-4 h-4"
-                              />
+                              <span role="img" aria-label="AdCoins">
+                                🪙
+                              </span>
                               <span>Coins</span>
                             </>
                           ) : (
