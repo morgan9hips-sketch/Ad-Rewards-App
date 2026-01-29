@@ -18,7 +18,9 @@ export default function LocationRequired() {
       if (success) {
         navigate('/dashboard')
       } else {
-        setError('Location access denied. Please enable it in your browser settings.')
+        setError(
+          'Location access denied. Please enable it in your browser settings.',
+        )
       }
     } catch (error) {
       console.error('Failed to enable location:', error)
@@ -34,12 +36,13 @@ export default function LocationRequired() {
         <div className="text-6xl mb-6">🌍</div>
 
         <h1 className="text-2xl font-bold text-white mb-4">
-          Location Required
+          Location Access Required
         </h1>
 
         <p className="text-gray-300 mb-6">
-          To provide accurate currency conversion and ensure fair earnings, we
-          need to detect your location.
+          <strong>Location access is MANDATORY.</strong> The app cannot function
+          without detecting your location for accurate currency conversion and
+          compliance with regional regulations.
         </p>
 
         {error && (

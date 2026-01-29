@@ -32,7 +32,11 @@ export default function LocationBanner() {
           Location Permission Required
         </h3>
         <p className="text-sm text-gray-300 mb-4 leading-relaxed">
-          Per our <span className="text-yellow-400 font-semibold">Application Policy</span>, location services must be enabled to use this app.
+          Per our{' '}
+          <span className="text-yellow-400 font-semibold">
+            Application Policy
+          </span>
+          , location services must be enabled to use this app.
         </p>
         <p className="text-sm text-gray-400 mb-4 leading-relaxed">
           We use your location to:

@@ -66,8 +66,8 @@ function ProtectedRoute({
     return <Navigate to="/login" replace />
   }
 
-  // Show location prompt if GPS not detected (but don't block access)
-  // Users can still use the app with IP-based currency
+  // MANDATORY: Block access if location not detected
+  // Location is REQUIRED for currency conversion
 
   if (requireAdmin && user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN') {
     return (

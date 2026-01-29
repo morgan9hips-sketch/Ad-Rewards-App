@@ -84,8 +84,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error requesting location:', error)
       setLocationError(true)
-      // Still load currency based on IP if location fails
-      loadCurrencyInfo()
+      // DO NOT fallback to IP - location is MANDATORY
       return false
     }
   }
