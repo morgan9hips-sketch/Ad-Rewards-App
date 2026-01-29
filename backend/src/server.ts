@@ -170,7 +170,11 @@ if (process.env.VERCEL !== '1') {
   })
 } else {
   // Initialize exchange rates for serverless environments on first request
-  initializeExchangeRates().catch(console.error)
+  // Note: This is called asynchronously on module load to avoid blocking
+  // Exchange rate queries should handle the case where rates may not be available yet
+  initializeExchangeRates().catch(err => {
+    console.error('Failed to initialize exchange rates:', err)
+  })
 }
 
 export default app

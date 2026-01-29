@@ -164,7 +164,7 @@ export default function Transactions() {
                               {coinsChange > 0 ? '+' : ''}
                               {tx.coinsChange}
                             </span>
-                            <span className="text-base" role="img" aria-label="AdCoins change">
+                            <span className="text-lg" role="img" aria-label="AdCoins change">
                               🪙
                             </span>
                           </p>
