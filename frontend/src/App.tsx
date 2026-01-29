@@ -43,10 +43,6 @@ import Cookies from './pages/legal/Cookies'
 import AdMob from './pages/legal/AdMob'
 
 // Components
-import LocationRequired from './components/LocationRequired'
-import { useCurrency } from './contexts/CurrencyContext'
-
-// Components
 import Footer from './components/Footer'
 
 function ProtectedRoute({
@@ -56,10 +52,9 @@ function ProtectedRoute({
   children: React.ReactNode
   requireAdmin?: boolean
 }) {
-  const { isAuthenticated, loading, user } = useAuth()
-  const { currencyInfo, loading: currencyLoading } = useCurrency()
+  const { isAuthenticated, loading, user, geoResolved, geoResolving } = useAuth()
 
-  if (loading || currencyLoading) {
+  if (loading || geoResolving) {
     return (
       <div className="flex justify-center items-center h-screen bg-black">
         <LoadingSpinner size="large" />
@@ -71,9 +66,16 @@ function ProtectedRoute({
     return <Navigate to="/login" replace />
   }
 
-  // MANDATORY: Block access until location is detected
-  if (!currencyInfo || !currencyInfo.locationDetected) {
-    return <LocationRequired />
+  // MANDATORY: Block access until geo is resolved
+  if (!geoResolved) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-black">
+        <div className="text-center">
+          <LoadingSpinner size="large" />
+          <p className="text-gray-400 mt-4">Detecting your location...</p>
+        </div>
+      </div>
+    )
   }
 
   if (requireAdmin && user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN') {
