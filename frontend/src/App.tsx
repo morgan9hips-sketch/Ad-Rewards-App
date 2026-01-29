@@ -43,6 +43,10 @@ import Cookies from './pages/legal/Cookies'
 import AdMob from './pages/legal/AdMob'
 
 // Components
+import LocationRequired from './components/LocationRequired'
+import { useCurrency } from './contexts/CurrencyContext'
+
+// Components
 import Footer from './components/Footer'
 
 function ProtectedRoute({
@@ -53,8 +57,9 @@ function ProtectedRoute({
   requireAdmin?: boolean
 }) {
   const { isAuthenticated, loading, user } = useAuth()
+  const { currencyInfo, loading: currencyLoading } = useCurrency()
 
-  if (loading) {
+  if (loading || currencyLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-black">
         <LoadingSpinner size="large" />
@@ -66,8 +71,10 @@ function ProtectedRoute({
     return <Navigate to="/login" replace />
   }
 
-  // MANDATORY: Block access if location not detected
-  // Location is REQUIRED for currency conversion
+  // MANDATORY: Block access until location is detected
+  if (!currencyInfo || !currencyInfo.locationDetected) {
+    return <LocationRequired />
+  }
 
   if (requireAdmin && user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN') {
     return (
