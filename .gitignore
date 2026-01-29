@@ -25,3 +25,4 @@ backend/.env.local
 frontend/android/
 frontend/ios/
 frontend/.capacitor/
+.vercel

@@ -4,7 +4,11 @@ interface LoadingSpinnerProps {
   withLogo?: boolean
 }
 
-export default function LoadingSpinner({ size = 'medium', color = 'border-blue-600', withLogo = false }: LoadingSpinnerProps) {
+export default function LoadingSpinner({
+  size = 'medium',
+  color = 'border-blue-600',
+  withLogo = false,
+}: LoadingSpinnerProps) {
   const sizeClasses = {
     small: 'w-6 h-6 border-2',
     medium: 'w-10 h-10 border-3',
@@ -20,9 +24,11 @@ export default function LoadingSpinner({ size = 'medium', color = 'border-blue-6
   if (withLogo) {
     return (
       <div className="flex flex-col justify-center items-center gap-4">
-        <div className={`loading-logo ${logoSizeClasses[size]} flex items-center justify-center text-4xl`} role="img" aria-label="Adify logo - Loading">
-          📺
-        </div>
+        <img
+          src="/images/branding/logo-icon.png"
+          alt="Loading..."
+          className={`loading-logo ${logoSizeClasses[size]}`}
+        />
         <p className="text-gray-400 text-sm">Loading...</p>
       </div>
     )

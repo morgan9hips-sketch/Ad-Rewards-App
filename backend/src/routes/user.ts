@@ -111,13 +111,27 @@ router.get('/profile', async (req: AuthRequest, res) => {
       })
     }
 
-    res.json({
+    // Convert BigInt and Decimal fields to strings before sending
+    const profileData = {
       ...profile,
+      // BigInt fields
       coinsBalance: profile.coinsBalance.toString(),
       totalCoinsEarned: profile.totalCoinsEarned.toString(),
-      walletBalance: profile.walletBalance.toString(),
-      totalEarned: profile.totalEarned.toString(),
-    })
+      // Decimal fields
+      cashBalanceUsd: profile.cashBalanceUsd.toString(),
+      totalCashEarnedUsd: profile.totalCashEarnedUsd.toString(),
+      totalWithdrawnUsd: profile.totalWithdrawnUsd.toString(),
+      totalEarningsUsd: profile.totalEarningsUsd.toString(),
+      rewardedAdEarningsUsd: profile.rewardedAdEarningsUsd.toString(),
+      retryAdEarningsUsd: profile.retryAdEarningsUsd.toString(),
+      signUpBonusUsd: profile.signUpBonusUsd.toString(),
+      cashWalletUsd: profile.cashWalletUsd.toString(),
+      // Legacy fields (keep as is for backwards compatibility)
+      walletBalance: profile.walletBalance,
+      totalEarned: profile.totalEarned,
+    }
+
+    res.json(profileData)
   } catch (error) {
     console.error('Error fetching profile:', error)
     res.status(500).json({ error: 'Failed to fetch profile' })
@@ -250,56 +264,60 @@ router.get('/currency-info', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
     const { lat, lng } = req.query
+    const ipAddress = getClientIP(req)
 
-    // Check if coordinates are provided
-    if (!lat || !lng) {
-      return res.status(403).json({
-        error: 'Location coordinates required',
-        message: 'Please enable location services to use this app',
-        locationRequired: true,
-      })
+    // Try GPS coordinates first, fallback to IP
+    let currencyInfo
+    let locationDetected = false
+    let detectedCountry: string | undefined
+
+    if (lat && lng) {
+      const latitude = parseFloat(lat as string)
+      const longitude = parseFloat(lng as string)
+
+      // Validate coordinates
+      if (
+        !isNaN(latitude) &&
+        !isNaN(longitude) &&
+        latitude >= -90 &&
+        latitude <= 90 &&
+        longitude >= -180 &&
+        longitude <= 180
+      ) {
+        // Get location info from coordinates
+        const locationInfo = getUserLocationInfoFromCoordinates(
+          latitude,
+          longitude,
+        )
+
+        if (locationInfo.countryCode) {
+          // Use GPS-based location
+          currencyInfo = await getUserCurrencyInfo(
+            userId,
+            'coordinates',
+            locationInfo.countryCode,
+          )
+          locationDetected = true
+          detectedCountry = locationInfo.countryCode
+        }
+      }
     }
 
-    const latitude = parseFloat(lat as string)
-    const longitude = parseFloat(lng as string)
-
-    // Validate coordinates
-    if (
-      isNaN(latitude) ||
-      isNaN(longitude) ||
-      latitude < -90 ||
-      latitude > 90 ||
-      longitude < -180 ||
-      longitude > 180
-    ) {
-      return res.status(400).json({
-        error: 'Invalid coordinates',
-        message: 'Please provide valid latitude and longitude',
-      })
+    // Fallback to IP-based detection
+    if (!currencyInfo) {
+      currencyInfo = await getUserCurrencyInfo(userId, ipAddress)
+      locationDetected = false
     }
-
-    // Get location info from coordinates
-    const locationInfo = getUserLocationInfoFromCoordinates(latitude, longitude)
-
-    if (!locationInfo.countryCode) {
-      return res.status(400).json({
-        error: 'Unable to determine country from location',
-        message: 'Your location could not be mapped to a supported country',
-      })
-    }
-
-    // Get currency info using the detected country
-    const currencyInfo = await getUserCurrencyInfo(
-      userId,
-      'coordinates',
-      locationInfo.countryCode,
-    )
 
     res.json({
       ...currencyInfo,
-      locationDetected: true,
-      coordinates: { lat: latitude, lng: longitude },
-      detectedCountry: locationInfo.countryCode,
+      locationDetected,
+      coordinates:
+        lat && lng
+          ? { lat: parseFloat(lat as string), lng: parseFloat(lng as string) }
+          : null,
+      detectedCountry: detectedCountry || currencyInfo.displayCountry,
+      locationRequired: false, // Not strictly required, just preferred
     })
   } catch (error) {
     console.error('Error fetching currency info:', error)

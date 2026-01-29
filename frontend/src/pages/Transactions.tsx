@@ -107,7 +107,10 @@ export default function Transactions() {
               {filterType === 'all'
                 ? 'All'
                 : getTypeLabel(filterType)
-                    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+                    .replace(
+                      /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,
+                      '',
+                    )
                     .trim()}
             </button>
           ),
@@ -132,24 +135,26 @@ export default function Transactions() {
                     key={tx.id}
                     className="flex justify-between items-start p-3 bg-gray-800 rounded-lg"
                   >
-                     <div className="flex-1">
-                       <div className="flex items-center gap-2">
-                         {tx.type === 'coin_earned' && (
-                           <span className="text-lg" role="img" aria-label="AdCoin earned">
-                             🪙
-                           </span>
-                         )}
-                         <p className={`font-semibold ${getTypeColor(tx.type)}`}>
-                           {getTypeLabel(tx.type)}
-                         </p>
-                       </div>
-                       <p className="text-sm text-gray-400 mt-1">
-                         {tx.description || 'No description'}
-                       </p>
-                       <p className="text-xs text-gray-500 mt-1">
-                         {new Date(tx.createdAt).toLocaleString()}
-                       </p>
-                     </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        {tx.type === 'coin_earned' && (
+                          <img
+                            src="/images/branding/Adcoin tiny 64x64.png"
+                            alt="AdCoin earned"
+                            className="w-5 h-5 inline"
+                          />
+                        )}
+                        <p className={`font-semibold ${getTypeColor(tx.type)}`}>
+                          {getTypeLabel(tx.type)}
+                        </p>
+                      </div>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {tx.description || 'No description'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(tx.createdAt).toLocaleString()}
+                      </p>
+                    </div>
                     <div className="text-right ml-4">
                       {coinsChange !== BigInt(0) && (
                         <>
@@ -164,16 +169,20 @@ export default function Transactions() {
                               {coinsChange > 0 ? '+' : ''}
                               {tx.coinsChange}
                             </span>
-                            <span className="text-lg" role="img" aria-label="AdCoins change">
-                              🪙
-                            </span>
+                            <img
+                              src="/images/branding/Adcoin tiny 64x64.png"
+                              alt="AdCoins change"
+                              className="w-5 h-5 inline"
+                            />
                           </p>
                           {tx.coinsBalanceAfter && (
                             <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 justify-end">
                               <span>Balance: {tx.coinsBalanceAfter}</span>
-                              <span className="text-sm" role="img" aria-label="AdCoins balance">
-                                🪙
-                              </span>
+                              <img
+                                src="/images/branding/Adcoin tiny 64x64.png"
+                                alt="AdCoins balance"
+                                className="w-4 h-4 inline"
+                              />
                             </p>
                           )}
                         </>

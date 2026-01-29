@@ -255,17 +255,17 @@ export default function Ads() {
           <h2 className="text-2xl font-bold text-white mb-2">
             Rewarded Video Ad
           </h2>
-          <p className="text-gray-400 mb-6">
-            Watch a video ad and earn coins!
-          </p>
+          <p className="text-gray-400 mb-6">Watch a video ad and earn coins!</p>
 
           <div className="bg-gray-800 rounded-lg p-4 mb-6 max-w-md mx-auto">
             <div className="flex items-center justify-center space-x-4">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2">
-                  <span className="text-3xl" role="img" aria-label="AdCoins">
-                    🪙
-                  </span>
+                  <img
+                    src="/images/branding/Adcoin medium 256x256.png"
+                    alt="AdCoins"
+                    className="w-10 h-10"
+                  />
                   <div className="text-yellow-400 font-bold text-2xl">100</div>
                 </div>
                 <div className="text-gray-400 text-sm">Coins</div>

@@ -93,17 +93,18 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const loadCurrencyInfo = async (lat?: number, lng?: number) => {
     try {
       setLoading(true)
-      
+
       // Get the current user session
-      const { data: { session } } = await supabase.auth.getSession()
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
       if (!session?.access_token) {
-        console.error('No authentication session - user must be logged in')
-        setLocationError(true)
+        console.log('No authentication session - waiting for login')
         setLoading(false)
         return
       }
-      
+
       let url = `${API_BASE_URL}/api/user/currency-info`
       if (lat && lng) {
         url += `?lat=${lat}&lng=${lng}`
@@ -111,8 +112,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
+          Authorization: `Bearer ${session.access_token}`,
+        },
       })
 
       if (response.ok) {
@@ -120,19 +121,42 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         console.log('Currency info loaded:', data)
         setCurrencyInfo({
           ...data,
-          locationDetected: !!(lat && lng),
-          locationRequired: false,
+          locationDetected: data.locationDetected || false,
+          locationRequired: data.locationRequired || false,
         })
         setLocationError(false)
       } else {
-        console.error('Currency API failed')
-        setLocationError(true)
-        setCurrencyInfo(null)
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Currency API failed:', errorData)
+        // Don't block - allow IP-based fallback
+        setLocationError(false)
+
+        // Set basic fallback currency info
+        setCurrencyInfo({
+          displayCurrency: 'USD',
+          revenueCountry: null,
+          displayCountry: null,
+          exchangeRate: 1,
+          formatting: { symbol: '$', decimals: 2, position: 'before' },
+          locationDetected: false,
+          locationRequired: false,
+        })
       }
     } catch (error) {
       console.error('Error loading currency info:', error)
-      setLocationError(true)
-      setCurrencyInfo(null)
+      // Don't block - allow access with fallback
+      setLocationError(false)
+
+      // Set basic fallback currency info
+      setCurrencyInfo({
+        displayCurrency: 'USD',
+        revenueCountry: null,
+        displayCountry: null,
+        exchangeRate: 1,
+        formatting: { symbol: '$', decimals: 2, position: 'before' },
+        locationDetected: false,
+        locationRequired: false,
+      })
     } finally {
       setLoading(false)
     }

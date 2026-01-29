@@ -126,12 +126,12 @@ export default function WatchAd() {
         <Card>
           <div className="text-center">
             <div className="flex items-center justify-center gap-3 mb-2">
-              <h2 className="text-2xl font-bold text-white">
-                🎉 You earned
-              </h2>
-              <span className="text-5xl" role="img" aria-label={`${coinsEarned} AdCoins earned`}>
-                🪙
-              </span>
+              <h2 className="text-2xl font-bold text-white">🎉 You earned</h2>
+              <img
+                src="/images/branding/Adcoin large 512x512.png"
+                alt={`${coinsEarned} AdCoins earned`}
+                className="w-20 h-20"
+              />
               <h2 className="text-2xl font-bold text-yellow-500">
                 {coinsEarned}!
               </h2>
@@ -142,9 +142,11 @@ export default function WatchAd() {
                 <p className="text-4xl font-bold text-yellow-500">
                   {totalCoins.toLocaleString()}
                 </p>
-                <span className="text-5xl" role="img" aria-label="Total AdCoins balance">
-                  🪙
-                </span>
+                <img
+                  src="/images/branding/Adcoin medium 256x256.png"
+                  alt="Total AdCoins balance"
+                  className="w-12 h-12"
+                />
               </div>
             </div>
             <p className="text-gray-400 text-sm mb-4">

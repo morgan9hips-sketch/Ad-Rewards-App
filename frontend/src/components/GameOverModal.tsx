@@ -17,7 +17,7 @@ export default function GameOverModal({
   sessionId,
   score,
   completed,
-  onRetryWithVideo,
+  onRetryWithVideo, // eslint-disable-line @typescript-eslint/no-unused-vars
   onRetryWithWait,
   onExit,
 }: GameOverModalProps) {
@@ -25,37 +25,60 @@ export default function GameOverModal({
   const [showWaitTimer, setShowWaitTimer] = useState(false)
   const [processing, setProcessing] = useState(false)
 
+  // Note: onRetryWithVideo is defined for future AdMob integration
+  // @ts-ignore - Will be used when AdMob is integrated
+  const _onRetryWithVideo = onRetryWithVideo
+
   const handleWatchVideo = async () => {
     try {
       setProcessing(true)
 
-      // In a real implementation, this would show an AdMob rewarded ad
-      // For now, we'll simulate it
-      const admobImpressionId = `mock_${Date.now()}`
+      // TODO: Integrate AdMob Rewarded Ad here
+      // You need to:
+      // 1. Import AdMob from Capacitor: import { AdMob } from '@capacitor-community/admob'
+      // 2. Call AdMob.showRewardedVideo()
+      // 3. Get the real admobImpressionId from the ad callback
+      // For now, this will fail on backend validation without real AdMob integration
 
       const token = session?.access_token
-      if (!token) return
-
-      const res = await fetch(`${API_BASE_URL}/api/game/retry-video`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sessionId,
-          admobImpressionId,
-        }),
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        alert(`Success! You earned ${data.coinsEarned} coins! You can continue playing.`)
-        onRetryWithVideo()
-      } else {
-        const error = await res.json()
-        alert(`Failed to process video: ${error.error}`)
+      if (!token) {
+        console.error('No authentication token')
+        setProcessing(false)
+        return
       }
+
+      // This requires real AdMob integration - see ADMOB_IMPLEMENTATION_COMPLETE.md
+      console.error('AdMob integration required for retry video feature')
+      alert(
+        'Ad viewing feature requires AdMob setup. Please complete mobile app integration.',
+      )
+      setProcessing(false)
+      return
+
+      // UNCOMMENT AFTER ADMOB INTEGRATION:
+      // const adResult = await AdMob.showRewardedVideo({ adUnitId: 'your-ad-unit-id' })
+      // const admobImpressionId = adResult.impressionId
+      //
+      // const res = await fetch(`${API_BASE_URL}/api/game/retry-video`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Authorization': `Bearer ${token}`,
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     sessionId,
+      //     admobImpressionId,
+      //   }),
+      // })
+      //
+      // if (res.ok) {
+      //   const data = await res.json()
+      //   alert(`Success! You earned ${data.coinsEarned} coins! You can continue playing.`)
+      //   onRetryWithVideo()
+      // } else {
+      //   const error = await res.json()
+      //   alert(`Failed to process video: ${error.error}`)
+      // }
     } catch (error) {
       console.error('Error processing video:', error)
       alert('Failed to process video. Please try again.')
@@ -76,7 +99,7 @@ export default function GameOverModal({
       const res = await fetch(`${API_BASE_URL}/api/game/retry-wait`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ sessionId }),
@@ -99,7 +122,9 @@ export default function GameOverModal({
     return (
       <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
         <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">⏰ Waiting Period</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">
+            ⏰ Waiting Period
+          </h2>
           <CooldownTimer
             endTime={new Date(Date.now() + 5 * 60 * 1000)}
             onComplete={handleCooldownComplete}
@@ -126,14 +151,19 @@ export default function GameOverModal({
             {completed ? '🎉 GAME COMPLETE!' : '💀 GAME OVER!'}
           </h2>
           <div className="text-gray-300 text-lg">
-            Your Score: <span className="text-yellow-500 font-bold">{score.toLocaleString()}</span>
+            Your Score:{' '}
+            <span className="text-yellow-500 font-bold">
+              {score.toLocaleString()}
+            </span>
           </div>
           {completed && (
             <div className="mt-2 text-green-400 font-semibold flex items-center justify-center gap-2">
               <span>You earned</span>
-              <span className="text-2xl" role="img" aria-label="10 AdCoins earned">
-                🪙
-              </span>
+              <img
+                src="/images/branding/Adcoin small 128x128.png"
+                alt="10 AdCoins earned"
+                className="w-6 h-6 inline"
+              />
               <span>10!</span>
             </div>
           )}
@@ -170,17 +200,11 @@ export default function GameOverModal({
                 <span className="text-xl">⏰</span>
                 <span>Wait 5 Minutes (Free)</span>
               </div>
-              <div className="text-sm opacity-90">
-                No coins, just patience
-              </div>
+              <div className="text-sm opacity-90">No coins, just patience</div>
             </button>
 
             <div className="border-t border-gray-700 pt-4">
-              <Button
-                variant="secondary"
-                fullWidth
-                onClick={onExit}
-              >
+              <Button variant="secondary" fullWidth onClick={onExit}>
                 Exit Game
               </Button>
             </div>
@@ -189,10 +213,7 @@ export default function GameOverModal({
 
         {completed && (
           <div className="mt-6">
-            <Button
-              fullWidth
-              onClick={onExit}
-            >
+            <Button fullWidth onClick={onExit}>
               Back to Dashboard
             </Button>
           </div>

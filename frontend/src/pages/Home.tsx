@@ -11,9 +11,11 @@ export default function Home() {
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
             <div className="flex items-center gap-3">
-              <span className="text-6xl" role="img" aria-label="Adify logo">
-                📺
-              </span>
+              <img
+                src="/images/branding/logo-full.png"
+                alt="Adify - Watch Ads, Earn Real Money"
+                className="h-16 w-auto mb-4"
+              />
               <h1 className="text-5xl font-bold text-white">Adify</h1>
             </div>
           </div>
@@ -21,7 +23,8 @@ export default function Home() {
             Press Play to Earn Real Money
           </p>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Turn your time into rewards. Watch video ads, complete tasks, and get paid through PayPal.
+            Turn your time into rewards. Watch video ads, complete tasks, and
+            get paid through PayPal.
           </p>
         </div>
 
@@ -30,7 +33,11 @@ export default function Home() {
             <Button size="lg" onClick={() => navigate('/login')}>
               Get Started
             </Button>
-            <Button size="lg" variant="secondary" onClick={() => navigate('/login')}>
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={() => navigate('/login')}
+            >
               Sign In
             </Button>
           </div>
@@ -42,7 +49,8 @@ export default function Home() {
               <div className="text-5xl mb-4">📺</div>
               <h3 className="text-xl font-bold text-white mb-2">Watch Ads</h3>
               <p className="text-gray-400">
-                Watch engaging video ads from our partners and earn money for every completed view.
+                Watch engaging video ads from our partners and earn money for
+                every completed view.
               </p>
             </div>
           </Card>
@@ -50,9 +58,12 @@ export default function Home() {
           <Card>
             <div className="text-center">
               <div className="text-5xl mb-4">💰</div>
-              <h3 className="text-xl font-bold text-white mb-2">Earn Rewards</h3>
+              <h3 className="text-xl font-bold text-white mb-2">
+                Earn Rewards
+              </h3>
               <p className="text-gray-400">
-                Build your balance with every ad watched. Track your earnings in real-time.
+                Build your balance with every ad watched. Track your earnings in
+                real-time.
               </p>
             </div>
           </Card>
@@ -62,7 +73,8 @@ export default function Home() {
               <div className="text-5xl mb-4">🎯</div>
               <h3 className="text-xl font-bold text-white mb-2">Get Paid</h3>
               <p className="text-gray-400">
-                Withdraw your earnings via PayPal once you reach the minimum threshold.
+                Withdraw your earnings via PayPal once you reach the minimum
+                threshold.
               </p>
             </div>
           </Card>
@@ -73,21 +85,21 @@ export default function Home() {
             Safe, secure, and transparent. No hidden fees.
           </p>
           <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-500">
-            <button 
+            <button
               onClick={() => navigate('/terms')}
               className="hover:text-gray-400 transition-colors underline"
             >
               Terms of Service
             </button>
             <span>•</span>
-            <button 
+            <button
               onClick={() => navigate('/privacy')}
               className="hover:text-gray-400 transition-colors underline"
             >
               Privacy Policy
             </button>
             <span>•</span>
-            <a 
+            <a
               href="mailto:admin@adrevtechnologies.com"
               className="hover:text-gray-400 transition-colors underline"
             >

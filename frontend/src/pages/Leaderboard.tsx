@@ -26,7 +26,10 @@ interface LeaderboardResponse {
 export default function Leaderboard() {
   const { session } = useAuth()
   const [loading, setLoading] = useState(true)
-  const [data, setData] = useState<LeaderboardResponse>({ leaderboard: [], currentUser: null })
+  const [data, setData] = useState<LeaderboardResponse>({
+    leaderboard: [],
+    currentUser: null,
+  })
 
   useEffect(() => {
     fetchLeaderboard()
@@ -57,10 +60,14 @@ export default function Leaderboard() {
 
   const getRankEmoji = (rank: number) => {
     switch (rank) {
-      case 1: return '🥇'
-      case 2: return '🥈'
-      case 3: return '🥉'
-      default: return `${rank}.`
+      case 1:
+        return '🥇'
+      case 2:
+        return '🥈'
+      case 3:
+        return '🥉'
+      default:
+        return `${rank}.`
     }
   }
 
@@ -84,8 +91,12 @@ export default function Leaderboard() {
         <Card>
           <div className="text-center py-12">
             <p className="text-4xl mb-4">🏆</p>
-            <p className="text-xl text-white mb-2">Be the first to earn coins!</p>
-            <p className="text-gray-400">Start watching ads to appear on the leaderboard</p>
+            <p className="text-xl text-white mb-2">
+              Be the first to earn coins!
+            </p>
+            <p className="text-gray-400">
+              Start watching ads to appear on the leaderboard
+            </p>
           </div>
         </Card>
       ) : (
@@ -101,7 +112,8 @@ export default function Leaderboard() {
                     <span className="text-2xl">{entry.avatarEmoji}</span>
                     <div>
                       <p className="text-white font-semibold">
-                        {entry.displayName} {entry.countryBadge && entry.countryBadge}
+                        {entry.displayName}{' '}
+                        {entry.countryBadge && entry.countryBadge}
                       </p>
                     </div>
                   </div>
@@ -110,9 +122,11 @@ export default function Leaderboard() {
                       <p className="text-yellow-500 font-bold text-lg">
                         {formatCoins(entry.coins)}
                       </p>
-                      <span className="text-xl" role="img" aria-label="AdCoins">
-                        🪙
-                      </span>
+                      <img
+                        src="/images/branding/Adcoin small 128x128.png"
+                        alt="AdCoins"
+                        className="w-6 h-6 inline"
+                      />
                     </div>
                   </div>
                 </div>
@@ -131,13 +145,13 @@ export default function Leaderboard() {
                   <p className="text-yellow-500 text-lg">
                     {formatCoins(data.currentUser.coins)}
                   </p>
-                  <span className="text-2xl" role="img" aria-label="Your AdCoins balance">
-                    🪙
-                  </span>
+                  <img
+                    src="/images/branding/Adcoin medium 256x256.png"
+                    alt="Your AdCoins balance"
+                    className="w-8 h-8"
+                  />
                 </div>
-                <p className="text-green-400 text-sm mt-2">
-                  Keep going! 💪
-                </p>
+                <p className="text-green-400 text-sm mt-2">Keep going! 💪</p>
               </div>
             </Card>
           )}

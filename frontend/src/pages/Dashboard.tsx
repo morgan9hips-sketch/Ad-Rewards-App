@@ -12,6 +12,7 @@ import RecentWithdrawals from '../components/RecentWithdrawals'
 import PlatformStats from '../components/PlatformStats'
 import SignupBonusBadge from '../components/SignupBonusBadge'
 import TermsAcceptanceModal from '../components/TermsAcceptanceModal'
+import LocationBanner from '../components/LocationBanner'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 
@@ -209,6 +210,9 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* Location Banner (non-blocking) */}
+      <LocationBanner />
+
       {/* Expiry Warnings */}
       <ExpiryWarning />
 
@@ -223,12 +227,12 @@ export default function Dashboard() {
           <Card>
             <div className="p-4">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-3xl" role="img" aria-label="AdCoins balance">
-                  🪙
-                </span>
-                <h2 className="text-xl font-bold text-white">
-                  Your Balance
-                </h2>
+                <img
+                  src="/images/branding/Adcoin medium 256x256.png"
+                  alt="AdCoins balance"
+                  className="w-8 h-8"
+                />
+                <h2 className="text-xl font-bold text-white">Your Balance</h2>
               </div>
               <p className="text-4xl font-bold text-yellow-500 mb-3">
                 {balance ? parseInt(balance.coins).toLocaleString() : '0'} Coins
@@ -271,10 +275,7 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              <Button
-                fullWidth
-                onClick={() => navigate('/withdrawals')}
-              >
+              <Button fullWidth onClick={() => navigate('/withdrawals')}>
                 Withdraw
               </Button>
 
@@ -329,9 +330,11 @@ export default function Dashboard() {
                 <span className="flex items-center justify-center gap-2">
                   <span>📺 Watch Videos</span>
                   <span className="flex items-center gap-1">
-                    <span role="img" aria-label="Earn 100 AdCoins">
-                      🪙
-                    </span>
+                    <img
+                      src="/images/branding/Adcoin tiny 64x64.png"
+                      alt="AdCoin"
+                      className="w-5 h-5 inline"
+                    />
                     <span>100</span>
                   </span>
                 </span>
@@ -344,9 +347,11 @@ export default function Dashboard() {
                 <span className="flex items-center justify-center gap-2">
                   <span>🎮 Play Game</span>
                   <span className="flex items-center gap-1">
-                    <span role="img" aria-label="Earn 10 AdCoins">
-                      🪙
-                    </span>
+                    <img
+                      src="/images/branding/Adcoin tiny 64x64.png"
+                      alt="AdCoin"
+                      className="w-5 h-5 inline"
+                    />
                     <span>10</span>
                   </span>
                 </span>
@@ -385,9 +390,11 @@ export default function Dashboard() {
                             {coinsChange > 0 ? '+' : ''}
                             {tx.coinsChange}
                           </span>
-                          <span role="img" aria-label="AdCoins">
-                            🪙
-                          </span>
+                          <img
+                            src="/images/branding/Adcoin tiny 64x64.png"
+                            alt="AdCoins"
+                            className="w-4 h-4 inline"
+                          />
                         </p>
                       </div>
                     </div>

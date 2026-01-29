@@ -1,5 +1,4 @@
-// API configuration - Using frontend deployment as proxy for comprehensive functionality
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'https://adify.adrevtechnologies.com'
+// API configuration - Points to backend API deployment
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 export { API_BASE_URL }

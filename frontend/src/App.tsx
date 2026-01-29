@@ -5,14 +5,13 @@ import {
   Navigate,
 } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { CurrencyProvider, useCurrency } from './contexts/CurrencyContext'
+import { CurrencyProvider } from './contexts/CurrencyContext'
 import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
 import CookieConsent from './components/CookieConsent'
 import BetaBanner from './components/BetaBanner'
 import AdBanner from './components/AdBanner'
 import LoadingSpinner from './components/LoadingSpinner'
-import LocationRequired from './components/LocationRequired'
 
 // Pages
 import Home from './pages/Home'
@@ -54,13 +53,8 @@ function ProtectedRoute({
   requireAdmin?: boolean
 }) {
   const { isAuthenticated, loading, user } = useAuth()
-  const {
-    currencyInfo,
-    loading: currencyLoading,
-    locationError,
-  } = useCurrency()
 
-  if (loading || currencyLoading) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-black">
         <LoadingSpinner size="large" />
@@ -72,10 +66,8 @@ function ProtectedRoute({
     return <Navigate to="/login" replace />
   }
 
-  // Location is required for authenticated users
-  if (locationError || !currencyInfo?.locationDetected) {
-    return <LocationRequired />
-  }
+  // Show location prompt if GPS not detected (but don't block access)
+  // Users can still use the app with IP-based currency
 
   if (requireAdmin && user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN') {
     return (
@@ -117,7 +109,7 @@ function AppContent() {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
-        
+
         {/* New Legal Pages */}
         <Route path="/legal/terms" element={<Terms />} />
         <Route path="/legal/privacy" element={<Privacy />} />

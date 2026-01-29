@@ -62,12 +62,12 @@ async function expireCoins() {
       totalValue += cashValue
 
       console.log(
-        `Expired ${coins} coins (R${cashValue.toFixed(2)}) from user ${user.email}`
+        `Expired ${coins} coins (R${cashValue.toFixed(2)}) from user ${user.email}`,
       )
     }
 
     console.log(
-      `✅ Coin expiry complete: ${inactiveUsers.length} users, ${totalExpired} coins (R${totalValue.toFixed(2)})`
+      `✅ Coin expiry complete: ${inactiveUsers.length} users, ${totalExpired} coins (R${totalValue.toFixed(2)})`,
     )
 
     return {
@@ -134,7 +134,7 @@ async function expireCash() {
     }
 
     console.log(
-      `✅ Cash expiry complete: ${inactiveUsers.length} users, $${totalExpired.toFixed(2)} USD`
+      `✅ Cash expiry complete: ${inactiveUsers.length} users, $${totalExpired.toFixed(2)} USD`,
     )
 
     return {
@@ -192,14 +192,3 @@ export function scheduleExpiryJob() {
 }
 
 // For manual testing
-if (require.main === module) {
-  runExpiryJob()
-    .then(() => {
-      console.log('Manual run complete')
-      process.exit(0)
-    })
-    .catch((error) => {
-      console.error('Manual run failed:', error)
-      process.exit(1)
-    })
-}
