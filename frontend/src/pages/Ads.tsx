@@ -263,11 +263,9 @@ export default function Ads() {
             <div className="flex items-center justify-center space-x-4">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2">
-                  <img 
-                    src="/images/branding/Adcoin medium 256x256.png" 
-                    alt="AdCoin" 
-                    className="w-8 h-8"
-                  />
+                  <span className="text-3xl" role="img" aria-label="AdCoins">
+                    🪙
+                  </span>
                   <div className="text-yellow-400 font-bold text-2xl">100</div>
                 </div>
                 <div className="text-gray-400 text-sm">Coins</div>

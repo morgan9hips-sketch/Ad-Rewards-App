@@ -223,11 +223,9 @@ export default function Dashboard() {
           <Card>
             <div className="p-4">
               <div className="flex items-center gap-2 mb-3">
-                <img 
-                  src="/images/branding/Adcoin medium 256x256.png" 
-                  alt="AdCoin" 
-                  className="w-8 h-8"
-                />
+                <span className="text-3xl" role="img" aria-label="AdCoins balance">
+                  🪙
+                </span>
                 <h2 className="text-xl font-bold text-white">
                   Your Balance
                 </h2>
@@ -331,11 +329,9 @@ export default function Dashboard() {
                 <span className="flex items-center justify-center gap-2">
                   <span>📺 Watch Videos</span>
                   <span className="flex items-center gap-1">
-                    <img 
-                      src="/images/branding/Adcoin tiny 64x64.png" 
-                      alt="AdCoin" 
-                      className="w-5 h-5 inline"
-                    />
+                    <span role="img" aria-label="Earn 100 AdCoins">
+                      🪙
+                    </span>
                     <span>100</span>
                   </span>
                 </span>
@@ -348,11 +344,9 @@ export default function Dashboard() {
                 <span className="flex items-center justify-center gap-2">
                   <span>🎮 Play Game</span>
                   <span className="flex items-center gap-1">
-                    <img 
-                      src="/images/branding/Adcoin tiny 64x64.png" 
-                      alt="AdCoin" 
-                      className="w-5 h-5 inline"
-                    />
+                    <span role="img" aria-label="Earn 10 AdCoins">
+                      🪙
+                    </span>
                     <span>10</span>
                   </span>
                 </span>
@@ -391,11 +385,9 @@ export default function Dashboard() {
                             {coinsChange > 0 ? '+' : ''}
                             {tx.coinsChange}
                           </span>
-                          <img 
-                            src="/images/branding/Adcoin tiny 64x64.png" 
-                            alt="AdCoin" 
-                            className="w-4 h-4 inline"
-                          />
+                          <span role="img" aria-label="AdCoins">
+                            🪙
+                          </span>
                         </p>
                       </div>
                     </div>

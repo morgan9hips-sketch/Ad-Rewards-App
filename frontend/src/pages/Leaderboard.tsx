@@ -110,11 +110,9 @@ export default function Leaderboard() {
                       <p className="text-yellow-500 font-bold text-lg">
                         {formatCoins(entry.coins)}
                       </p>
-                      <img 
-                        src="/images/branding/Adcoin tiny 64x64.png" 
-                        alt="AdCoin" 
-                        className="w-5 h-5"
-                      />
+                      <span className="text-xl" role="img" aria-label="AdCoins">
+                        🪙
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -133,11 +131,9 @@ export default function Leaderboard() {
                   <p className="text-yellow-500 text-lg">
                     {formatCoins(data.currentUser.coins)}
                   </p>
-                  <img 
-                    src="/images/branding/Adcoin small 128x128.png" 
-                    alt="AdCoin" 
-                    className="w-6 h-6"
-                  />
+                  <span className="text-2xl" role="img" aria-label="Your AdCoins balance">
+                    🪙
+                  </span>
                 </div>
                 <p className="text-green-400 text-sm mt-2">
                   Keep going! 💪

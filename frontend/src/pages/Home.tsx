@@ -10,11 +10,12 @@ export default function Home() {
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
-            <img 
-              src="/images/branding/logo-full.png" 
-              alt="Adify - Watch Ads, Earn Real Money" 
-              className="hero-logo"
-            />
+            <div className="flex items-center gap-3">
+              <span className="text-6xl" role="img" aria-label="Adify logo">
+                📺
+              </span>
+              <h1 className="text-5xl font-bold text-white">Adify</h1>
+            </div>
           </div>
           <p className="text-2xl text-gray-300 mb-2 font-semibold">
             Press Play to Earn Real Money

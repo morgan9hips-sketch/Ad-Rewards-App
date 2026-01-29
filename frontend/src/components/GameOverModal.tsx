@@ -131,11 +131,9 @@ export default function GameOverModal({
           {completed && (
             <div className="mt-2 text-green-400 font-semibold flex items-center justify-center gap-2">
               <span>You earned</span>
-              <img 
-                src="/images/branding/Adcoin small 128x128.png" 
-                alt="AdCoin" 
-                className="w-6 h-6 inline"
-              />
+              <span className="text-2xl" role="img" aria-label="10 AdCoins earned">
+                🪙
+              </span>
               <span>10!</span>
             </div>
           )}

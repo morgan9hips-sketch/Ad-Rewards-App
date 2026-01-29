@@ -7,6 +7,53 @@ async function main() {
 
   console.log('🌱 Seeding database...')
 
+  // Seed exchange rates
+  console.log('💱 Seeding exchange rates...')
+  try {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    await prisma.exchangeRate.upsert({
+      where: {
+        targetCurrency_date: {
+          targetCurrency: 'ZAR',
+          date: today,
+        },
+      },
+      update: {
+        rate: 18.50,
+      },
+      create: {
+        baseCurrency: 'USD',
+        targetCurrency: 'ZAR',
+        rate: 18.50,
+        date: today,
+      },
+    })
+
+    await prisma.exchangeRate.upsert({
+      where: {
+        targetCurrency_date: {
+          targetCurrency: 'USD',
+          date: today,
+        },
+      },
+      update: {
+        rate: 0.054,
+      },
+      create: {
+        baseCurrency: 'ZAR',
+        targetCurrency: 'USD',
+        rate: 0.054,
+        date: today,
+      },
+    })
+
+    console.log('✅ Exchange rates seeded successfully')
+  } catch (error) {
+    console.error('❌ Error seeding exchange rates:', error)
+  }
+
   // Check if admin user already exists
   const existingAdmin = await prisma.userProfile.findUnique({
     where: { email: adminEmail },
