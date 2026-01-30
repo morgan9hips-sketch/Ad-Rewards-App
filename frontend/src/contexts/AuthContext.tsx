@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [geoResolved, setGeoResolved] = useState(false)
   const [geoResolving, setGeoResolving] = useState(false)
 
-  const fetchUserRole = async (token: string) => {
+  const fetchUserProfile = async (token: string) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
         headers: {
@@ -37,15 +37,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       if (response.ok) {
         const data = await response.json()
-        return data.role as UserRole
+        return {
+          role: data.role as UserRole,
+          geoResolved: data.geoResolved || false
+        }
       }
     } catch (error) {
-      console.error('Failed to fetch user role:', error)
+      console.error('Failed to fetch user profile:', error)
     }
-    return 'USER' as UserRole
+    return { role: 'USER' as UserRole, geoResolved: false }
   }
 
-  const resolveGeo = async (token: string) => {
+  const resolveGeo = async (token: string, alreadyResolved: boolean) => {
+    // Skip API call if user is already geo-resolved
+    if (alreadyResolved) {
+      setGeoResolved(true)
+      return true
+    }
+
     try {
       setGeoResolving(true)
       const response = await fetch(`${API_BASE_URL}/api/geo/resolve`, {
@@ -54,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       })
       
       if (response.ok) {
@@ -62,13 +72,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return data.resolved || false
       } else {
         console.error('Geo resolution failed')
-        setGeoResolved(false)
-        return false
+        // Allow user to proceed even if geo-resolution fails (as per requirements)
+        setGeoResolved(true)
+        return true
       }
     } catch (error) {
       console.error('Failed to resolve geo:', error)
-      setGeoResolved(false)
-      return false
+      // Allow user to proceed even if geo-resolution fails (as per requirements)
+      setGeoResolved(true)
+      return true
     } finally {
       setGeoResolving(false)
     }
@@ -78,10 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
       if (session?.user) {
-        const role = await fetchUserRole(session.access_token)
+        const { role, geoResolved: isGeoResolved } = await fetchUserProfile(session.access_token)
         setUser({ ...session.user, role })
-        // Resolve geo after authentication
-        await resolveGeo(session.access_token)
+        // Only call geo-resolution API if user is not already geo-resolved
+        await resolveGeo(session.access_token, isGeoResolved)
       } else {
         setUser(null)
         setGeoResolved(false)
@@ -94,10 +106,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session)
       if (session?.user) {
-        const role = await fetchUserRole(session.access_token)
+        const { role, geoResolved: isGeoResolved } = await fetchUserProfile(session.access_token)
         setUser({ ...session.user, role })
-        // Resolve geo after authentication
-        await resolveGeo(session.access_token)
+        // Only call geo-resolution API if user is not already geo-resolved
+        await resolveGeo(session.access_token, isGeoResolved)
       } else {
         setUser(null)
         setGeoResolved(false)
