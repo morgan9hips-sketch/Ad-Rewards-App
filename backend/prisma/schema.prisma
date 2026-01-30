@@ -83,6 +83,14 @@ model UserProfile {
   vpnSuspicionScore   Int     @default(0) @map("vpn_suspicion_score")
   suspiciousActivity  Boolean @default(false) @map("suspicious_activity")
 
+  // Geo-resolution (one-time IP-based assignment for currency/payout)
+  countryName    String?   @map("country_name")
+  currencyCode   String?   @map("currency_code")
+  ipAddress      String?   @map("ip_address")
+  geoResolved    Boolean   @default(false) @map("geo_resolved")
+  geoSource      String?   @map("geo_source")
+  geoResolvedAt  DateTime? @map("geo_resolved_at")
+
   adsWatched Int      @default(0) @map("ads_watched")
   tier       UserTier @default(Free)
   role       UserRole @default(USER)

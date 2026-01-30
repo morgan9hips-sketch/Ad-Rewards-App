@@ -21,6 +21,7 @@ import referralsRoutes from './routes/referrals.js'
 import coinValuationRoutes from './routes/coinValuation.js'
 import platformRoutes from './routes/platform.js'
 import legalRoutes from './routes/legal.js'
+import geoRoutes from './routes/geo.js'
 
 dotenv.config()
 
@@ -135,6 +136,8 @@ app.use('/coin-valuation', authenticate, coinValuationRoutes)
 app.use('/api/coin-valuation', authenticate, coinValuationRoutes)
 app.use('/platform', authenticate, platformRoutes)
 app.use('/api/platform', authenticate, platformRoutes)
+app.use('/geo', authenticate, geoRoutes)
+app.use('/api/geo', authenticate, geoRoutes)
 
 // Error handler
 app.use(
