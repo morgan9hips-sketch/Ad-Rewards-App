@@ -1,7 +1,22 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { API_BASE_URL } from '../config/api'
+
+// TypeScript declaration for Android bridge
+declare global {
+  interface Window {
+    Android?: {
+      setAuthToken: (token: string) => void
+    }
+  }
+}
 
 type UserRole = 'USER' | 'ADMIN' | 'SUPER_ADMIN'
 
@@ -39,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await response.json()
         return {
           role: data.role as UserRole,
-          geoResolved: data.geoResolved || false
+          geoResolved: data.geoResolved || false,
         }
       }
     } catch (error) {
@@ -65,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
         credentials: 'include',
       })
-      
+
       if (response.ok) {
         const data = await response.json()
         setGeoResolved(data.resolved || false)
@@ -86,14 +101,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const sendTokenToAndroid = (token: string) => {
+    // Check if running inside Android WebView
+    if (window.Android && typeof window.Android.setAuthToken === 'function') {
+      try {
+        window.Android.setAuthToken(token)
+        console.log('✅ Auth token sent to Android app')
+      } catch (error) {
+        console.error('❌ Failed to send token to Android:', error)
+      }
+    } else {
+      console.log('ℹ️ Not running in Android WebView, skipping token bridge')
+    }
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
       if (session?.user) {
-        const { role, geoResolved: isGeoResolved } = await fetchUserProfile(session.access_token)
+        const { role, geoResolved: isGeoResolved } = await fetchUserProfile(
+          session.access_token,
+        )
         setUser({ ...session.user, role })
         // Only call geo-resolution API if user is not already geo-resolved
         await resolveGeo(session.access_token, isGeoResolved)
+
+        // 🚨 NEW: Send auth token to Android app
+        sendTokenToAndroid(session.access_token)
       } else {
         setUser(null)
         setGeoResolved(false)
@@ -106,10 +140,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session)
       if (session?.user) {
-        const { role, geoResolved: isGeoResolved } = await fetchUserProfile(session.access_token)
+        const { role, geoResolved: isGeoResolved } = await fetchUserProfile(
+          session.access_token,
+        )
         setUser({ ...session.user, role })
         // Only call geo-resolution API if user is not already geo-resolved
         await resolveGeo(session.access_token, isGeoResolved)
+
+        // 🚨 NEW: Send auth token to Android app on auth state change
+        sendTokenToAndroid(session.access_token)
       } else {
         setUser(null)
         setGeoResolved(false)
@@ -126,7 +165,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAuthenticated: !!user, geoResolved, geoResolving, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        loading,
+        isAuthenticated: !!user,
+        geoResolved,
+        geoResolving,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )
