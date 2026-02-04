@@ -1,118 +1,90 @@
-import { PrismaClient } from '@prisma/client'
+/*import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+// --- CONSTANTS ---
+// These are required for the functions below.
 const SIGNUP_BONUS_LIMIT_PER_REGION = 10000
 const SIGNUP_BONUS_COINS = 500
 const SIGNUP_BONUS_VALUE_ZAR = 50.0
+// --- END CONSTANTS ---
 
 /**
- * Check if a user is eligible for signup bonus
- * Called during user registration
+ * Check if a user is eligible for signup bonus and credit it immediately.
+ * Called during user registration.
  */
 export async function checkSignupBonusEligibility(
   userId: string,
   countryCode: string
 ): Promise<boolean> {
   try {
-    // Count existing users in this region
-    const existingUsersCount = await prisma.signupBonus.count({
-      where: { countryCode },
-    })
+    // Use a transaction to ensure all operations succeed or fail together
+    return await prisma.$transaction(async (tx) => {
+      // Count existing users in this region
+      const existingUsersCount = await tx.signupBonus.count({
+        where: { countryCode },
+      });
 
-    const userNumberInRegion = existingUsersCount + 1
-    const eligible = userNumberInRegion <= SIGNUP_BONUS_LIMIT_PER_REGION
+      const userNumberInRegion = existingUsersCount + 1;
+      const eligible = userNumberInargin <= SIGNUP_BONUS_LIMIT_PER_REGION;
 
-    // Create signup bonus record
-    await prisma.signupBonus.create({
-      data: {
-        userId,
-        countryCode,
-        userNumberInRegion,
-        bonusCoins: SIGNUP_BONUS_COINS,
-        bonusValueZar: SIGNUP_BONUS_VALUE_ZAR,
-        eligible,
-      },
-    })
+      let creditedAt: Date | null = null;
 
-    return eligible
-  } catch (error) {
-    console.error('Error checking signup bonus eligibility:', error)
-    return false
-  }
-}
+      // --- NEW LOGIC: If eligible, credit the bonus immediately ---
+      if (eligible) {
+        creditedAt = new Date(); // Mark as credited now
 
-/**
- * Credit signup bonus when user reaches minimum withdrawal threshold
- */
-export async function creditSignupBonus(userId: string): Promise<boolean> {
-  try {
-    const signupBonus = await prisma.signupBonus.findUnique({
-      where: { userId },
-    })
-
-    if (!signupBonus) {
-      return false
-    }
-
-    // Check if already credited
-    if (signupBonus.creditedAt) {
-      return false
-    }
-
-    // Check if eligible
-    if (!signupBonus.eligible) {
-      return false
-    }
-
-    // Credit the bonus
-    await prisma.$transaction(async (tx) => {
-      // Add coins to user balance
-      await tx.userProfile.update({
-        where: { userId },
-        data: {
-          coinsBalance: { increment: signupBonus.bonusCoins },
-          totalCoinsEarned: { increment: signupBonus.bonusCoins },
-        },
-      })
-
-      // Add cash value to backend tracking
-      const bonusValueUsd = Number(signupBonus.bonusValueZar) / 18.5
-      await tx.userProfile.update({
-        where: { userId },
-        data: {
-          cashBalanceUsd: {
-            increment: bonusValueUsd,
+        // 1. Add coins to user's profile
+        await tx.userProfile.update({
+          where: { userId },
+          data: {
+            coinsBalance: { increment: SIGNUP_BONUS_COINS },
+            totalCoinsEarned: { increment: SIGNUP_BONUS_COINS },
           },
-          totalCashEarnedUsd: {
-            increment: bonusValueUsd,
+        });
+
+        // 2. Add cash value for backend tracking
+        const bonusValueUsd = Number(SIGNUP_BONUS_VALUE_ZAR) / 18.5; // Consider making the exchange rate dynamic
+        await tx.userProfile.update({
+          where: { userId },
+          data: {
+            cashBalanceUsd: { increment: bonusValueUsd },
+            totalCashEarnedUsd: { increment: bonusValueUsd },
           },
-        },
-      })
+        });
 
-      // Mark as credited
-      await tx.signupBonus.update({
-        where: { userId },
-        data: { creditedAt: new Date() },
-      })
+        // 3. Create a transaction record for history
+        await tx.transaction.create({
+          data: {
+            userId,
+            type: 'signup_bonus',
+            coinsChange: SIGNUP_BONUS_COINS,
+            cashChangeUsd: bonusValueUsd,
+            description: `Signup bonus - User #${userNumberInRegion} in ${countryCode}`,
+          },
+        });
 
-      // Create transaction record
-      await tx.transaction.create({
+        console.log(`✅ Immediately credited signup bonus for new user ${userId}`);
+      }
+
+      // Create the final signup bonus record
+      await tx.signupBonus.create({
         data: {
           userId,
-          type: 'signup_bonus',
-          coinsChange: signupBonus.bonusCoins,
-          cashChangeUsd: bonusValueUsd,
-          description: `Signup bonus - User #${signupBonus.userNumberInRegion} in ${signupBonus.countryCode}`,
+          countryCode,
+          userNumberInRegion,
+          bonusCoins: SIGNUP_BONUS_COINS,
+          bonusValueZar: SIGNUP_BONUS_VALUE_ZAR,
+          eligible,
+          creditedAt, // This will be the date if eligible, null otherwise
         },
-      })
-    })
+      });
 
-    console.log(`Credited signup bonus for user ${userId}`)
-    return true
+      return eligible;
+    });
   } catch (error) {
-    console.error('Error crediting signup bonus:', error)
-    return false
+    console.error('Error during signup bonus eligibility check and credit:', error);
+    return false;
   }
 }
 
@@ -138,7 +110,7 @@ export async function getSignupBonusInfo(userId: string): Promise<{
 
     // Calculate spots remaining in region
     let spotsRemaining = null
-    if (signupBonus.eligible && !signupBonus.creditedAt) {
+    if (signupBonus.eligible) {
       const totalInRegion = await prisma.signupBonus.count({
         where: { countryCode: signupBonus.countryCode },
       })
