@@ -87,4 +87,15 @@ router.get('/withdrawal', async (req, res) => {
   }
 })
 
+// GET /api/legal/delete-account - Serve Delete Account Instructions
+router.get('/delete-account', async (req, res) => {
+  try {
+    const content = await readLegalDocument('DELETE_ACCOUNT.md')
+    res.setHeader('Content-Type', 'text/markdown; charset=utf-8')
+    res.send(content)
+  } catch (error: any) {
+    res.status(404).json({ error: error.message })
+  }
+})
+
 export default router
