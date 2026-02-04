@@ -14,6 +14,12 @@ export async function checkSignupBonusEligibility(
   userId: string,
   countryCode: string
 ): Promise<boolean> {
+  console.info('[SIGNUP_BONUS] Entry: checkSignupBonusEligibility', {
+    userId,
+    countryCode,
+    timestamp: new Date().toISOString(),
+  })
+
   try {
     // Count existing users in this region
     const existingUsersCount = await prisma.signupBonus.count({
@@ -22,6 +28,14 @@ export async function checkSignupBonusEligibility(
 
     const userNumberInRegion = existingUsersCount + 1
     const eligible = userNumberInRegion <= SIGNUP_BONUS_LIMIT_PER_REGION
+
+    console.info('[SIGNUP_BONUS] Eligibility check', {
+      userId,
+      countryCode,
+      userNumberInRegion,
+      eligible,
+      limit: SIGNUP_BONUS_LIMIT_PER_REGION,
+    })
 
     // Create signup bonus record
     await prisma.signupBonus.create({
@@ -35,9 +49,31 @@ export async function checkSignupBonusEligibility(
       },
     })
 
+    if (eligible) {
+      console.info('[SIGNUP_BONUS] Bonus awarded', {
+        userId,
+        countryCode,
+        userNumberInRegion,
+        bonusCoins: SIGNUP_BONUS_COINS,
+        bonusValueZar: SIGNUP_BONUS_VALUE_ZAR,
+      })
+    } else {
+      console.info('[SIGNUP_BONUS] Bonus skipped - limit reached', {
+        userId,
+        countryCode,
+        userNumberInRegion,
+        limit: SIGNUP_BONUS_LIMIT_PER_REGION,
+      })
+    }
+
     return eligible
   } catch (error) {
-    console.error('Error checking signup bonus eligibility:', error)
+    console.error('[SIGNUP_BONUS] Error checking signup bonus eligibility:', {
+      userId,
+      countryCode,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
     return false
   }
 }
@@ -46,22 +82,37 @@ export async function checkSignupBonusEligibility(
  * Credit signup bonus when user reaches minimum withdrawal threshold
  */
 export async function creditSignupBonus(userId: string): Promise<boolean> {
+  console.info('[SIGNUP_BONUS] Credit attempt', {
+    userId,
+    timestamp: new Date().toISOString(),
+  })
+
   try {
     const signupBonus = await prisma.signupBonus.findUnique({
       where: { userId },
     })
 
     if (!signupBonus) {
+      console.info('[SIGNUP_BONUS] Credit skipped - no bonus record', { userId })
       return false
     }
 
     // Check if already credited
     if (signupBonus.creditedAt) {
+      console.info('[SIGNUP_BONUS] Credit skipped - already credited', {
+        userId,
+        creditedAt: signupBonus.creditedAt,
+      })
       return false
     }
 
     // Check if eligible
     if (!signupBonus.eligible) {
+      console.info('[SIGNUP_BONUS] Credit skipped - not eligible', {
+        userId,
+        userNumberInRegion: signupBonus.userNumberInRegion,
+        countryCode: signupBonus.countryCode,
+      })
       return false
     }
 
@@ -108,10 +159,20 @@ export async function creditSignupBonus(userId: string): Promise<boolean> {
       })
     })
 
-    console.log(`Credited signup bonus for user ${userId}`)
+    console.info('[SIGNUP_BONUS] Bonus credited successfully', {
+      userId,
+      bonusCoins: signupBonus.bonusCoins,
+      bonusValueZar: signupBonus.bonusValueZar,
+      userNumberInRegion: signupBonus.userNumberInRegion,
+      countryCode: signupBonus.countryCode,
+    })
     return true
   } catch (error) {
-    console.error('Error crediting signup bonus:', error)
+    console.error('[SIGNUP_BONUS] Error crediting signup bonus:', {
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
     return false
   }
 }

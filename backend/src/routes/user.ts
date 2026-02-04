@@ -82,15 +82,29 @@ router.get('/profile', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
 
+    console.info('[USER_PROFILE] Profile request', {
+      userId,
+      timestamp: new Date().toISOString(),
+    })
+
     let profile = await prisma.userProfile.findUnique({
       where: { userId },
     })
 
     // Create profile if it doesn't exist
     if (!profile) {
+      console.info('[USER_PROFILE] Creating new profile', { userId })
+
       // Get user's country from IP automatically
       const clientIP = getClientIP(req)
       const { countryCode, currency } = getUserLocationInfo(clientIP)
+
+      console.info('[USER_PROFILE] Detected location', {
+        userId,
+        countryCode: countryCode || 'ZA',
+        currency: currency || 'ZAR',
+        clientIP: clientIP !== 'unknown' ? 'detected' : 'unknown',
+      })
 
       profile = await prisma.userProfile.create({
         data: {
@@ -101,8 +115,26 @@ router.get('/profile', async (req: AuthRequest, res) => {
         },
       })
 
+      console.info('[USER_PROFILE] Profile created', {
+        userId,
+        country: profile.country,
+      })
+
       // NEW: Check signup bonus eligibility for new users
-      await checkSignupBonusEligibility(userId, countryCode || 'ZA')
+      console.info('[USER_PROFILE] Checking signup bonus eligibility', {
+        userId,
+        countryCode: countryCode || 'ZA',
+      })
+
+      const eligible = await checkSignupBonusEligibility(
+        userId,
+        countryCode || 'ZA'
+      )
+
+      console.info('[USER_PROFILE] Signup bonus eligibility result', {
+        userId,
+        eligible,
+      })
     } else {
       // Update lastLogin
       await prisma.userProfile.update({
