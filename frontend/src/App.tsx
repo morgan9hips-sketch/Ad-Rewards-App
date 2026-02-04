@@ -41,6 +41,7 @@ import Terms from './pages/legal/Terms'
 import Privacy from './pages/legal/Privacy'
 import Cookies from './pages/legal/Cookies'
 import AdMob from './pages/legal/AdMob'
+import DeleteAccount from './pages/legal/DeleteAccount'
 
 // Components
 import Footer from './components/Footer'
@@ -125,6 +126,7 @@ function AppContent() {
         <Route path="/legal/privacy" element={<Privacy />} />
         <Route path="/legal/cookies" element={<Cookies />} />
         <Route path="/legal/admob" element={<AdMob />} />
+        <Route path="/legal/delete-account" element={<DeleteAccount />} />
 
         <Route
           path="/dashboard"
