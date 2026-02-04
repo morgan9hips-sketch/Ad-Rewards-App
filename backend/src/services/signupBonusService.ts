@@ -1,4 +1,4 @@
-/*import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -26,7 +26,7 @@ export async function checkSignupBonusEligibility(
       });
 
       const userNumberInRegion = existingUsersCount + 1;
-      const eligible = userNumberInargin <= SIGNUP_BONUS_LIMIT_PER_REGION;
+      const eligible = userNumberInRegion <= SIGNUP_BONUS_LIMIT_PER_REGION;
 
       let creditedAt: Date | null = null;
 
