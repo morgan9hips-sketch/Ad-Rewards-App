@@ -1,3 +1,17 @@
+/**
+ * ⚠️ DEPRECATED - PayPal Service
+ * 
+ * This service has been replaced by Wise Platform API (wiseService.ts)
+ * 
+ * Kept for reference and potential data migration needs.
+ * All new withdrawals should use Wise Platform API.
+ * 
+ * Migration completed: 2026-02-05
+ * Reason: Better global coverage, lower fees, faster transfers
+ * 
+ * @deprecated Use wiseService.ts instead
+ */
+
 import axios from 'axios'
 
 const PAYPAL_API_BASE = process.env.PAYPAL_MODE === 'sandbox' 
@@ -8,6 +22,7 @@ const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || ''
 const PAYPAL_SECRET = process.env.PAYPAL_SECRET || ''
 
 /**
+ * @deprecated - Use Wise Platform API instead
  * Get PayPal access token
  */
 async function getAccessToken(): Promise<string> {
