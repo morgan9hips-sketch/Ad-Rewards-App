@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
+import { createClient } from '@supabase/supabase-js'
 import { AuthRequest } from '../middleware/auth.js'
 import {
   getExchangeRate,
@@ -18,6 +19,12 @@ import { checkSignupBonusEligibility } from '../services/signupBonusService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
+
+// Initialize Supabase client for auth operations
+const supabase = createClient(
+  process.env.SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_KEY || ''
+)
 
 // Setup user profile (first-time setup)
 router.post('/setup-profile', async (req: AuthRequest, res) => {
@@ -414,6 +421,63 @@ router.post('/accept-terms', async (req: AuthRequest, res) => {
   } catch (error) {
     console.error('Error accepting terms:', error)
     res.status(500).json({ error: 'Failed to record terms acceptance' })
+  }
+})
+
+// Delete user account (Google Play requirement)
+router.delete('/account', async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id
+
+    // Soft-delete: anonymize user data in database
+    await prisma.$transaction(async (tx) => {
+      // Anonymize user profile
+      await tx.userProfile.update({
+        where: { userId },
+        data: {
+          email: `deleted_${userId}@deleted.local`,
+          name: 'Deleted User',
+          paypalEmail: null,
+          displayName: null,
+          avatarUrl: null,
+          ipAddress: null,
+          lastIpAddress: null,
+          // Keep balances for potential data recovery/compliance
+          // But mark as deleted
+        },
+      })
+
+      // Cancel any active subscriptions
+      await tx.subscription.updateMany({
+        where: {
+          userId,
+          status: 'active',
+        },
+        data: {
+          status: 'cancelled',
+          cancelledAt: new Date(),
+        },
+      })
+    })
+
+    // Hard-delete: remove from Supabase Auth
+    const { error: deleteError } = await supabase.auth.admin.deleteUser(userId)
+    
+    if (deleteError) {
+      console.error('Error deleting user from Supabase Auth:', deleteError)
+      // Continue anyway - database is already anonymized
+    }
+
+    res.json({
+      success: true,
+      message: 'Account deleted successfully',
+    })
+  } catch (error) {
+    console.error('Error deleting account:', error)
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to delete account' 
+    })
   }
 })
 

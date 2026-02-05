@@ -3,6 +3,12 @@ import { PrismaClient } from '@prisma/client'
 import { AuthRequest } from '../middleware/auth.js'
 import { getExchangeRate, convertFromUSD } from '../services/currencyService.js'
 import { processWithdrawal } from '../services/transactionService.js'
+import { 
+  createWiseRecipient, 
+  createWiseQuote, 
+  createWisePayout,
+  validateBankDetails 
+} from '../services/wiseService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -14,7 +20,21 @@ const BASELINE_RATE_VALUE = 1.0 // R1 per 100 coins at 1.0x multiplier
 router.post('/request', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
-    const { paypalEmail } = req.body
+    const { 
+      accountHolderName, 
+      currency, 
+      country, 
+      bankDetails 
+    } = req.body
+
+    // Validate bank details
+    const validation = validateBankDetails(currency, country, bankDetails)
+    if (!validation.valid) {
+      return res.status(400).json({ 
+        error: 'Invalid bank details', 
+        details: validation.errors 
+      })
+    }
 
     // Get user profile
     const profile = await prisma.userProfile.findUnique({
@@ -52,13 +72,12 @@ router.post('/request', async (req: AuthRequest, res) => {
       })
     }
 
-    // Validate PayPal email
-    if (!paypalEmail || !paypalEmail.includes('@')) {
-      return res.status(400).json({ error: 'Valid PayPal email is required' })
+    // Validate required fields
+    if (!accountHolderName || !currency || !country) {
+      return res.status(400).json({ error: 'Account holder name, currency, and country are required' })
     }
 
-    // Get user's preferred currency and exchange rate
-    const currency = profile.preferredCurrency || 'USD'
+    // Get exchange rate for the target currency
     const exchangeRate = await getExchangeRate(currency)
     const amountLocal = await convertFromUSD(cashBalanceUsd, currency)
 
@@ -73,7 +92,7 @@ router.post('/request', async (req: AuthRequest, res) => {
 
     // Create withdrawal within transaction
     const withdrawal = await prisma.$transaction(async (tx) => {
-      // Create withdrawal record with coins and rate
+      // Create withdrawal record with Wise details
       const newWithdrawal = await tx.withdrawal.create({
         data: {
           userId,
@@ -83,9 +102,14 @@ router.post('/request', async (req: AuthRequest, res) => {
           amountLocal: amountLocal,
           currencyCode: currency,
           exchangeRate: exchangeRate,
-          method: 'paypal',
-          paypalEmail,
+          method: 'wise_bank_transfer',
           status: 'pending',
+          // Store bank details as JSON for Wise processing
+          bankDetails: JSON.stringify({
+            accountHolderName,
+            country,
+            bankDetails,
+          }),
         },
       })
 
@@ -104,7 +128,7 @@ router.post('/request', async (req: AuthRequest, res) => {
       currency,
       rateMultiplier: Number(rateMultiplier.toFixed(2)),
       status: 'pending',
-      message: 'Withdrawal request submitted successfully',
+      message: 'Withdrawal request submitted successfully. Funds will be transferred to your bank account within 1-3 business days.',
     })
   } catch (error) {
     console.error('Error creating withdrawal:', error)

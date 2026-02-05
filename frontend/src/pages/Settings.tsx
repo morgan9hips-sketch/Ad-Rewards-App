@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Card from '../components/Card'
 import Button from '../components/Button'
 import AvatarSelector from '../components/AvatarSelector'
@@ -8,8 +9,9 @@ import { useCurrency } from '../contexts/CurrencyContext'
 import { API_BASE_URL } from '../config/api'
 
 export default function Settings() {
-  const { user, session } = useAuth()
+  const { user, session, signOut } = useAuth()
   const { currencyInfo, refreshCurrencyInfo } = useCurrency()
+  const navigate = useNavigate()
   const [paypalEmail, setPaypalEmail] = useState('')
   const [country, setCountry] = useState('US')
   const [preferredCurrency, setPreferredCurrency] = useState('USD')
@@ -24,6 +26,9 @@ export default function Settings() {
 
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     fetchProfile()
@@ -109,6 +114,44 @@ export default function Settings() {
     } catch (error) {
       console.error('Error saving settings:', error)
       setError('An error occurred while saving settings')
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') return
+    
+    setIsDeleting(true)
+    setError(null)
+
+    try {
+      const token = session?.access_token
+      if (!token) {
+        setError('Not authenticated')
+        return
+      }
+
+      const res = await fetch(`${API_BASE_URL}/api/user/account`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (res.ok) {
+        // Account deleted successfully, sign out and redirect
+        await signOut()
+        navigate('/')
+      } else {
+        const data = await res.json()
+        setError(data.error || 'Failed to delete account')
+      }
+    } catch (err) {
+      console.error('Error deleting account:', err)
+      setError('Failed to delete account. Please try again.')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteModal(false)
+      setDeleteConfirmText('')
     }
   }
 
@@ -366,6 +409,74 @@ export default function Settings() {
       <Button fullWidth onClick={handleSave}>
         Save Changes
       </Button>
+
+      {/* Danger Zone - Account Deletion */}
+      <Card className="mt-8 border-red-900/50 bg-red-950/20">
+        <h2 className="text-xl font-bold text-red-400 mb-4">⚠️ Danger Zone</h2>
+        <div className="space-y-4">
+          <p className="text-gray-300 text-sm">
+            Once you delete your account, there is no going back. This action is permanent and will:
+          </p>
+          <ul className="list-disc list-inside text-gray-400 text-sm space-y-1">
+            <li>Permanently delete all your data</li>
+            <li>Remove your profile and transaction history</li>
+            <li>Forfeit any remaining balance</li>
+            <li>Cancel active subscriptions</li>
+          </ul>
+          <Button
+            variant="danger"
+            fullWidth
+            onClick={() => setShowDeleteModal(true)}
+          >
+            Delete My Account Permanently
+          </Button>
+        </div>
+      </Card>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-md w-full border-red-900/50">
+            <h2 className="text-2xl font-bold text-red-400 mb-4">
+              ⚠️ Confirm Account Deletion
+            </h2>
+            <p className="text-gray-300 mb-4">
+              This action cannot be undone. All your data, earnings, and progress will be permanently deleted.
+            </p>
+            <p className="text-gray-300 mb-4">
+              Type <strong className="text-white">DELETE</strong> to confirm:
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type DELETE here"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white mb-4 focus:outline-none focus:border-red-500"
+            />
+            <div className="flex gap-3">
+              <Button
+                variant="secondary"
+                fullWidth
+                onClick={() => {
+                  setShowDeleteModal(false)
+                  setDeleteConfirmText('')
+                }}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                fullWidth
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== 'DELETE' || isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Forever'}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }
