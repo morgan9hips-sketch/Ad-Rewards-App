@@ -38,10 +38,10 @@ To be eligible for withdrawals, your account must:
 
 **18+ Years:**
 - Full withdrawal privileges
-- Direct withdrawal to personal PayPal account
+- Direct withdrawal to personal Wise account
 
 **13-17 Years (with parental consent):**
-- May request withdrawals to parent/guardian PayPal account
+- May request withdrawals to parent/guardian Wise account
 - Parent/guardian must verify identity
 - Additional verification required for first withdrawal
 - Parent/guardian receives withdrawal notification
@@ -53,15 +53,15 @@ To be eligible for withdrawals, your account must:
 ### 2.3 Geographic Restrictions
 
 **Supported Countries:**
-- Withdrawals available in most countries where PayPal operates
+- Withdrawals available in most countries where Wise operates
 - Some restricted countries may have limited or no withdrawal availability
 
 **Restricted Countries:**
 - Countries subject to international sanctions
-- Countries where PayPal doesn't operate
+- Countries where Wise doesn't operate
 - Countries where local regulations prohibit our service
 
-**Verification:** We verify that your account location, IP address, and PayPal account location are consistent. Mismatched locations may trigger additional verification or withdrawal denial.
+**Verification:** We verify that your account location, IP address, and Wise account location are consistent. Mismatched locations may trigger additional verification or withdrawal denial.
 
 ## 3. Minimum Withdrawal Threshold
 
@@ -114,11 +114,11 @@ If your Cash Balance is below 15,000 AdCoins:
 
 ## 4. Payment Method
 
-### 4.1 PayPal Only
+### 4.1 Wise Only
 
-**Current Payment Method:** PayPal is the **only** supported payment method for withdrawals from Adify.
+**Current Payment Method:** Wise is the **only** supported payment method for withdrawals from Adify.
 
-**Why PayPal:**
+**Why Wise:**
 - **Global Reach:** Available in 200+ countries
 - **Security:** Industry-leading fraud protection and encryption
 - **Speed:** Fast transfer times (typically 2-5 business days once processed)
@@ -126,9 +126,9 @@ If your Cash Balance is below 15,000 AdCoins:
 - **Cost-Effective:** Reasonable transaction fees
 - **Integration:** Robust API for seamless integration
 
-### 4.2 PayPal Account Requirements
+### 4.2 Wise Account Requirements
 
-Your PayPal account must:
+Your Wise account must:
 
 **Be Active and Verified:**
 - Account in good standing (not limited or suspended)
@@ -136,28 +136,28 @@ Your PayPal account must:
 - Preferably verified (linked bank account or credit card)
 
 **Match Account Information:**
-- PayPal account name must match your Adify account name (legal name)
-- PayPal email provided in Adify must be accurate and current
+- Wise account name must match your Adify account name (legal name)
+- Wise email provided in Adify must be accurate and current
 - Geographic location should match (consistent IP, account registration country)
 
 **Accept Payments:**
-- Capable of receiving payments (some PayPal accounts are send-only)
+- Capable of receiving payments (some Wise accounts are send-only)
 - Not restricted from receiving business/commercial payments
-- Currency supported by PayPal (USD or convertible currencies)
+- Currency supported by Wise (USD or convertible currencies)
 
-### 4.3 PayPal Email
+### 4.3 Wise Email
 
-**Providing PayPal Email:**
-- Enter your PayPal email in Account Settings → Payment Information
+**Providing Wise Email:**
+- Enter your Wise email in Account Settings → Payment Information
 - Verify email for accuracy (typos will cause payment failures)
-- Email must be associated with an active PayPal account
+- Email must be associated with an active Wise account
 
-**Updating PayPal Email:**
+**Updating Wise Email:**
 - Can be updated anytime in account settings
 - Changes take effect for future withdrawals
 - Already-processed withdrawals cannot be redirected
 
-**Security Note:** Never share your PayPal password with us. We only need your PayPal email address for withdrawals.
+**Security Note:** Never share your Wise password with us. We only need your Wise email address for withdrawals.
 
 ### 4.4 Future Payment Methods
 
@@ -188,7 +188,7 @@ We may add additional payment methods in the future, such as:
 - Not feasible for digital platform
 - Security and logistical challenges
 
-**PayPal Alternatives (Venmo, Cash App, etc.):**
+**Wise Alternatives (Venmo, Cash App, etc.):**
 - Limited international availability
 - Less robust API support
 - Fragmented user base
@@ -197,7 +197,7 @@ We may add additional payment methods in the future, such as:
 
 ### 5.1 Total Processing Time: 7-14 Business Days
 
-From the time you submit a withdrawal request to the time funds appear in your PayPal account, the process typically takes **7-14 business days**.
+From the time you submit a withdrawal request to the time funds appear in your Wise account, the process typically takes **7-14 business days**.
 
 **Breakdown:**
 
@@ -213,9 +213,9 @@ From the time you submit a withdrawal request to the time funds appear in your P
 - Finalization and approval
 
 **Phase 3: Transfer Period (2-4 business days)**
-- Transfer initiated to PayPal
-- PayPal processes incoming payment
-- Funds appear in your PayPal balance
+- Transfer initiated to Wise
+- Wise processes incoming payment
+- Funds appear in your Wise balance
 
 ### 5.2 Business Days Defined
 
@@ -258,13 +258,13 @@ From the time you submit a withdrawal request to the time funds appear in your P
 
 Some delays are beyond our control:
 
-**PayPal Processing:**
-- PayPal may take additional time to credit your account
-- PayPal may flag transaction for their own security review
-- PayPal account issues (limited account, verification required)
+**Wise Processing:**
+- Wise may take additional time to credit your account
+- Wise may flag transaction for their own security review
+- Wise account issues (limited account, verification required)
 
 **Banking Delays:**
-- If you withdraw from PayPal to your bank, additional 2-5 business days apply
+- If you withdraw from Wise to your bank, additional 2-5 business days apply
 - Bank holidays and processing times vary
 
 **International Transfers:**
@@ -278,7 +278,7 @@ Some delays are beyond our control:
 - Email notifications sent at key stages:
   - Withdrawal request received
   - Withdrawal approved (payment initiated)
-  - Payment sent to PayPal
+  - Payment sent to Wise
   - Issues or delays (if any)
 
 **Possible Statuses:**
@@ -286,8 +286,8 @@ Some delays are beyond our control:
 - **Under Review:** Fraud detection and verification in progress
 - **Approved:** Passed review, payment being processed
 - **Processing:** Payment being prepared and batched
-- **Sent:** Payment sent to PayPal, awaiting PayPal confirmation
-- **Completed:** Funds successfully transferred to your PayPal
+- **Sent:** Payment sent to Wise, awaiting Wise confirmation
+- **Completed:** Funds successfully transferred to your Wise
 - **Rejected:** Withdrawal denied (see Section 7)
 - **Cancelled:** You canceled the request
 
@@ -329,16 +329,16 @@ We may request proof of residence to verify your location:
 - Shows your full name and residential address
 - Address must match your account registration address
 
-### 6.3 PayPal Account Verification
+### 6.3 Wise Account Verification
 
-We may require confirmation that you own the PayPal account:
+We may require confirmation that you own the Wise account:
 
 **Methods:**
 - Small test deposit (e.g., $0.01) that you confirm receiving
-- Screenshot of PayPal account showing your name and email
-- PayPal transaction ID from a previous interaction
+- Screenshot of Wise account showing your name and email
+- Wise transaction ID from a previous interaction
 
-**Purpose:** Prevents withdrawals to unauthorized PayPal accounts (fraud prevention).
+**Purpose:** Prevents withdrawals to unauthorized Wise accounts (fraud prevention).
 
 ### 6.4 Account History Review
 
@@ -377,7 +377,7 @@ For high-value withdrawals or high-risk accounts, we may require:
 - Parental verification (for minors aged 13-17)
 
 **Bank Account Verification:**
-- If PayPal is linked to a bank, we may verify bank account ownership
+- If Wise is linked to a bank, we may verify bank account ownership
 
 ### 6.6 Verification Timeframe
 
@@ -425,15 +425,15 @@ Withdrawal requests may be rejected for various reasons:
 
 **Verification Failures:**
 - Failed identity verification
-- Mismatched account information (name, location, PayPal)
-- Unable to verify PayPal account ownership
+- Mismatched account information (name, location, Wise)
+- Unable to verify Wise account ownership
 - Documents not provided or insufficient
 
 **Payment Method Issues:**
-- Invalid or inactive PayPal email address
-- PayPal account in bad standing (limited, suspended)
-- PayPal account unable to receive payments
-- Geographic mismatch between Adify account and PayPal
+- Invalid or inactive Wise email address
+- Wise account in bad standing (limited, suspended)
+- Wise account unable to receive payments
+- Geographic mismatch between Adify account and Wise
 
 **Insufficient Account Age or Activity:**
 - Account less than 7 days old (first withdrawal only)
@@ -492,10 +492,10 @@ Withdrawal requests may be rejected for various reasons:
 2. Ensure accuracy and compliance with requirements
 3. Resubmit withdrawal request after verification is complete
 
-**PayPal Issues:**
-1. Update PayPal email in account settings
-2. Verify PayPal account is active and can receive payments
-3. Resolve any PayPal account limitations
+**Wise Issues:**
+1. Update Wise email in account settings
+2. Verify Wise account is active and can receive payments
+3. Resolve any Wise account limitations
 4. Resubmit withdrawal request
 
 **Account Age:**
@@ -575,14 +575,14 @@ Withdrawal requests may be rejected for various reasons:
 **Your Multiplier Is Based On:**
 1. **Account Registration Country:** Country selected during signup
 2. **IP Address:** Current and historical IP addresses
-3. **PayPal Account Location:** Country of your PayPal account
+3. **Wise Account Location:** Country of your Wise account
 
 **Consistency Required:**
 All three indicators should align. Mismatched locations trigger additional verification or withdrawal denial.
 
 **Examples of Mismatches:**
 - Account registered in US, but IP address consistently shows India
-- PayPal account in UK, but account registered in Nigeria
+- Wise account in UK, but account registered in Nigeria
 - IP addresses from multiple countries (possible VPN use)
 
 ### 8.5 Prohibited Multiplier Manipulation
@@ -618,7 +618,7 @@ All three indicators should align. Mismatched locations trigger additional verif
 - If you move to a different country, contact support@adrevtechnologies.co.za
 - Provide proof of relocation (new address verification)
 - Account location and multiplier will be updated after verification
-- PayPal account should also be updated to new country
+- Wise account should also be updated to new country
 
 ### 8.7 Transparency
 
@@ -647,7 +647,7 @@ In most jurisdictions, earnings from Adify are considered taxable income:
 
 **Types of Taxable Income:**
 - AdCoins earned and converted to cash
-- Withdrawals made to PayPal
+- Withdrawals made to Wise
 - Potentially even AdCoins balance (depending on tax rules)
 
 **Forms of Income:**
@@ -775,17 +775,17 @@ If you have a dispute regarding a withdrawal:
 - Management reviews case within 10 business days
 - Final internal decision provided
 
-### 10.2 PayPal Disputes
+### 10.2 Wise Disputes
 
-**If Issue Is with PayPal:**
-- Contact PayPal support directly: https://www.paypal.com/support
-- We cannot control PayPal's processes
-- If we can assist (e.g., providing transaction details to PayPal), contact us
+**If Issue Is with Wise:**
+- Contact Wise support directly: https://www.paypal.com/support
+- We cannot control Wise's processes
+- If we can assist (e.g., providing transaction details to Wise), contact us
 
-**Common PayPal Issues:**
-- Payment not received (check PayPal account, spam folder for notification)
-- Payment held or limited by PayPal (contact PayPal to resolve)
-- Payment to wrong email (ensure PayPal email is correct in Adify settings)
+**Common Wise Issues:**
+- Payment not received (check Wise account, spam folder for notification)
+- Payment held or limited by Wise (contact Wise to resolve)
+- Payment to wrong email (ensure Wise email is correct in Adify settings)
 
 ### 10.3 Chargebacks and Reversals
 
@@ -869,28 +869,28 @@ We reserve the right to modify this Withdrawal Policy at any time to reflect:
 ## 12. Frequently Asked Questions (FAQ)
 
 **Q: How long does a withdrawal take?**
-A: 7-14 business days from request to PayPal receipt.
+A: 7-14 business days from request to Wise receipt.
 
 **Q: Why was my withdrawal rejected?**
-A: Common reasons include fraud detection, failed verification, PayPal issues, or Terms violations. Check email for specific reason.
+A: Common reasons include fraud detection, failed verification, Wise issues, or Terms violations. Check email for specific reason.
 
 **Q: Can I withdraw less than 15,000 AdCoins?**
 A: No, 15,000 AdCoins is the minimum threshold.
 
-**Q: Can I change my PayPal email after requesting a withdrawal?**
-A: No, once requested, the withdrawal is tied to the PayPal email on file at request time. Update email before requesting future withdrawals.
+**Q: Can I change my Wise email after requesting a withdrawal?**
+A: No, once requested, the withdrawal is tied to the Wise email on file at request time. Update email before requesting future withdrawals.
 
-**Q: What if my PayPal email was wrong?**
-A: Contact support immediately. If payment hasn't been sent, we may be able to cancel and correct. If already sent to wrong email, you'll need to resolve with PayPal.
+**Q: What if my Wise email was wrong?**
+A: Contact support immediately. If payment hasn't been sent, we may be able to cancel and correct. If already sent to wrong email, you'll need to resolve with Wise.
 
 **Q: Do you support bank transfers?**
-A: Not currently; PayPal only. We may add bank transfers in the future.
+A: Not currently; Wise only. We may add bank transfers in the future.
 
-**Q: Can I withdraw to someone else's PayPal?**
-A: No, PayPal account must be in your name (or parent's name for minors 13-17).
+**Q: Can I withdraw to someone else's Wise?**
+A: No, Wise account must be in your name (or parent's name for minors 13-17).
 
 **Q: Are there withdrawal fees?**
-A: We don't charge withdrawal fees. PayPal may charge receiving fees in some countries.
+A: We don't charge withdrawal fees. Wise may charge receiving fees in some countries.
 
 **Q: Why is my first withdrawal taking longer?**
 A: First withdrawals require thorough verification, which can extend processing time.
@@ -899,7 +899,7 @@ A: First withdrawals require thorough verification, which can extend processing 
 A: Elite subscribers receive priority support but still undergo standard security checks. Processing time is similar.
 
 **Q: What if I'm traveling when I request a withdrawal?**
-A: Temporary travel is fine. Ensure your account information is accurate and matches your PayPal account.
+A: Temporary travel is fine. Ensure your account information is accurate and matches your Wise account.
 
 **Q: Can I cancel a withdrawal request?**
 A: If the withdrawal is still in "Pending" or "Under Review" status, contact support to request cancellation. Once "Approved" or "Processing," it may be too late.
@@ -965,11 +965,11 @@ If your issue is not resolved satisfactorily:
 
 ✅ **Minimum Threshold:** 15,000 AdCoins Cash Balance required
 
-💳 **Payment Method:** PayPal only (currently)
+💳 **Payment Method:** Wise only (currently)
 
 ⏱️ **Processing Time:** 7-14 business days
 
-🔍 **Verification:** Identity, address, and PayPal ownership may be required
+🔍 **Verification:** Identity, address, and Wise ownership may be required
 
 🌍 **Regional Multipliers:** Affect cash value of AdCoins (0.8x to 1.2x)
 

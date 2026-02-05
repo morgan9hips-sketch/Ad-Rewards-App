@@ -19,7 +19,7 @@ For purposes of these Terms, the following definitions apply:
 
 **"AdCoins"** means the virtual currency unit used within the Adify Platform to track user earnings from various activities. AdCoins have no inherent monetary value until converted to Cash Balance.
 
-**"Cash Balance"** means the monetary value accumulated in your account that is eligible for withdrawal via PayPal, calculated based on applicable conversion rates and regional multipliers.
+**"Cash Balance"** means the monetary value accumulated in your account that is eligible for withdrawal via Wise, calculated based on applicable conversion rates and regional multipliers.
 
 **"Conversion Rate"** means the exchange ratio between AdCoins and real currency (typically USD), which may vary based on your geographic region and the Regional Rate Multiplier applicable to your account.
 
@@ -189,7 +189,7 @@ Your Regional Rate Multiplier is determined by:
 
 - **IP Address Location:** Primary method for determining geographic location
 - **Account Registration Country:** Country specified during account creation
-- **Payment Method Location:** Geographic location associated with your PayPal account
+- **Payment Method Location:** Geographic location associated with your Wise account
 - **Consistency Verification:** Our systems verify that these indicators are consistent to prevent location manipulation
 
 ### 6.4 Prohibited Location Manipulation
@@ -232,12 +232,12 @@ To request a withdrawal, you must have accumulated a minimum Cash Balance equiva
 
 ### 7.2 Payment Method
 
-Currently, **PayPal is the only supported payment method** for withdrawals:
+Currently, **Wise is the only supported payment method** for withdrawals:
 
-- You must provide a valid PayPal email address
-- The PayPal account must be in your legal name
-- The PayPal account must be in good standing
-- The PayPal account geographic location must match your account location
+- You must provide a valid Wise email address
+- The Wise account must be in your legal name
+- The Wise account must be in good standing
+- The Wise account geographic location must match your account location
 
 We may add additional payment methods in the future, which will be announced through the Platform.
 
@@ -247,7 +247,7 @@ Withdrawal requests are processed within **7-14 business days** from the date of
 
 - **Review Period (3-5 business days):** All withdrawal requests undergo fraud detection review and verification
 - **Processing Period (2-5 business days):** Approved withdrawals are prepared for payment transfer
-- **Transfer Period (2-4 business days):** Funds are transferred to your PayPal account
+- **Transfer Period (2-4 business days):** Funds are transferred to your Wise account
 
 Processing times may be extended during high-volume periods, technical issues, or when additional verification is required.
 
@@ -257,7 +257,7 @@ Before processing withdrawals, we may require:
 
 - **Identity Verification:** Government-issued ID to confirm your identity
 - **Address Verification:** Proof of residence matching your account registration
-- **Payment Method Verification:** Confirmation of PayPal account ownership
+- **Payment Method Verification:** Confirmation of Wise account ownership
 - **Account History Review:** Examination of your earning activities for fraud indicators
 - **Tax Documentation:** Tax forms as required by applicable laws
 
@@ -275,8 +275,8 @@ The following limits apply to withdrawals:
 ### 7.6 Withdrawal Fees
 
 - **Platform Fees:** We do not charge withdrawal fees to users
-- **PayPal Fees:** PayPal may assess fees for receiving payments; these fees are the user's responsibility
-- **Currency Conversion:** If your PayPal account currency differs from USD, PayPal's conversion rates apply
+- **Wise Fees:** Wise may assess fees for receiving payments; these fees are the user's responsibility
+- **Currency Conversion:** If your Wise account currency differs from USD, Wise's conversion rates apply
 
 ### 7.7 Rejected Withdrawals
 
@@ -294,7 +294,7 @@ If your withdrawal is rejected, you will be notified via email with the reason f
 
 ### 7.8 Irreversible Transactions
 
-Once a withdrawal is processed and funds are transferred to your PayPal account, the transaction is generally irreversible. You are responsible for ensuring your PayPal information is correct before submitting a withdrawal request.
+Once a withdrawal is processed and funds are transferred to your Wise account, the transaction is generally irreversible. You are responsible for ensuring your Wise information is correct before submitting a withdrawal request.
 
 ## 8. Subscription Tiers
 
@@ -332,7 +332,7 @@ Elite subscribers receive:
 Elite subscription pricing is:
 
 - Billed on a recurring basis (monthly or annual options)
-- Processed through PayPal
+- Processed through Wise
 - Subject to applicable taxes and fees
 - Subject to change with 30 days advance notice to subscribers
 
@@ -662,7 +662,7 @@ TO THE MAXIMUM EXTENT PERMITTED BY LAW, OUR TOTAL LIABILITY TO YOU FOR ALL CLAIM
 We are not responsible for:
 
 - Google AdMob service availability or issues
-- PayPal payment processing delays or failures
+- Wise payment processing delays or failures
 - Third-party service outages affecting the Platform
 - Actions or omissions of third-party service providers
 

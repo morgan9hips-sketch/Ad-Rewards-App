@@ -5,6 +5,7 @@ import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 import EmptyState from '../components/EmptyState'
 import WithdrawalSuccessModal from '../components/WithdrawalSuccessModal'
+import CountryBankFields from '../components/CountryBankFields'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 
@@ -57,9 +58,15 @@ export default function Withdrawals() {
   const [balance, setBalance] = useState<UserBalance | null>(null)
   const [coinValuation, setCoinValuation] = useState<CoinValuation | null>(null)
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([])
-  const [paypalEmail, setPaypalEmail] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [withdrawalResult, setWithdrawalResult] = useState<WithdrawalResult | null>(null)
+  
+  // Bank transfer form fields
+  const [accountHolderName, setAccountHolderName] = useState('')
+  const [currency, setCurrency] = useState('USD')
+  const [country, setCountry] = useState('US')
+  const [bankDetails, setBankDetails] = useState<Record<string, string>>({})
+  const [bankErrors, setBankErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     fetchData()
@@ -133,8 +140,15 @@ export default function Withdrawals() {
   const handleWithdrawal = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!paypalEmail || !paypalEmail.includes('@')) {
-      alert('Please enter a valid PayPal email address')
+    // Validate form
+    if (!accountHolderName.trim()) {
+      alert('Please enter account holder name')
+      return
+    }
+
+    // Basic validation for required bank details
+    if (Object.keys(bankDetails).length === 0) {
+      alert('Please fill in all bank details')
       return
     }
 
@@ -148,7 +162,7 @@ export default function Withdrawals() {
 
     if (
       !confirm(
-        `Request withdrawal of ${coins.toLocaleString()} coins?\n\nEstimated payout: ${estimate.symbol}${estimate.low} - ${estimate.symbol}${estimate.high}\n\nActual amount will be calculated at processing time based on current regional ad performance.`,
+        `Request withdrawal of ${coins.toLocaleString()} coins?\n\nEstimated payout: ${estimate.symbol}${estimate.low} - ${estimate.symbol}${estimate.high}\n\nFunds will be transferred directly to your bank account within 1-3 business days.\n\nActual amount will be calculated at processing time based on current regional ad performance.`,
       )
     ) {
       return
@@ -165,7 +179,12 @@ export default function Withdrawals() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ paypalEmail }),
+        body: JSON.stringify({ 
+          accountHolderName,
+          currency,
+          country,
+          bankDetails
+        }),
       })
 
       const result = await res.json()
@@ -180,13 +199,17 @@ export default function Withdrawals() {
           coinsWithdrawn: coins,
           rateMultiplier: estimate.multiplier,
           transactionId: result.withdrawalId,
-          paypalEmail,
+          paypalEmail: accountHolderName, // Use account holder name
         })
         setShowForm(false)
-        setPaypalEmail('')
+        setAccountHolderName('')
+        setBankDetails({})
         fetchData() // Refresh data
       } else {
         alert(`Error: ${result.error}`)
+        if (result.details) {
+          setBankErrors(result.details)
+        }
       }
     } catch (error) {
       console.error('Error requesting withdrawal:', error)
@@ -314,27 +337,69 @@ export default function Withdrawals() {
         )}
       </Card>
 
-      {/* Withdrawal Form */}
+      {/* Bank Transfer Withdrawal Form */}
       {showForm && coins > 0 && (
         <Card className="mb-6">
           <h2 className="text-xl font-bold text-white mb-4">
-            Enter PayPal Details
+            💰 Bank Transfer Details
           </h2>
           <form onSubmit={handleWithdrawal} className="space-y-4">
+            {/* Account Holder */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                PayPal Email Address *
+                Full Name (as on bank account) *
               </label>
               <input
-                type="email"
-                value={paypalEmail}
-                onChange={(e) => setPaypalEmail(e.target.value)}
+                type="text"
+                value={accountHolderName}
+                onChange={(e) => setAccountHolderName(e.target.value)}
                 className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
-                placeholder="your-email@example.com"
+                placeholder="John Smith"
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Make sure this email is connected to your PayPal account
+            </div>
+
+            {/* Currency Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Payout Currency *
+              </label>
+              <select
+                value={currency}
+                onChange={(e) => {
+                  setCurrency(e.target.value)
+                  // Auto-detect country from currency
+                  if (e.target.value === 'USD') setCountry('US')
+                  else if (e.target.value === 'GBP') setCountry('GB')
+                  else if (e.target.value === 'ZAR') setCountry('ZA')
+                  else if (e.target.value === 'EUR') setCountry('DE')
+                }}
+                className="w-full px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:outline-none"
+              >
+                <option value="USD">🇺🇸 US Dollar (USD)</option>
+                <option value="GBP">🇬🇧 British Pound (GBP)</option>
+                <option value="EUR">🇪🇺 Euro (EUR)</option>
+                <option value="ZAR">🇿🇦 South African Rand (ZAR)</option>
+                <option value="NGN">🇳🇬 Nigerian Naira (NGN)</option>
+              </select>
+            </div>
+
+            {/* Country-specific bank fields */}
+            <CountryBankFields
+              currency={currency}
+              country={country}
+              values={bankDetails}
+              onChange={(fieldName, fieldValue) => {
+                setBankDetails(prev => ({ ...prev, [fieldName]: fieldValue }))
+                setBankErrors(prev => ({ ...prev, [fieldName]: '' }))
+              }}
+              errors={bankErrors}
+            />
+
+            {/* Processing time notice */}
+            <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
+              <p className="text-sm text-blue-300">
+                ⏱️ Bank transfers typically arrive within <strong>1-3 business days</strong> via Wise Platform
               </p>
             </div>
 
@@ -344,7 +409,9 @@ export default function Withdrawals() {
                 fullWidth
                 onClick={() => {
                   setShowForm(false)
-                  setPaypalEmail('')
+                  setAccountHolderName('')
+                  setBankDetails({})
+                  setBankErrors({})
                 }}
               >
                 Cancel

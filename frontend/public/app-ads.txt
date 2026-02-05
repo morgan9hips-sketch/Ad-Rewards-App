@@ -3,5 +3,13 @@
 
 google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
 
-# Replace pub-XXXXXXXXXXXXXXXX with actual AdMob Publisher ID
-# Find your Publisher ID: AdMob Console → Account → Settings → Account Information → Publisher ID
+# ⚠️ IMPORTANT: Replace pub-XXXXXXXXXXXXXXXX with your ACTUAL AdMob Publisher ID
+# 
+# Steps to get your Publisher ID:
+# 1. Go to: https://admob.google.com
+# 2. Navigate to: Account → Settings → Account Information
+# 3. Copy your Publisher ID (format: pub-1234567890123456 - 16 digits after "pub-")
+# 4. Replace the placeholder above with your real Publisher ID
+# 5. Deploy changes
+#
+# Without a real Publisher ID, AdMob ads will not serve!

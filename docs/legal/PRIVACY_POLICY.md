@@ -35,7 +35,7 @@ We collect several types of information to provide, maintain, and improve our se
 - Parental consent documentation (for users aged 13-17)
 
 **Payment Information:**
-- PayPal email address
+- Wise email address
 - Payment history and transaction records
 - Withdrawal request details
 - Tax identification information (when required by law)
@@ -115,10 +115,10 @@ Through our integration with Google AdMob, we collect:
 
 ### 2.4 Information from Third Parties
 
-**PayPal:**
+**Wise:**
 - Payment processing status
 - Transaction confirmation
-- PayPal account status (good standing verification)
+- Wise account status (good standing verification)
 - Basic account holder information for verification
 
 **Fraud Prevention Services:**
@@ -139,7 +139,7 @@ To protect your privacy, we explicitly do NOT collect:
 - SMS messages or call logs
 - Photos or media files (except those you explicitly upload)
 - Passwords to other accounts
-- Banking information (PayPal handles all payment processing)
+- Banking information (Wise handles all payment processing)
 - Biometric data (fingerprints, facial recognition data)
 - Health information
 - Government-issued ID numbers (except when legally required for verification)
@@ -162,8 +162,8 @@ We use the information we collect for the following purposes:
 - **Earnings Calculation:** To track and calculate AdCoins earned through various activities
 - **Regional Multipliers:** To apply appropriate Regional Rate Multipliers based on your country
 - **Conversion:** To convert AdCoins to Cash Balance using current conversion rates
-- **Withdrawal Processing:** To process withdrawal requests and transfer funds via PayPal
-- **Payment Verification:** To verify PayPal account ownership and legitimacy
+- **Withdrawal Processing:** To process withdrawal requests and transfer funds via Wise
+- **Payment Verification:** To verify Wise account ownership and legitimacy
 - **Transaction Records:** To maintain accurate records of all earnings and withdrawals
 - **Tax Reporting:** To comply with tax reporting obligations when required by law
 
@@ -292,11 +292,11 @@ We share your personal information only in the following circumstances:
 - **Privacy Policy:** https://policies.google.com/privacy
 - **Contractual Protections:** Data Processing Agreement with Google
 
-**PayPal (Payment Processor):**
+**Wise (Payment Processor):**
 - **Data Shared:** Name, email, payment amounts, transaction details
 - **Purpose:** Processing withdrawals and payments
 - **Privacy Policy:** https://www.paypal.com/privacy
-- **Security:** PayPal's PCI DSS compliance protects payment data
+- **Security:** Wise's PCI DSS compliance protects payment data
 
 **Supabase (Database Hosting):**
 - **Data Shared:** All account data, earnings, transactions
@@ -672,7 +672,7 @@ We collect the same information from minors as adults, but with additional prote
 
 - **Minimal Collection:** We collect only information necessary for service provision
 - **Parental Access:** Parents can review their child's information at any time
-- **Limited Sharing:** We do not share minor data except as essential for service (AdMob, PayPal for withdrawals)
+- **Limited Sharing:** We do not share minor data except as essential for service (AdMob, Wise for withdrawals)
 - **No Marketing:** We do not send marketing communications to users under 18
 
 ### 8.4 Parental Rights for Minor Users
@@ -817,7 +817,7 @@ We implement comprehensive security measures to protect your personal informatio
 All third-party service providers are required to maintain security standards:
 
 - **Google AdMob:** Google's enterprise-grade security
-- **PayPal:** PCI DSS Level 1 compliance
+- **Wise:** PCI DSS Level 1 compliance
 - **Supabase:** SOC 2 Type II certified, ISO 27001 compliant
 - **Vercel:** SOC 2 Type II certified
 - **Data Processing Agreements:** Signed with all processors
@@ -896,7 +896,7 @@ While we implement strong security, you also play a role:
 While we implement industry-leading security measures, no system is 100% secure. We cannot guarantee absolute security against all possible threats.
 
 **Third-Party Risk:**
-We cannot control the security practices of third parties you interact with (such as PayPal). Review their security policies independently.
+We cannot control the security practices of third parties you interact with (such as Wise). Review their security policies independently.
 
 **User Responsibility:**
 We are not liable for security breaches resulting from your failure to protect your account credentials or follow security best practices.
@@ -931,7 +931,7 @@ Your data may be processed in the following locations:
 **United States:**
 - Google AdMob (advertising)
 - Vercel (application hosting)
-- PayPal (payment processing)
+- Wise (payment processing)
 
 **European Union:**
 - Supabase database servers (available in EU regions)
@@ -965,7 +965,7 @@ You have the right to:
 ### 10.5 Government Access
 
 **CLOUD Act Considerations:**
-US-based service providers (Google, Vercel, PayPal) may be subject to US government data access requests under the CLOUD Act. We:
+US-based service providers (Google, Vercel, Wise) may be subject to US government data access requests under the CLOUD Act. We:
 
 - Require these providers to notify us of government requests (unless legally prohibited)
 - Challenge overbroad or unjustified requests
