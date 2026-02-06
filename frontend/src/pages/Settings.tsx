@@ -156,20 +156,6 @@ export default function Settings() {
     }
   }
 
-      if (res.ok) {
-        setSaved(true)
-        await refreshCurrencyInfo() // Refresh currency context
-        setTimeout(() => setSaved(false), 3000)
-      } else {
-        const data = await res.json()
-        setError(data.error || 'Failed to save settings')
-      }
-    } catch (error) {
-      console.error('Error saving settings:', error)
-      setError('An error occurred while saving settings')
-    }
-  }
-
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
       <h1 className="text-3xl font-bold text-white mb-6">Settings ⚙️</h1>
