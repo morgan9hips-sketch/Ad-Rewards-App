@@ -7,6 +7,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
+// Use production URL for redirects, fallback to current origin for dev
+const appUrl = import.meta.env.VITE_APP_URL || window.location.origin
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export const auth = {
@@ -14,7 +17,7 @@ export const auth = {
     supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${appUrl}/auth/callback`,
       },
     }),
 
@@ -22,7 +25,7 @@ export const auth = {
     supabase.auth.signInWithOAuth({
       provider: 'facebook',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${appUrl}/auth/callback`,
       },
     }),
 

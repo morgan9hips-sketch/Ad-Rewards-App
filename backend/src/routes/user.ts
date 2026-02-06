@@ -417,4 +417,42 @@ router.post('/accept-terms', async (req: AuthRequest, res) => {
   }
 })
 
+// DELETE /api/user/account - Delete user account (Google Play requirement)
+router.delete('/account', async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id
+
+    // Delete all user data in transaction for data consistency
+    await prisma.$transaction(async (tx) => {
+      // Delete related records first (foreign key constraints)
+      await tx.adView.deleteMany({ where: { userId } })
+      await tx.gameSession.deleteMany({ where: { userId } })
+      await tx.transaction.deleteMany({ where: { userId } })
+      await tx.withdrawal.deleteMany({ where: { userId } })
+      await tx.referral.deleteMany({ 
+        where: { 
+          OR: [
+            { referrerId: userId },
+            { referredId: userId }
+          ]
+        } 
+      })
+      await tx.signupBonus.deleteMany({ where: { userId } })
+      await tx.userBadge.deleteMany({ where: { userId } })
+      await tx.subscription.deleteMany({ where: { userId } })
+      
+      // Finally delete the user profile
+      await tx.userProfile.delete({ where: { userId } })
+    })
+
+    res.json({ 
+      success: true, 
+      message: 'Account successfully deleted. All personal data has been removed from our systems.' 
+    })
+  } catch (error) {
+    console.error('Error deleting account:', error)
+    res.status(500).json({ error: 'Failed to delete account. Please contact support.' })
+  }
+})
+
 export default router

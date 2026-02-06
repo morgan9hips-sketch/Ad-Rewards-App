@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Card from '../components/Card'
 import Button from '../components/Button'
 import AvatarSelector from '../components/AvatarSelector'
@@ -6,8 +7,10 @@ import CountrySelector from '../components/CountrySelector'
 import { useAuth } from '../contexts/AuthContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import { API_BASE_URL } from '../config/api'
+import { supabase } from '../lib/supabase'
 
 export default function Settings() {
+  const navigate = useNavigate()
   const { user, session } = useAuth()
   const { currencyInfo, refreshCurrencyInfo } = useCurrency()
   const [paypalEmail, setPaypalEmail] = useState('')
@@ -24,6 +27,8 @@ export default function Settings() {
 
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     fetchProfile()
@@ -97,6 +102,59 @@ export default function Settings() {
           showOnLeaderboard,
         }),
       })
+
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 3000)
+
+        // Refresh currency info if currency-related settings changed
+        await refreshCurrencyInfo()
+      } else {
+        const data = await res.json()
+        setError(data.error || 'Failed to save settings')
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      setError('Failed to save settings')
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true)
+    setError(null)
+
+    try {
+      const token = session?.access_token
+      if (!token) {
+        setError('Not authenticated')
+        setDeleting(false)
+        return
+      }
+
+      const res = await fetch(`${API_BASE_URL}/api/user/account`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (res.ok) {
+        // Sign out from Supabase
+        await supabase.auth.signOut()
+        
+        // Redirect to home with success message
+        navigate('/', { state: { message: 'Your account has been permanently deleted.' } })
+      } else {
+        const data = await res.json()
+        setError(data.error || 'Failed to delete account')
+        setDeleting(false)
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error)
+      setError('Failed to delete account. Please try again or contact support.')
+      setDeleting(false)
+    }
+  }
 
       if (res.ok) {
         setSaved(true)
@@ -330,6 +388,65 @@ export default function Settings() {
               <p className="text-sm text-gray-400">How we protect your data</p>
             </div>
           </a>
+        </div>
+      </Card>
+
+      <Card className="mb-6 border border-red-500/30">
+        <h2 className="text-xl font-bold text-red-400 mb-4">⚠️ Danger Zone</h2>
+        <div className="space-y-4">
+          <div>
+            <p className="text-gray-300 text-sm mb-3">
+              Permanently delete your account and all associated data. This
+              action cannot be undone.
+            </p>
+            <a
+              href="/legal/delete-account"
+              className="text-blue-400 hover:text-blue-300 text-sm underline mb-3 inline-block"
+            >
+              Learn more about account deletion
+            </a>
+          </div>
+
+          {!showDeleteConfirm ? (
+            <Button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete My Account
+            </Button>
+          ) : (
+            <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4">
+              <p className="text-red-400 font-bold mb-3">
+                Are you absolutely sure?
+              </p>
+              <p className="text-gray-300 text-sm mb-4">
+                This will permanently delete:
+              </p>
+              <ul className="text-gray-400 text-sm list-disc list-inside mb-4 space-y-1">
+                <li>Your profile and account data</li>
+                <li>All earned coins and rewards</li>
+                <li>Transaction and withdrawal history</li>
+                <li>Badges and leaderboard rankings</li>
+                <li>All other personal information</li>
+              </ul>
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleDeleteAccount}
+                  disabled={deleting}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {deleting ? 'Deleting...' : 'Yes, Delete Forever'}
+                </Button>
+                <Button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={deleting}
+                  className="bg-gray-700 hover:bg-gray-600"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </Card>
 

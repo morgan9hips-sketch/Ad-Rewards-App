@@ -5,7 +5,14 @@ const config: CapacitorConfig = {
   appName: 'Adify',
   webDir: 'dist',
   server: {
-    androidScheme: 'https'
+    androidScheme: 'https',
+    // Allow external navigation for legal pages and authentication
+    allowNavigation: [
+      'adify.adrevtechnologies.com',
+      'api.adrevtechnologies.com',
+      '*.supabase.co',
+      'accounts.google.com'
+    ]
   },
   plugins: {
     AdMob: {
