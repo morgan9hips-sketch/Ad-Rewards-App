@@ -15,7 +15,7 @@ const SIGNUP_BONUS_VALUE_ZAR = 50.0
  */
 export async function checkSignupBonusEligibility(
   userId: string,
-  countryCode: string
+  countryCode: string,
 ): Promise<boolean> {
   try {
     // Use a transaction to ensure all operations succeed or fail together
@@ -23,16 +23,16 @@ export async function checkSignupBonusEligibility(
       // Count existing users in this region
       const existingUsersCount = await tx.signupBonus.count({
         where: { countryCode },
-      });
+      })
 
-      const userNumberInRegion = existingUsersCount + 1;
-      const eligible = userNumberInRegion <= SIGNUP_BONUS_LIMIT_PER_REGION;
+      const userNumberInRegion = existingUsersCount + 1
+      const eligible = userNumberInRegion <= SIGNUP_BONUS_LIMIT_PER_REGION
 
-      let creditedAt: Date | null = null;
+      let creditedAt: Date | null = null
 
       // --- NEW LOGIC: If eligible, credit the bonus immediately ---
       if (eligible) {
-        creditedAt = new Date(); // Mark as credited now
+        creditedAt = new Date() // Mark as credited now
 
         // 1. Add coins to user's profile
         await tx.userProfile.update({
@@ -41,17 +41,17 @@ export async function checkSignupBonusEligibility(
             coinsBalance: { increment: SIGNUP_BONUS_COINS },
             totalCoinsEarned: { increment: SIGNUP_BONUS_COINS },
           },
-        });
+        })
 
         // 2. Add cash value for backend tracking
-        const bonusValueUsd = Number(SIGNUP_BONUS_VALUE_ZAR) / 18.5; // Consider making the exchange rate dynamic
+        const bonusValueUsd = Number(SIGNUP_BONUS_VALUE_ZAR) / 18.5 // Consider making the exchange rate dynamic
         await tx.userProfile.update({
           where: { userId },
           data: {
             cashBalanceUsd: { increment: bonusValueUsd },
             totalCashEarnedUsd: { increment: bonusValueUsd },
           },
-        });
+        })
 
         // 3. Create a transaction record for history
         await tx.transaction.create({
@@ -62,9 +62,11 @@ export async function checkSignupBonusEligibility(
             cashChangeUsd: bonusValueUsd,
             description: `Signup bonus - User #${userNumberInRegion} in ${countryCode}`,
           },
-        });
+        })
 
-        console.log(`✅ Immediately credited signup bonus for new user ${userId}`);
+        console.log(
+          `✅ Immediately credited signup bonus for new user ${userId}`,
+        )
       }
 
       // Create the final signup bonus record
@@ -78,13 +80,16 @@ export async function checkSignupBonusEligibility(
           eligible,
           creditedAt, // This will be the date if eligible, null otherwise
         },
-      });
+      })
 
-      return eligible;
-    });
+      return eligible
+    })
   } catch (error) {
-    console.error('Error during signup bonus eligibility check and credit:', error);
-    return false;
+    console.error(
+      'Error during signup bonus eligibility check and credit:',
+      error,
+    )
+    return false
   }
 }
 
@@ -114,7 +119,10 @@ export async function getSignupBonusInfo(userId: string): Promise<{
       const totalInRegion = await prisma.signupBonus.count({
         where: { countryCode: signupBonus.countryCode },
       })
-      spotsRemaining = Math.max(0, SIGNUP_BONUS_LIMIT_PER_REGION - totalInRegion)
+      spotsRemaining = Math.max(
+        0,
+        SIGNUP_BONUS_LIMIT_PER_REGION - totalInRegion,
+      )
     }
 
     return {
@@ -153,7 +161,10 @@ export async function getRegionSignupBonusStats(countryCode: string): Promise<{
       where: { countryCode, creditedAt: { not: null } },
     })
 
-    const spotsRemaining = Math.max(0, SIGNUP_BONUS_LIMIT_PER_REGION - totalUsers)
+    const spotsRemaining = Math.max(
+      0,
+      SIGNUP_BONUS_LIMIT_PER_REGION - totalUsers,
+    )
 
     return {
       totalUsers,

@@ -14,6 +14,7 @@ declare global {
   interface Window {
     Android?: {
       setAuthToken: (token: string) => void
+      onUserSignedUp: () => void // Added for IP address capture
     }
   }
 }
@@ -115,7 +116,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const triggerAndroidSignUp = () => {
+    if (window.Android && typeof window.Android.onUserSignedUp === 'function') {
+      console.log('🚀 New user detected. Triggering IP capture in Android app.')
+      window.Android.onUserSignedUp()
+    }
+  }
+
   useEffect(() => {
+    // This handles the initial session load
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
       if (session?.user) {
@@ -123,10 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           session.access_token,
         )
         setUser({ ...session.user, role })
-        // Only call geo-resolution API if user is not already geo-resolved
         await resolveGeo(session.access_token, isGeoResolved)
-
-        // 🚨 NEW: Send auth token to Android app
         sendTokenToAndroid(session.access_token)
       } else {
         setUser(null)
@@ -135,25 +141,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
     })
 
+    // This handles subsequent auth events (SIGN_IN, SIGN_OUT)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session)
-      if (session?.user) {
+      if (event === 'SIGNED_IN' && session?.user) {
         const { role, geoResolved: isGeoResolved } = await fetchUserProfile(
           session.access_token,
         )
         setUser({ ...session.user, role })
-        // Only call geo-resolution API if user is not already geo-resolved
         await resolveGeo(session.access_token, isGeoResolved)
-
-        // 🚨 NEW: Send auth token to Android app on auth state change
         sendTokenToAndroid(session.access_token)
-      } else {
+
+        // --- 🚨 NEW LOGIC FOR SIGN-UP 🚨 ---
+        // Heuristic to detect if this is a new sign-up vs. a regular sign-in.
+        const user = session.user
+        const creationTime = new Date(user.created_at).getTime()
+        const lastSignInTime = user.last_sign_in_at
+          ? new Date(user.last_sign_in_at).getTime()
+          : creationTime
+
+        // If account was created less than 10 seconds before this sign-in, treat as new user.
+        if (Math.abs(creationTime - lastSignInTime) < 10000) {
+          triggerAndroidSignUp()
+        }
+        // --- END OF NEW LOGIC ---
+      } else if (event === 'SIGNED_OUT') {
         setUser(null)
         setGeoResolved(false)
       }
-      setLoading(false)
+      // We keep loading=false on initial load only to prevent UI flicker
     })
 
     return () => subscription.unsubscribe()
