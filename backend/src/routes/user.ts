@@ -433,13 +433,12 @@ router.delete('/account', async (req: AuthRequest, res) => {
         where: { 
           OR: [
             { referrerId: userId },
-            { referredId: userId }
+            { refereeId: userId }
           ]
         } 
       })
       await tx.signupBonus.deleteMany({ where: { userId } })
       await tx.userBadge.deleteMany({ where: { userId } })
-      await tx.subscription.deleteMany({ where: { userId } })
       
       // Finally delete the user profile
       await tx.userProfile.delete({ where: { userId } })
