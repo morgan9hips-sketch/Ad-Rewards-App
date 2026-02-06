@@ -16,7 +16,7 @@ export default function LegalPage({ endpoint, title }: LegalPageProps) {
     const fetchContent = async () => {
       try {
         const backendUrl =
-          import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
+          import.meta.env.VITE_API_URL || 'http://localhost:4000'
         const response = await fetch(`${backendUrl}/api/legal/${endpoint}`)
 
         if (!response.ok) {
