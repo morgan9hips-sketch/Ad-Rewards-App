@@ -2,6 +2,7 @@ import express from 'express'
 import { promises as fs } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { DELETE_ACCOUNT_CONTENT } from '../constants/legalContent.js'
 
 const router = express.Router()
 
@@ -90,11 +91,11 @@ router.get('/withdrawal', async (req, res) => {
 // GET /api/legal/delete-account - Serve Delete Account Instructions
 router.get('/delete-account', async (req, res) => {
   try {
-    const content = await readLegalDocument('DELETE_ACCOUNT.md')
+    // Return embedded content for Vercel serverless
     res.setHeader('Content-Type', 'text/markdown; charset=utf-8')
-    res.send(content)
+    res.send(DELETE_ACCOUNT_CONTENT)
   } catch (error: any) {
-    res.status(404).json({ error: error.message })
+    res.status(500).json({ error: 'Failed to load delete account instructions' })
   }
 })
 
