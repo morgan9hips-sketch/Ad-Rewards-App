@@ -38,14 +38,17 @@
 ```
 1. User clicks "Login with Google" in WebView
 2. Web calls HybridBridge.requestAuth()
-3. Native opens Chrome Custom Tabs
-4. User authenticates in Chrome (Google allows it)
+3. Native opens Chrome Custom Tabs with direct Supabase OAuth URL
+4. User authenticates with Google in Chrome (Google allows it - not WebView!)
 5. Supabase redirects to: adify://oauth/callback#access_token=...
 6. Android deep link reopens app
 7. MainActivity.onNewIntent() extracts token
 8. Token stored in Android Keystore (AES256-GCM)
 9. Token injected into WebView
 10. User logged in
+
+Note: The native code directly constructs the Supabase OAuth URL, bypassing
+the web login page for a cleaner, single-step authentication experience.
 ```
 
 ## Testing Instructions
