@@ -112,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const sendTokenToAndroid = (token: string) => {
     // DEPRECATED: Old Android bridge method (kept for backwards compatibility)
+    // TODO: Remove after verifying all users have migrated to HybridBridge
     // Check if running inside Android WebView
     if (window.Android && typeof window.Android.setAuthToken === 'function') {
       try {

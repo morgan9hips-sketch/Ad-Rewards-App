@@ -6,6 +6,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.webkit.WebChromeClient
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import android.view.ViewGroup
 import android.widget.FrameLayout
 
@@ -57,6 +58,18 @@ class MainActivity : ComponentActivity() {
         val container = FrameLayout(this)
         container.addView(webView)
         setContentView(container)
+        
+        // Handle back button press
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
         
         // Load production URL
         webView.loadUrl(PRODUCTION_URL)
@@ -124,14 +137,6 @@ class MainActivity : ComponentActivity() {
         
         // Clear cache on first launch for testing
         // webView.clearCache(true)
-    }
-    
-    override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
     }
     
     override fun onDestroy() {
