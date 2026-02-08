@@ -8,6 +8,14 @@ import {
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { API_BASE_URL } from '../config/api'
+import {
+  isHybridEnvironment,
+  getStoredSessionFromNative,
+  storeSessionToNative,
+  clearSessionFromNative,
+  setupSessionInjectionListener,
+  type SessionData as NativeSessionData,
+} from '../utils/hybridBridge'
 
 // TypeScript declaration for Android bridge
 declare global {
@@ -103,16 +111,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const sendTokenToAndroid = (token: string) => {
+    // DEPRECATED: Old Android bridge method (kept for backwards compatibility)
     // Check if running inside Android WebView
     if (window.Android && typeof window.Android.setAuthToken === 'function') {
       try {
         window.Android.setAuthToken(token)
-        console.log('✅ Auth token sent to Android app')
+        console.log('✅ Auth token sent to Android app (legacy bridge)')
       } catch (error) {
         console.error('❌ Failed to send token to Android:', error)
       }
-    } else {
-      console.log('ℹ️ Not running in Android WebView, skipping token bridge')
     }
   }
 
@@ -123,9 +130,134 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  /**
+   * Store session to native hybrid bridge.
+   * Only called in hybrid environment.
+   */
+  const storeSessionToHybridBridge = (session: Session) => {
+    if (!isHybridEnvironment()) {
+      return
+    }
+
+    try {
+      // Calculate expiry timestamp (default to 1 hour from now if not provided)
+      const expiryTimestamp = session.expires_at
+        ? session.expires_at * 1000
+        : Date.now() + 3600000
+
+      storeSessionToNative(
+        session.access_token,
+        session.refresh_token || null,
+        session.user?.id || null,
+        expiryTimestamp
+      )
+    } catch (error) {
+      console.error('❌ Critical: Failed to store session to native bridge:', error)
+      // FAIL FAST: In hybrid environment, this is critical
+      throw error
+    }
+  }
+
+  /**
+   * Restore session from native storage on boot.
+   * Returns true if session was restored, false otherwise.
+   */
+  const restoreSessionFromNative = async (): Promise<boolean> => {
+    if (!isHybridEnvironment()) {
+      return false
+    }
+
+    const nativeSession = getStoredSessionFromNative()
+    if (!nativeSession || !nativeSession.accessToken) {
+      return false
+    }
+
+    try {
+      // Set the session in Supabase
+      const { data, error } = await supabase.auth.setSession({
+        access_token: nativeSession.accessToken,
+        refresh_token: nativeSession.refreshToken || '',
+      })
+
+      if (error) {
+        console.error('❌ Failed to restore session from native storage:', error)
+        // Clear invalid session
+        clearSessionFromNative()
+        return false
+      }
+
+      if (data.session && data.session.user) {
+        console.log('✅ Session restored from native storage')
+        setSession(data.session)
+
+        // Fetch user profile and resolve geo
+        const { role, geoResolved: isGeoResolved } = await fetchUserProfile(
+          data.session.access_token
+        )
+        setUser({ ...data.session.user, role })
+        await resolveGeo(data.session.access_token, isGeoResolved)
+
+        return true
+      }
+
+      return false
+    } catch (error) {
+      console.error('❌ Error restoring session from native:', error)
+      clearSessionFromNative()
+      return false
+    }
+  }
+
   useEffect(() => {
-    // This handles the initial session load
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Setup session injection listener for hybrid environment
+    if (isHybridEnvironment()) {
+      setupSessionInjectionListener(async (nativeSession: NativeSessionData) => {
+        if (!nativeSession.accessToken) {
+          return
+        }
+
+        try {
+          // Set the session in Supabase
+          const { data, error } = await supabase.auth.setSession({
+            access_token: nativeSession.accessToken,
+            refresh_token: nativeSession.refreshToken || '',
+          })
+
+          if (error) {
+            console.error('❌ Failed to inject session from native:', error)
+            return
+          }
+
+          if (data.session && data.session.user) {
+            console.log('✅ Session injected successfully')
+            setSession(data.session)
+
+            // Fetch user profile and resolve geo
+            const { role, geoResolved: isGeoResolved } = await fetchUserProfile(
+              data.session.access_token
+            )
+            setUser({ ...data.session.user, role })
+            await resolveGeo(data.session.access_token, isGeoResolved)
+          }
+        } catch (error) {
+          console.error('❌ Error injecting session:', error)
+        }
+      })
+    }
+
+    // Initialize authentication
+    const initAuth = async () => {
+      // HYBRID MODE: Try to restore session from native storage first
+      if (isHybridEnvironment()) {
+        const restored = await restoreSessionFromNative()
+        if (restored) {
+          setLoading(false)
+          return
+        }
+      }
+
+      // STANDARD MODE: Get session from Supabase
+      const { data: { session } } = await supabase.auth.getSession()
       setSession(session)
       if (session?.user) {
         const { role, geoResolved: isGeoResolved } = await fetchUserProfile(
@@ -133,13 +265,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         )
         setUser({ ...session.user, role })
         await resolveGeo(session.access_token, isGeoResolved)
+        
+        // Store to native if in hybrid mode
+        if (isHybridEnvironment()) {
+          storeSessionToHybridBridge(session)
+        }
+        
+        // Legacy bridge support
         sendTokenToAndroid(session.access_token)
       } else {
         setUser(null)
         setGeoResolved(false)
       }
       setLoading(false)
-    })
+    }
+
+    initAuth()
 
     // This handles subsequent auth events (SIGN_IN, SIGN_OUT)
     const {
@@ -152,6 +293,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         )
         setUser({ ...session.user, role })
         await resolveGeo(session.access_token, isGeoResolved)
+        
+        // Store to native if in hybrid mode
+        if (isHybridEnvironment()) {
+          storeSessionToHybridBridge(session)
+        }
+        
+        // Legacy bridge support
         sendTokenToAndroid(session.access_token)
 
         // --- 🚨 NEW LOGIC FOR SIGN-UP 🚨 ---
@@ -170,6 +318,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else if (event === 'SIGNED_OUT') {
         setUser(null)
         setGeoResolved(false)
+        
+        // Clear native storage on sign out
+        if (isHybridEnvironment()) {
+          clearSessionFromNative()
+        }
       }
       // We keep loading=false on initial load only to prevent UI flicker
     })
@@ -180,6 +333,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut()
     setGeoResolved(false)
+    
+    // Clear native storage if in hybrid mode
+    if (isHybridEnvironment()) {
+      clearSessionFromNative()
+    }
   }
 
   return (
