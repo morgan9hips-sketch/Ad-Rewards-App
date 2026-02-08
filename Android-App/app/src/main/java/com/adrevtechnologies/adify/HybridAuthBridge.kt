@@ -1,9 +1,11 @@
 package com.adrevtechnologies.adify
 
 import android.app.Activity
+import android.net.Uri
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.util.Log
+import androidx.browser.customtabs.CustomTabsIntent
 import org.json.JSONObject
 
 /**
@@ -97,26 +99,39 @@ class HybridAuthBridge(
     }
     
     /**
-     * CRITICAL: Request auth from native.
+     * CRITICAL: Request auth from native using Chrome Custom Tabs.
      * Web calls this when user needs to login.
-     * Native performs OAuth via existing production URL.
      * 
      * Flow:
      * 1. Web calls requestAuth()
-     * 2. Native navigates to /login (existing endpoint)
-     * 3. User completes OAuth
-     * 4. Supabase callback returns token
-     * 5. Native intercepts token, stores in Keystore
-     * 6. Native calls web callback with token
+     * 2. Native opens Chrome Custom Tabs (real browser, NOT WebView)
+     * 3. User completes OAuth in Chrome
+     * 4. Supabase redirects to adify://oauth/callback with token
+     * 5. Deep link reopens app → onNewIntent() in MainActivity
+     * 6. Native extracts token, stores in Keystore
+     * 7. Native injects into WebView
+     * 
+     * WHY Chrome Custom Tabs:
+     * - Google blocks OAuth in WebView (Error 403: disallowed_useragent)
+     * - Chrome Custom Tabs = actual browser = Google allows it
+     * - Better security: user can verify URL in address bar
      */
     @JavascriptInterface
     fun requestAuth() {
-        Log.d(TAG, "🔐 Web requested authentication - loading OAuth flow")
+        Log.d(TAG, "🔐 Web requested authentication - launching Chrome Custom Tabs")
         
-        // Navigate to production login URL - Supabase handles OAuth
-        // Token will be captured via URL interception in WebViewClient
         activity.runOnUiThread {
-            webView.loadUrl("https://adify.adrevtechnologies.com/login")
+            // Build OAuth URL with custom redirect URI
+            val authUrl = "https://adify.adrevtechnologies.com/login?redirect_uri=adify://oauth/callback"
+            
+            // Launch Chrome Custom Tabs
+            val customTabsIntent = CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .build()
+            
+            customTabsIntent.launchUrl(activity, Uri.parse(authUrl))
+            
+            Log.d(TAG, "✅ Chrome Custom Tabs launched for OAuth")
         }
     }
     

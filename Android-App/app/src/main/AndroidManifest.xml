@@ -16,12 +16,26 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:label="@string/app_name"
             android:theme="@style/Theme.AdifyWebView">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            
+            <!-- Deep link for OAuth callback - REQUIRED for Chrome Custom Tabs -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                
+                <!-- Custom scheme: adify://oauth/callback -->
+                <data
+                    android:scheme="adify"
+                    android:host="oauth"
+                    android:pathPrefix="/callback" />
             </intent-filter>
         </activity>
     </application>

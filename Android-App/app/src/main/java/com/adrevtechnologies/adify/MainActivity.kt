@@ -1,5 +1,6 @@
 package com.adrevtechnologies.adify
 
+import android.content.Intent
 import android.os.Bundle
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -104,19 +105,56 @@ class MainActivity : ComponentActivity() {
             userAgentString = "${userAgentString} AdifyHybrid/1.0"
         }
         
-        // Set WebViewClient to handle URL loading and token interception
+        // Set WebViewClient to handle URL loading
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 
-                // CRITICAL: Intercept Supabase OAuth callback
-                if (url != null && url.contains("access_token=")) {
-                    android.util.Log.d("AdifyWebView", "🎯 Intercepted OAuth callback with token")
+                // After page loads, check if we have a stored session
+                // If yes, inject it into the web app
+                if (sessionStorage.hasValidSession()) {
+                    authBridge.injectSessionIntoWebView()
+                }
+            }
+            
+            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                // Allow navigation to production domain
+                // OAuth now happens in Chrome Custom Tabs, not WebView
+                return if (url != null && url.startsWith("https://adify.adrevtechnologies.com")) {
+                    false // Allow navigation
+                } else {
+                    true // Block external navigation
+                }
+            }
+        }
+        
+        // Set WebChromeClient for console messages and alerts
+        webView.webChromeClient = WebChromeClient()
+        
+        // Clear cache on first launch for testing
+        // webView.clearCache(true)
+    }
+    
+    /**
+     * Handle deep link callback from Chrome Custom Tabs OAuth.
+     * Called when Supabase redirects to adify://oauth/callback with token.
+     */
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        
+        intent?.data?.let { uri ->
+            android.util.Log.d("AdifyWebView", "🎯 Deep link received: $uri")
+            
+            // Check if this is OAuth callback
+            if (uri.scheme == "adify" && uri.host == "oauth" && uri.path == "/callback") {
+                // Extract token from fragment (Supabase uses #access_token, not ?access_token)
+                val fragment = uri.fragment
+                if (fragment != null && fragment.contains("access_token=")) {
+                    android.util.Log.d("AdifyWebView", "🔑 Extracting token from fragment")
                     
-                    // Extract token from URL fragment
-                    val token = extractTokenFromUrl(url)
-                    val refreshToken = extractRefreshTokenFromUrl(url)
-                    val expiresIn = extractExpiresInFromUrl(url)
+                    val token = extractTokenFromFragment(fragment)
+                    val refreshToken = extractRefreshTokenFromFragment(fragment)
+                    val expiresIn = extractExpiresInFromFragment(fragment)
                     
                     if (token != null) {
                         // Store in Keystore
@@ -129,7 +167,7 @@ class MainActivity : ComponentActivity() {
                         sessionStorage.storeSession(
                             accessToken = token,
                             refreshToken = refreshToken,
-                            userId = null, // Will be populated by web app
+                            userId = null,
                             expiryTimestamp = expiryTimestamp
                         )
                         
@@ -139,66 +177,38 @@ class MainActivity : ComponentActivity() {
                         authBridge.injectSessionIntoWebView()
                         
                         // Navigate to dashboard
-                        view?.loadUrl("https://adify.adrevtechnologies.com/dashboard")
-                        return
+                        webView.loadUrl("https://adify.adrevtechnologies.com/dashboard")
                     }
-                }
-                
-                // After page loads, check if we have a stored session
-                // If yes, inject it into the web app
-                if (sessionStorage.hasValidSession()) {
-                    authBridge.injectSessionIntoWebView()
-                }
-            }
-            
-            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                // Allow navigation to production domain and auth providers
-                return if (url != null && (
-                    url.startsWith("https://adify.adrevtechnologies.com") ||
-                    url.startsWith("https://api.adrevtechnologies.com") ||
-                    url.contains("supabase.co") ||
-                    url.contains("accounts.google.com") ||
-                    url.contains("facebook.com")
-                )) {
-                    false // Allow navigation
-                } else {
-                    true // Block navigation
-                }
-            }
-            
-            private fun extractTokenFromUrl(url: String): String? {
-                return try {
-                    val regex = "access_token=([^&]+)".toRegex()
-                    regex.find(url)?.groupValues?.get(1)
-                } catch (e: Exception) {
-                    null
-                }
-            }
-            
-            private fun extractRefreshTokenFromUrl(url: String): String? {
-                return try {
-                    val regex = "refresh_token=([^&]+)".toRegex()
-                    regex.find(url)?.groupValues?.get(1)
-                } catch (e: Exception) {
-                    null
-                }
-            }
-            
-            private fun extractExpiresInFromUrl(url: String): Long {
-                return try {
-                    val regex = "expires_in=([^&]+)".toRegex()
-                    regex.find(url)?.groupValues?.get(1)?.toLong() ?: 0
-                } catch (e: Exception) {
-                    0
                 }
             }
         }
-        
-        // Set WebChromeClient for console messages and alerts
-        webView.webChromeClient = WebChromeClient()
-        
-        // Clear cache on first launch for testing
-        // webView.clearCache(true)
+    }
+    
+    private fun extractTokenFromFragment(fragment: String): String? {
+        return try {
+            val regex = "access_token=([^&]+)".toRegex()
+            regex.find(fragment)?.groupValues?.get(1)
+        } catch (e: Exception) {
+            null
+        }
+    }
+    
+    private fun extractRefreshTokenFromFragment(fragment: String): String? {
+        return try {
+            val regex = "refresh_token=([^&]+)".toRegex()
+            regex.find(fragment)?.groupValues?.get(1)
+        } catch (e: Exception) {
+            null
+        }
+    }
+    
+    private fun extractExpiresInFromFragment(fragment: String): Long {
+        return try {
+            val regex = "expires_in=([^&]+)".toRegex()
+            regex.find(fragment)?.groupValues?.get(1)?.toLong() ?: 0
+        } catch (e: Exception) {
+            0
+        }
     }
     
     override fun onDestroy() {

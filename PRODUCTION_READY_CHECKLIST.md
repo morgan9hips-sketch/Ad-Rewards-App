@@ -45,6 +45,7 @@
 ## 📦 BUILD CONFIGURATION
 
 ### ✅ Keystore
+
 - **Location:** `Android-App/ad-rewards-app.keystore`
 - **Password:** `AdRewards2026!`
 - **Alias:** `key0`
@@ -52,6 +53,7 @@
 - **Status:** ✅ Working, no rotation needed
 
 ### ✅ App Configuration
+
 - **Package:** `com.adrevtechnologies.adify`
 - **Version:** 1.1 (increment before upload)
 - **Min SDK:** 24 (Android 7.0)
@@ -59,6 +61,7 @@
 - **Production URL:** `https://adify.adrevtechnologies.com` (hardcoded)
 
 ### ✅ Dependencies Added
+
 ```kotlin
 implementation("androidx.security:security-crypto:1.1.0-alpha06")
 implementation("androidx.activity:activity-ktx:1.8.2")
@@ -69,6 +72,7 @@ implementation("androidx.activity:activity-ktx:1.8.2")
 ## 🚀 PRE-DEPLOYMENT CHECKLIST
 
 ### Code Quality ✅
+
 - [x] All changes committed (292fdbe)
 - [x] All changes pushed to GitHub (origin/main)
 - [x] No hardcoded test credentials
@@ -76,6 +80,7 @@ implementation("androidx.activity:activity-ktx:1.8.2")
 - [x] Production URL enforced
 
 ### Security ✅
+
 - [x] Android Keystore encryption enabled
 - [x] Fail-fast error handling
 - [x] No token exposure in logs
@@ -83,6 +88,7 @@ implementation("androidx.activity:activity-ktx:1.8.2")
 - [x] Keystore backup secured offline
 
 ### Testing Required ⚠️
+
 - [ ] Build AAB with Android Studio
 - [ ] Verify AAB file size < 150MB
 - [ ] Install on physical device via `adb install-multiple`
@@ -97,6 +103,7 @@ implementation("androidx.activity:activity-ktx:1.8.2")
 ## 📱 BUILD & UPLOAD STEPS
 
 ### 1. Build Signed AAB
+
 ```
 Android Studio:
 1. Open: C:\Ad-Rewards-App\Android-App
@@ -113,16 +120,18 @@ Output: Android-App/app/build/outputs/bundle/release/app-release.aab
 ```
 
 ### 2. Verify AAB
+
 ```powershell
 # Check file exists and size
 Get-Item "C:\Ad-Rewards-App\Android-App\app\build\outputs\bundle\release\app-release.aab" | Select-Object Length, LastWriteTime
 
-# Expected: 
+# Expected:
 # - Modified today (Feb 8, 2026)
 # - Size: ~10-30 MB
 ```
 
 ### 3. Upload to Google Play
+
 ```
 1. Open: https://play.google.com/console
 2. Select: Ad Rewards App
@@ -130,13 +139,14 @@ Get-Item "C:\Ad-Rewards-App\Android-App\app\build\outputs\bundle\release\app-rel
 4. Click: Create new release
 5. Upload: app-release.aab
 6. Add release notes:
-   "Fixed authentication flow for native Android WebView. 
+   "Fixed authentication flow for native Android WebView.
     Implemented secure session persistence with Android Keystore."
 7. Save → Review → Start rollout
 8. Wait: 15-60 minutes for processing
 ```
 
 ### 4. Test Internal Link
+
 ```
 1. Wait for "Available to testers" status
 2. Open internal test link on fresh device
@@ -150,11 +160,13 @@ Get-Item "C:\Ad-Rewards-App\Android-App\app\build\outputs\bundle\release\app-rel
 ## 🔍 VERIFICATION COMMANDS
 
 ### Watch Logs During Testing
+
 ```powershell
 adb logcat | Select-String "HybridAuthBridge|SecureSessionStorage|AdifyWebView"
 ```
 
 ### Expected Log Output
+
 ```
 ✅ Hybrid environment detected - requesting auth from native
 ✅ 🔐 Web requested authentication - loading OAuth flow
@@ -166,6 +178,7 @@ adb logcat | Select-String "HybridAuthBridge|SecureSessionStorage|AdifyWebView"
 ```
 
 ### Check Session Storage
+
 ```powershell
 # After login, restart app and watch:
 adb logcat -c; adb logcat | Select-String "Session"
@@ -180,6 +193,7 @@ adb logcat -c; adb logcat | Select-String "Session"
 ## ⚠️ KNOWN REQUIREMENTS
 
 ### Google Play Specific
+
 - [x] OAuth works in production domain
 - [x] No test credentials in code
 - [x] Session persists across restarts
@@ -187,6 +201,7 @@ adb logcat -c; adb logcat | Select-String "Session"
 - [x] Package name unchanged: `com.adrevtechnologies.adify`
 
 ### Post-Upload Actions
+
 - [ ] Test internal test link on device
 - [ ] Verify "item not found" error is resolved
 - [ ] Monitor crash reports in Play Console
@@ -197,11 +212,13 @@ adb logcat -c; adb logcat | Select-String "Session"
 ## 📋 MANUAL ACTIONS REQUIRED
 
 ### Before Upload
+
 1. ✅ Increment version code in `build.gradle.kts`
 2. ✅ Build signed AAB
 3. ⏳ Test AAB on physical device
 
 ### After Upload
+
 1. ⏳ Upload AAB to Google Play Console
 2. ⏳ Add release notes
 3. ⏳ Start rollout to internal testing
@@ -237,13 +254,13 @@ When testing the internal test link:
 
 ## 📞 IF ISSUES OCCUR
 
-| Issue | Solution |
-|-------|----------|
-| "Item not found" | Wait 60 minutes, clear Play Store cache, retry |
-| OAuth fails | Check logcat for callback interception |
-| Session not persisting | Verify Keystore logs show "stored securely" |
-| Build fails | Check `build.gradle.kts` dependencies |
-| Signing fails | Verify keystore password: `AdRewards2026!` |
+| Issue                  | Solution                                       |
+| ---------------------- | ---------------------------------------------- |
+| "Item not found"       | Wait 60 minutes, clear Play Store cache, retry |
+| OAuth fails            | Check logcat for callback interception         |
+| Session not persisting | Verify Keystore logs show "stored securely"    |
+| Build fails            | Check `build.gradle.kts` dependencies          |
+| Signing fails          | Verify keystore password: `AdRewards2026!`     |
 
 ---
 

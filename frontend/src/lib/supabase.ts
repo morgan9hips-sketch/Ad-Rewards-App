@@ -7,8 +7,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
+// Detect if running in hybrid native app
+const isHybrid = typeof window !== 'undefined' && 
+  window.navigator.userAgent.includes('AdifyHybrid')
+
 // Use production URL for redirects, fallback to current origin for dev
 const appUrl = import.meta.env.VITE_APP_URL || window.location.origin
+
+// CRITICAL: Use custom scheme for native app OAuth
+const redirectUri = isHybrid 
+  ? 'adify://oauth/callback' 
+  : `${appUrl}/auth/callback`
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
@@ -17,7 +26,7 @@ export const auth = {
     supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${appUrl}/auth/callback`,
+        redirectTo: redirectUri,
       },
     }),
 
@@ -25,7 +34,7 @@ export const auth = {
     supabase.auth.signInWithOAuth({
       provider: 'facebook',
       options: {
-        redirectTo: `${appUrl}/auth/callback`,
+        redirectTo: redirectUri,
       },
     }),
 

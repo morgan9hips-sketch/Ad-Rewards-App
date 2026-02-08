@@ -49,6 +49,10 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     
+    // Chrome Custom Tabs - REQUIRED for OAuth (Google blocks WebView)
+    implementation("androidx.browser:browser:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
+    
     // WebView and Security for hybrid auth
     implementation("androidx.webkit:webkit:1.8.0")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
