@@ -7,6 +7,8 @@
 
 // TypeScript interface for the native bridge
 interface NativeHybridBridge {
+  // Session management
+  getSession: () => string
   getStoredSession: () => string
   storeSession: (
     accessToken: string,
@@ -16,6 +18,9 @@ interface NativeHybridBridge {
   ) => void
   clearSession: () => void
   hasValidSession: () => string
+  
+  // CRITICAL: Request auth from native
+  requestAuth: () => void
 }
 
 // Extended window interface
@@ -153,5 +158,25 @@ export function setupSessionInjectionListener(
   window.HybridAuthBridge.onSessionInjected = (session: SessionData) => {
     console.log('✅ Session injected from native app')
     callback(session)
+  }
+}
+
+/**
+ * CRITICAL: Request authentication from native.
+ * Call this when user clicks login in hybrid environment.
+ * Native will handle OAuth, store token, and inject back into web.
+ */
+export function requestAuthFromNative(): void {
+  if (!isHybridEnvironment() || !window.HybridBridge) {
+    console.error('❌ Cannot request auth - not in hybrid environment')
+    return
+  }
+
+  try {
+    console.log('🔐 Requesting authentication from native...')
+    window.HybridBridge.requestAuth()
+  } catch (error) {
+    console.error('❌ Failed to request auth from native:', error)
+    throw error
   }
 }

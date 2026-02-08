@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { auth } from '../lib/supabase'
+import { isHybridEnvironment, requestAuthFromNative } from '../utils/hybridBridge'
 import Button from '../components/Button'
 import Card from '../components/Card'
 
@@ -8,6 +9,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
+  
+  // Detect if running in native hybrid environment
+  const isHybrid = isHybridEnvironment()
 
   const handleGoogleLogin = async () => {
     if (!termsAccepted) {
@@ -18,6 +22,16 @@ export default function Login() {
     setLoading(true)
     setError('')
     try {
+      // NATIVE-FIRST AUTH: If hybrid, let native handle OAuth
+      if (isHybrid) {
+        console.log('🔐 Hybrid environment detected - requesting auth from native')
+        requestAuthFromNative()
+        // Native will handle OAuth and inject token
+        // No need to wait - native controls the flow
+        return
+      }
+      
+      // WEB FALLBACK: Standard web OAuth flow
       const { error } = await auth.signInWithGoogle()
       if (error) throw error
     } catch (err: unknown) {
@@ -26,7 +40,7 @@ export default function Login() {
     }
   }
 
-  const handleFacebookLogin = async () => {
+  const handleFacebookLogin = async () {
     if (!termsAccepted) {
       setError('Please accept the Terms of Service to continue')
       return
@@ -35,6 +49,15 @@ export default function Login() {
     setLoading(true)
     setError('')
     try {
+      // NATIVE-FIRST AUTH: If hybrid, let native handle OAuth
+      if (isHybrid) {
+        console.log('🔐 Hybrid environment detected - requesting auth from native')
+        requestAuthFromNative()
+        // Native will handle OAuth and inject token
+        return
+      }
+      
+      // WEB FALLBACK: Standard web OAuth flow
       const { error } = await auth.signInWithFacebook()
       if (error) throw error
     } catch (err: unknown) {

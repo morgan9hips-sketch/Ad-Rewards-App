@@ -45,8 +45,8 @@ class MainActivity : ComponentActivity() {
             )
         }
         
-        // Initialize hybrid auth bridge
-        authBridge = HybridAuthBridge(webView, sessionStorage)
+        // Initialize hybrid auth bridge (pass activity for OAuth handling)
+        authBridge = HybridAuthBridge(this, webView, sessionStorage)
         
         // Configure WebView settings
         configureWebView()
@@ -104,10 +104,45 @@ class MainActivity : ComponentActivity() {
             userAgentString = "${userAgentString} AdifyHybrid/1.0"
         }
         
-        // Set WebViewClient to handle URL loading
+        // Set WebViewClient to handle URL loading and token interception
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
+                
+                // CRITICAL: Intercept Supabase OAuth callback
+                if (url != null && url.contains("access_token=")) {
+                    android.util.Log.d("AdifyWebView", "🎯 Intercepted OAuth callback with token")
+                    
+                    // Extract token from URL fragment
+                    val token = extractTokenFromUrl(url)
+                    val refreshToken = extractRefreshTokenFromUrl(url)
+                    val expiresIn = extractExpiresInFromUrl(url)
+                    
+                    if (token != null) {
+                        // Store in Keystore
+                        val expiryTimestamp = if (expiresIn > 0) {
+                            System.currentTimeMillis() + (expiresIn * 1000)
+                        } else {
+                            System.currentTimeMillis() + 3600000 // 1 hour default
+                        }
+                        
+                        sessionStorage.storeSession(
+                            accessToken = token,
+                            refreshToken = refreshToken,
+                            userId = null, // Will be populated by web app
+                            expiryTimestamp = expiryTimestamp
+                        )
+                        
+                        android.util.Log.d("AdifyWebView", "✅ Token stored in Keystore")
+                        
+                        // Inject token into web app
+                        authBridge.injectSessionIntoWebView()
+                        
+                        // Navigate to dashboard
+                        view?.loadUrl("https://adify.adrevtechnologies.com/dashboard")
+                        return
+                    }
+                }
                 
                 // After page loads, check if we have a stored session
                 // If yes, inject it into the web app
@@ -128,6 +163,33 @@ class MainActivity : ComponentActivity() {
                     false // Allow navigation
                 } else {
                     true // Block navigation
+                }
+            }
+            
+            private fun extractTokenFromUrl(url: String): String? {
+                return try {
+                    val regex = "access_token=([^&]+)".toRegex()
+                    regex.find(url)?.groupValues?.get(1)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+            
+            private fun extractRefreshTokenFromUrl(url: String): String? {
+                return try {
+                    val regex = "refresh_token=([^&]+)".toRegex()
+                    regex.find(url)?.groupValues?.get(1)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+            
+            private fun extractExpiresInFromUrl(url: String): Long {
+                return try {
+                    val regex = "expires_in=([^&]+)".toRegex()
+                    regex.find(url)?.groupValues?.get(1)?.toLong() ?: 0
+                } catch (e: Exception) {
+                    0
                 }
             }
         }
