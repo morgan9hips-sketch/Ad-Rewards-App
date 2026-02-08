@@ -121,8 +121,11 @@ class HybridAuthBridge(
         Log.d(TAG, "🔐 Web requested authentication - launching Chrome Custom Tabs")
         
         activity.runOnUiThread {
-            // Build OAuth URL with custom redirect URI
-            val authUrl = "https://adify.adrevtechnologies.com/login?redirect_uri=adify://oauth/callback"
+            // Build direct Supabase OAuth URL (bypasses web login page for better UX)
+            // This URL directly initiates Google OAuth flow in system browser
+            val authUrl = "https://yvgdzwzyaxzwwunnmlhc.supabase.co/auth/v1/authorize" +
+                "?provider=google" +
+                "&redirect_to=adify://oauth/callback"
             
             // Launch Chrome Custom Tabs
             val customTabsIntent = CustomTabsIntent.Builder()
