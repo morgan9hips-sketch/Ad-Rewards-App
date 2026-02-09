@@ -9,6 +9,7 @@
 ## ✅ WHAT'S BEEN COMPLETED
 
 ### **All Layers Deployed:**
+
 - ✅ **Backend API:** Legal documents served at `https://api.adrevtechnologies.com/api/legal/*`
 - ✅ **Frontend:** Deployed to `https://adify.adrevtechnologies.com`
 - ✅ **Settings Buttons:** Now open formatted pages at `https://adify.adrevtechnologies.com/legal/*`
@@ -16,6 +17,7 @@
 - ✅ **Git:** All changes committed and pushed (commit `f109a94`)
 
 ### **Legal URLs Fixed:**
+
 ```
 ✅ https://adify.adrevtechnologies.com/legal/terms
 ✅ https://adify.adrevtechnologies.com/legal/privacy
@@ -30,21 +32,26 @@
 
 **Go to:** https://supabase.com/dashboard/project/yvgdzwzyaxzwwunnmlhc/auth/url-configuration
 
-**Add these 3 URLs:**
+**Check if you already have wildcard domain configured:**
+- If you see `https://*.adrevtechnologies.com/*` → You're already set for web OAuth ✅
+- You ONLY need to add the Android deep link: `adify://oauth/callback`
+
+**If you DON'T have wildcard, add this URL:**
+
 ```
 adify://oauth/callback
-https://adify.adrevtechnologies.com/auth/callback
-http://localhost:5173/auth/callback
 ```
 
 **Steps:**
+
 1. Log into Supabase Dashboard
 2. Project: `yvgdzwzyaxzwwunnmlhc`
 3. **Authentication** → **URL Configuration**
-4. In **Redirect URLs** section, add all 3 URLs above
-5. Click **Save**
+4. Check if `https://*.adrevtechnologies.com/*` exists
+5. If NOT, add: `adify://oauth/callback`
+6. Click **Save**
 
-**Why:** OAuth will fail with "redirect_uri_mismatch" error without this.
+**Why:** Android OAuth needs `adify://oauth/callback` for Chrome Custom Tabs to redirect back to app.
 
 ---
 
@@ -81,14 +88,16 @@ http://localhost:5173/auth/callback
 2. **Application type:** Android
 3. **Package name:** `com.adrevtechnologies.adify`
 4. **SHA-1 certificate fingerprint:**
-   
+
    **Get SHA-1 by running:**
+
    ```bash
    cd Android-App
    ./gradlew signingReport
    ```
-   
+
    **Look for output like:**
+
    ```
    Variant: debug
    Config: debug
@@ -98,7 +107,7 @@ http://localhost:5173/auth/callback
    SHA1: A1:B2:C3:D4:E5:F6:...  ← COPY THIS
    SHA-256: XX:XX:XX:...
    ```
-   
+
    **Copy the SHA1 value** and paste into Google Cloud Console
 
 5. **Create**
@@ -119,6 +128,7 @@ http://localhost:5173/auth/callback
 4. **Save**
 
 **Where to get Client ID + Secret:**
+
 - Go to Google Cloud Console → APIs & Services → Credentials
 - Find your **Web application** OAuth 2.0 Client
 - Click to view Client ID and Client Secret
@@ -132,16 +142,19 @@ http://localhost:5173/auth/callback
 **When submitting app to Google Play, use these URLs:**
 
 **Privacy Policy:**
+
 ```
 https://adify.adrevtechnologies.com/legal/privacy
 ```
 
 **Terms of Service (optional but recommended):**
+
 ```
 https://adify.adrevtechnologies.com/legal/terms
 ```
 
 **Where to add:**
+
 1. Google Play Console → Your App
 2. **App content** section
 3. Click **Privacy Policy**
@@ -157,6 +170,7 @@ https://adify.adrevtechnologies.com/legal/terms
 ### **Test OAuth on Android Device:**
 
 1. **Install app:**
+
    ```bash
    cd Android-App
    ./gradlew assembleDebug
@@ -164,6 +178,7 @@ https://adify.adrevtechnologies.com/legal/terms
    ```
 
 2. **Monitor logs:**
+
    ```bash
    adb logcat -s AdifyWebView HybridAuthBridge MainActivity
    ```
@@ -176,6 +191,7 @@ https://adify.adrevtechnologies.com/legal/terms
    - You should be logged in
 
 **Expected logs:**
+
 ```
 ✅ LOGIN COMPONENT DEBUG: isHybrid: true
 ✅ requestAuth() called from JavaScript
@@ -187,11 +203,13 @@ https://adify.adrevtechnologies.com/legal/terms
 ### **Test Legal Documents:**
 
 **In Web App:**
+
 1. Open https://adify.adrevtechnologies.com/settings
 2. Click "Terms of Service" button
 3. Should open formatted page in new tab (not raw text)
 
 **In Android App:**
+
 1. Run app from Android Studio
 2. Go to Settings
 3. Click "Terms of Service" button
@@ -204,7 +222,7 @@ https://adify.adrevtechnologies.com/legal/terms
 
 **Complete these in order:**
 
-- [ ] **Step 1:** Add redirect URLs in Supabase (3 URLs)
+- [ ] **Step 1:** Add Android deep link in Supabase (`adify://oauth/callback` only)
 - [ ] **Step 2A:** Configure OAuth consent screen in Google Cloud
 - [ ] **Step 2B:** Add authorized redirect URI in Google Cloud (Web)
 - [ ] **Step 2C:** Create Android OAuth client with SHA-1 in Google Cloud
@@ -212,6 +230,7 @@ https://adify.adrevtechnologies.com/legal/terms
 - [ ] **Step 4 (later):** Add legal URLs to Google Play Console when submitting app
 
 **After completing steps 1-3:**
+
 - [ ] Test OAuth on Android device
 - [ ] Test legal document links (web + Android)
 - [ ] Verify logs show successful OAuth flow
@@ -221,15 +240,19 @@ https://adify.adrevtechnologies.com/legal/terms
 ## ❓ COMMON ISSUES
 
 ### "redirect_uri_mismatch" error
+
 **Fix:** Complete Step 1 (add `adify://oauth/callback` to Supabase)
 
 ### "unauthorized_client" error
+
 **Fix:** Complete Step 2C (add SHA-1 fingerprint to Google Cloud)
 
 ### "provider_not_found" error
+
 **Fix:** Complete Step 3 (enable Google provider in Supabase)
 
 ### OAuth button does nothing
+
 **Fix:** Check all 3 steps above are complete
 
 ---
@@ -237,15 +260,13 @@ https://adify.adrevtechnologies.com/legal/terms
 ## 🎯 WHAT HAPPENS NEXT
 
 **After you complete manual actions 1-3:**
+
 1. OAuth will work on Android app ✅
 2. Users can sign up with Google ✅
 3. Legal documents accessible to everyone ✅
 4. App ready for internal/beta testing ✅
 
-**For Google Play submission (later):**
-5. Complete Step 4 (add legal URLs to Play Console)
-6. Submit app for review
-7. Google reviews and approves
+**For Google Play submission (later):** 5. Complete Step 4 (add legal URLs to Play Console) 6. Submit app for review 7. Google reviews and approves
 
 ---
 
@@ -258,11 +279,13 @@ https://supabase.com/dashboard/project/yvgdzwzyaxzwwunnmlhc
 https://console.cloud.google.com/apis/credentials
 
 **Check Supabase OAuth Settings:**
+
 ```bash
 curl "https://yvgdzwzyaxzwwunnmlhc.supabase.co/auth/v1/settings" | jq
 ```
 
 **Get Android SHA-1:**
+
 ```bash
 cd Android-App
 ./gradlew signingReport
