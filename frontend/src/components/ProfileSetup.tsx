@@ -133,6 +133,8 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
       if (profileRes.ok) {
         const profileData = await profileRes.json()
         console.log('Profile saved and verified:', profileData)
+      } else {
+        console.error('Failed to verify profile persistence:', profileRes.status)
       }
 
       onComplete()

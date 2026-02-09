@@ -185,14 +185,20 @@ class MainActivity : ComponentActivity() {
                 // Check if we've already prompted for location
                 val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
                 val hasPrompted = prefs.getBoolean("location_prompted", false)
+                val wasGranted = prefs.getBoolean("location_granted", false)
                 
                 if (hasPrompted) {
-                    // Already prompted once, grant permission without showing prompt again
-                    callback?.invoke(origin, true, false)
+                    // Already prompted once - respect the previous decision
+                    callback?.invoke(origin, wasGranted, false)
+                    android.util.Log.d("AdifyWebView", "📍 Using cached location permission: $wasGranted")
                 } else {
-                    // First time - show prompt and remember that we prompted
+                    // First time - show prompt and remember the decision
                     callback?.invoke(origin, true, true)
-                    prefs.edit().putBoolean("location_prompted", true).apply()
+                    prefs.edit().apply {
+                        putBoolean("location_prompted", true)
+                        putBoolean("location_granted", true)
+                        apply()
+                    }
                     android.util.Log.d("AdifyWebView", "📍 Location permission prompted (first time)")
                 }
             }

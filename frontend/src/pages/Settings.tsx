@@ -400,7 +400,7 @@ export default function Settings() {
             </p>
             <button
               onClick={() => window.open("https://adify.adrevtechnologies.com/legal/delete-account", "_blank")}
-              className="text-blue-400 hover:text-blue-300 text-sm underline mb-3 inline-block"
+              className="text-blue-400 hover:text-blue-300 text-sm underline mb-3 inline-block cursor-pointer"
             >
               Learn more about account deletion
             </button>
