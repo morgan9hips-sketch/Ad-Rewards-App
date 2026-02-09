@@ -13,7 +13,8 @@ const __dirname = path.dirname(__filename)
 // Helper function to read legal document
 async function readLegalDocument(filename: string): Promise<string> {
   try {
-    const filePath = path.join(__dirname, '../../../docs/legal', filename)
+    // For Vercel deployment: Use ../../docs/legal (backend is deployment root)
+    const filePath = path.join(__dirname, '../../docs/legal', filename)
     const content = await fs.readFile(filePath, 'utf-8')
     return content
   } catch (error) {
