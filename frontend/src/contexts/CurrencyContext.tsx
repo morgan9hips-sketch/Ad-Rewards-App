@@ -44,10 +44,20 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   const requestLocationPermission = async (): Promise<boolean> => {
     try {
+      // Check if we've already prompted the user
+      const hasPrompted = localStorage.getItem('location_prompted')
+      if (hasPrompted === 'true') {
+        console.log('Location already prompted, skipping...')
+        // Still try to load with IP fallback
+        loadCurrencyInfo()
+        return false
+      }
+
       // Check if geolocation is available
       if (!navigator.geolocation) {
         console.error('Geolocation not supported')
         setLocationError(true)
+        localStorage.setItem('location_prompted', 'true')
         return false
       }
 
@@ -61,6 +71,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
               position.coords.longitude,
             )
             setLocationError(false)
+            localStorage.setItem('location_prompted', 'true')
             loadCurrencyInfo(
               position.coords.latitude,
               position.coords.longitude,
@@ -70,6 +81,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
           (error) => {
             console.error('Location error:', error.message)
             setLocationError(true)
+            localStorage.setItem('location_prompted', 'true')
             // Still load currency based on IP if location is denied
             loadCurrencyInfo()
             resolve(false)
@@ -84,6 +96,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error requesting location:', error)
       setLocationError(true)
+      localStorage.setItem('location_prompted', 'true')
       // DO NOT fallback to IP - location is MANDATORY
       return false
     }

@@ -109,6 +109,9 @@ export default function Settings() {
 
         // Refresh currency info if currency-related settings changed
         await refreshCurrencyInfo()
+        
+        // Refetch profile to ensure UI is in sync
+        await fetchProfile()
       } else {
         const data = await res.json()
         setError(data.error || 'Failed to save settings')
@@ -352,9 +355,9 @@ export default function Settings() {
           📄 Legal Documents
         </h2>
         <div className="space-y-3">
-          <a
-            href="/terms"
-            className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-white"
+          <button
+            onClick={() => window.open("https://adify.adrevtechnologies.com/legal/terms", "_blank")}
+            className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-white w-full text-left"
           >
             <span className="text-xl">📋</span>
             <div>
@@ -363,17 +366,27 @@ export default function Settings() {
                 Review our terms and conditions
               </p>
             </div>
-          </a>
-          <a
-            href="/privacy"
-            className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-white"
+          </button>
+          <button
+            onClick={() => window.open("https://adify.adrevtechnologies.com/legal/privacy", "_blank")}
+            className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-white w-full text-left"
           >
             <span className="text-xl">🔒</span>
             <div>
               <p className="font-medium">Privacy Policy</p>
               <p className="text-sm text-gray-400">How we protect your data</p>
             </div>
-          </a>
+          </button>
+          <button
+            onClick={() => window.open("https://adify.adrevtechnologies.com/legal/delete-account", "_blank")}
+            className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-white w-full text-left"
+          >
+            <span className="text-xl">🗑️</span>
+            <div>
+              <p className="font-medium">Account Deletion</p>
+              <p className="text-sm text-gray-400">Learn about data deletion</p>
+            </div>
+          </button>
         </div>
       </Card>
 
@@ -385,12 +398,12 @@ export default function Settings() {
               Permanently delete your account and all associated data. This
               action cannot be undone.
             </p>
-            <a
-              href="/legal/delete-account"
+            <button
+              onClick={() => window.open("https://adify.adrevtechnologies.com/legal/delete-account", "_blank")}
               className="text-blue-400 hover:text-blue-300 text-sm underline mb-3 inline-block"
             >
               Learn more about account deletion
-            </a>
+            </button>
           </div>
 
           {!showDeleteConfirm ? (
