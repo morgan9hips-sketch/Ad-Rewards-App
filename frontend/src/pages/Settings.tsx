@@ -360,7 +360,7 @@ export default function Settings() {
           <button
             onClick={() =>
               window.open(
-                'https://api.adrevtechnologies.com/legal/terms',
+                'https://adify.adrevtechnologies.com/legal/terms',
                 '_blank',
               )
             }
@@ -377,7 +377,7 @@ export default function Settings() {
           <button
             onClick={() =>
               window.open(
-                'https://api.adrevtechnologies.com/legal/privacy',
+                'https://adify.adrevtechnologies.com/legal/privacy',
                 '_blank',
               )
             }
@@ -392,7 +392,7 @@ export default function Settings() {
           <button
             onClick={() =>
               window.open(
-                'https://api.adrevtechnologies.com/legal/delete-account',
+                'https://adify.adrevtechnologies.com/legal/delete-account',
                 '_blank',
               )
             }
@@ -418,7 +418,7 @@ export default function Settings() {
             <button
               onClick={() =>
                 window.open(
-                  'https://api.adrevtechnologies.com/legal/delete-account',
+                  'https://adify.adrevtechnologies.com/legal/delete-account',
                   '_blank',
                 )
               }
