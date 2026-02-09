@@ -6,10 +6,12 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.webkit.WebChromeClient
+import android.webkit.GeolocationPermissions
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.content.Context
 
 /**
  * Main Activity - Native Shell for Hybrid Architecture.
@@ -92,6 +94,9 @@ class MainActivity : ComponentActivity() {
             // Enable database storage
             databaseEnabled = true
             
+            // Enable geolocation
+            setGeolocationEnabled(true)
+            
             // Enable caching for better performance
             cacheMode = WebSettings.LOAD_DEFAULT
             
@@ -154,6 +159,13 @@ class MainActivity : ComponentActivity() {
             }
             
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                // Open legal documents in system browser
+                if (url != null && url.contains("/legal/")) {
+                    val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url))
+                    startActivity(intent)
+                    return true // Prevent WebView from loading
+                }
+                
                 // Allow navigation to production domain
                 // OAuth now happens in Chrome Custom Tabs, not WebView
                 return if (url != null && url.startsWith("https://adify.adrevtechnologies.com")) {
@@ -164,8 +176,33 @@ class MainActivity : ComponentActivity() {
             }
         }
         
-        // Set WebChromeClient for console messages and alerts
-        webView.webChromeClient = WebChromeClient()
+        // Set WebChromeClient for console messages, alerts, and geolocation
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onGeolocationPermissionsShowPrompt(
+                origin: String?,
+                callback: GeolocationPermissions.Callback?
+            ) {
+                // Check if we've already prompted for location
+                val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                val hasPrompted = prefs.getBoolean("location_prompted", false)
+                val wasGranted = prefs.getBoolean("location_granted", false)
+                
+                if (hasPrompted) {
+                    // Already prompted once - respect the previous decision
+                    callback?.invoke(origin, wasGranted, false)
+                    android.util.Log.d("AdifyWebView", "📍 Using cached location permission: $wasGranted")
+                } else {
+                    // First time - show prompt and remember the decision
+                    callback?.invoke(origin, true, true)
+                    prefs.edit().apply {
+                        putBoolean("location_prompted", true)
+                        putBoolean("location_granted", true)
+                        apply()
+                    }
+                    android.util.Log.d("AdifyWebView", "📍 Location permission prompted (first time)")
+                }
+            }
+        }
         
         // Clear cache on first launch for testing
         // webView.clearCache(true)

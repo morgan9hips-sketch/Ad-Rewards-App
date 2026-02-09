@@ -125,6 +125,18 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
         return
       }
 
+      // Refetch profile to ensure changes are persisted
+      const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      
+      if (profileRes.ok) {
+        const profileData = await profileRes.json()
+        console.log('Profile saved and verified:', profileData)
+      } else {
+        console.error('Failed to verify profile persistence:', profileRes.status)
+      }
+
       onComplete()
     } catch (err) {
       console.error('Error saving profile:', err)

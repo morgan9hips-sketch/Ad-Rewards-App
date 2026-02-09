@@ -44,10 +44,33 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   const requestLocationPermission = async (): Promise<boolean> => {
     try {
+      // Check if we've already prompted the user
+      const hasPrompted = localStorage.getItem('location_prompted')
+      if (hasPrompted === 'true') {
+        console.log('Location already prompted, skipping repeat prompt...')
+        // Don't prompt again, but still try to get location if user granted it
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              console.log('Location available from previous grant')
+              loadCurrencyInfo(position.coords.latitude, position.coords.longitude)
+            },
+            () => {
+              // User denied or permission unavailable, fallback to IP
+              console.log('Location unavailable, using IP fallback')
+              loadCurrencyInfo()
+            },
+            { maximumAge: 300000 }
+          )
+        }
+        return false
+      }
+
       // Check if geolocation is available
       if (!navigator.geolocation) {
         console.error('Geolocation not supported')
         setLocationError(true)
+        localStorage.setItem('location_prompted', 'true')
         return false
       }
 
@@ -61,6 +84,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
               position.coords.longitude,
             )
             setLocationError(false)
+            localStorage.setItem('location_prompted', 'true')
             loadCurrencyInfo(
               position.coords.latitude,
               position.coords.longitude,
@@ -70,7 +94,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
           (error) => {
             console.error('Location error:', error.message)
             setLocationError(true)
-            // Still load currency based on IP if location is denied
+            localStorage.setItem('location_prompted', 'true')
+            // Fallback to IP if location is denied
             loadCurrencyInfo()
             resolve(false)
           },
@@ -84,7 +109,9 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error requesting location:', error)
       setLocationError(true)
-      // DO NOT fallback to IP - location is MANDATORY
+      localStorage.setItem('location_prompted', 'true')
+      // Fallback to IP on error
+      loadCurrencyInfo()
       return false
     }
   }
