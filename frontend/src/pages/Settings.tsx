@@ -109,7 +109,7 @@ export default function Settings() {
 
         // Refresh currency info if currency-related settings changed
         await refreshCurrencyInfo()
-        
+
         // Refetch profile to ensure UI is in sync
         await fetchProfile()
       } else {
@@ -144,9 +144,11 @@ export default function Settings() {
       if (res.ok) {
         // Sign out from Supabase
         await supabase.auth.signOut()
-        
+
         // Redirect to home with success message
-        navigate('/', { state: { message: 'Your account has been permanently deleted.' } })
+        navigate('/', {
+          state: { message: 'Your account has been permanently deleted.' },
+        })
       } else {
         const data = await res.json()
         setError(data.error || 'Failed to delete account')
@@ -356,7 +358,12 @@ export default function Settings() {
         </h2>
         <div className="space-y-3">
           <button
-            onClick={() => window.open("https://adify.adrevtechnologies.com/legal/terms", "_blank")}
+            onClick={() =>
+              window.open(
+                'https://api.adrevtechnologies.com/legal/terms',
+                '_blank',
+              )
+            }
             className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-white w-full text-left"
           >
             <span className="text-xl">📋</span>
@@ -368,7 +375,12 @@ export default function Settings() {
             </div>
           </button>
           <button
-            onClick={() => window.open("https://adify.adrevtechnologies.com/legal/privacy", "_blank")}
+            onClick={() =>
+              window.open(
+                'https://api.adrevtechnologies.com/legal/privacy',
+                '_blank',
+              )
+            }
             className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-white w-full text-left"
           >
             <span className="text-xl">🔒</span>
@@ -378,7 +390,12 @@ export default function Settings() {
             </div>
           </button>
           <button
-            onClick={() => window.open("https://adify.adrevtechnologies.com/legal/delete-account", "_blank")}
+            onClick={() =>
+              window.open(
+                'https://api.adrevtechnologies.com/legal/delete-account',
+                '_blank',
+              )
+            }
             className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors text-white w-full text-left"
           >
             <span className="text-xl">🗑️</span>
@@ -399,7 +416,12 @@ export default function Settings() {
               action cannot be undone.
             </p>
             <button
-              onClick={() => window.open("https://adify.adrevtechnologies.com/legal/delete-account", "_blank")}
+              onClick={() =>
+                window.open(
+                  'https://api.adrevtechnologies.com/legal/delete-account',
+                  '_blank',
+                )
+              }
               className="text-blue-400 hover:text-blue-300 text-sm underline mb-3 inline-block cursor-pointer"
             >
               Learn more about account deletion
