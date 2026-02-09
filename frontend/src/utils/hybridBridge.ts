@@ -167,16 +167,25 @@ export function setupSessionInjectionListener(
  * Native will handle OAuth, store token, and inject back into web.
  */
 export function requestAuthFromNative(): void {
+  console.log('🔐 requestAuthFromNative() called')
+  console.log('  - isHybridEnvironment():', isHybridEnvironment())
+  console.log('  - window.HybridBridge:', typeof window !== 'undefined' ? (window as any).HybridBridge : undefined)
+  
   if (!isHybridEnvironment() || !window.HybridBridge) {
     console.error('❌ Cannot request auth - not in hybrid environment')
+    console.error('  - isHybridEnvironment():', isHybridEnvironment())
+    console.error('  - window.HybridBridge:', typeof window !== 'undefined' ? (window as any).HybridBridge : undefined)
     return
   }
 
   try {
     console.log('🔐 Requesting authentication from native...')
+    console.log('🔐 About to call window.HybridBridge.requestAuth()')
     window.HybridBridge.requestAuth()
+    console.log('✅ window.HybridBridge.requestAuth() returned successfully')
   } catch (error) {
     console.error('❌ Failed to request auth from native:', error)
+    console.error('❌ Error details:', JSON.stringify(error))
     throw error
   }
 }

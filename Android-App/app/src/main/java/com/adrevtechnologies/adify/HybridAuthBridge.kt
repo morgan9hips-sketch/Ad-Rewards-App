@@ -118,23 +118,37 @@ class HybridAuthBridge(
      */
     @JavascriptInterface
     fun requestAuth() {
+        Log.d(TAG, "🔐 requestAuth() called from JavaScript")
         Log.d(TAG, "🔐 Web requested authentication - launching Chrome Custom Tabs")
+        Log.d(TAG, "🔐 Activity: $activity")
+        Log.d(TAG, "🔐 Thread: ${Thread.currentThread().name}")
         
         activity.runOnUiThread {
+            Log.d(TAG, "🔐 Inside runOnUiThread")
+            
             // Build direct Supabase OAuth URL (bypasses web login page for better UX)
             // This URL directly initiates Google OAuth flow in system browser
             val authUrl = "https://yvgdzwzyaxzwwunnmlhc.supabase.co/auth/v1/authorize" +
                 "?provider=google" +
                 "&redirect_to=adify://oauth/callback"
             
+            Log.d(TAG, "🔐 Auth URL: $authUrl")
+            
             // Launch Chrome Custom Tabs
-            val customTabsIntent = CustomTabsIntent.Builder()
-                .setShowTitle(true)
-                .build()
-            
-            customTabsIntent.launchUrl(activity, Uri.parse(authUrl))
-            
-            Log.d(TAG, "✅ Chrome Custom Tabs launched for OAuth")
+            try {
+                val customTabsIntent = CustomTabsIntent.Builder()
+                    .setShowTitle(true)
+                    .build()
+                
+                Log.d(TAG, "🔐 CustomTabsIntent created, about to launch...")
+                customTabsIntent.launchUrl(activity, Uri.parse(authUrl))
+                
+                Log.d(TAG, "✅ Chrome Custom Tabs launched for OAuth")
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Failed to launch Chrome Custom Tabs", e)
+                Log.e(TAG, "❌ Error: ${e.message}")
+                throw e
+            }
         }
     }
     

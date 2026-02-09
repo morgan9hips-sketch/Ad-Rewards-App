@@ -12,8 +12,17 @@ export default function Login() {
   
   // Detect if running in native hybrid environment
   const isHybrid = isHybridEnvironment()
+  
+  // DEBUG: Log detection at component mount
+  console.log('🔍 LOGIN COMPONENT DEBUG:')
+  console.log('  - isHybrid:', isHybrid)
+  console.log('  - window.HybridBridge exists:', typeof window !== 'undefined' && (window as any).HybridBridge !== undefined)
+  console.log('  - User-Agent:', typeof window !== 'undefined' ? window.navigator.userAgent : 'N/A')
+  console.log('  - HybridBridge methods:', typeof window !== 'undefined' && (window as any).HybridBridge ? Object.keys((window as any).HybridBridge) : 'N/A')
 
   const handleGoogleLogin = async () => {
+    console.log('🚀 handleGoogleLogin clicked')
+    
     if (!termsAccepted) {
       setError('Please accept the Terms of Service to continue')
       return
@@ -25,11 +34,15 @@ export default function Login() {
       // NATIVE-FIRST AUTH: If hybrid, let native handle OAuth
       if (isHybrid) {
         console.log('🔐 Hybrid environment detected - requesting auth from native')
+        console.log('🔐 Calling requestAuthFromNative()...')
         requestAuthFromNative()
+        console.log('✅ requestAuthFromNative() called successfully')
         // Native will handle OAuth and inject token
         // No need to wait - native controls the flow
         return
       }
+      
+      console.log('🌐 Web environment - using standard OAuth')
       
       // WEB FALLBACK: Standard web OAuth flow
       const { error } = await auth.signInWithGoogle()

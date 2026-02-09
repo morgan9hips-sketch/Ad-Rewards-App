@@ -49,11 +49,16 @@ class MainActivity : ComponentActivity() {
         // Initialize hybrid auth bridge (pass activity for OAuth handling)
         authBridge = HybridAuthBridge(this, webView, sessionStorage)
         
+        android.util.Log.d("AdifyWebView", "🔧 Initializing WebView and bridge")
+        android.util.Log.d("AdifyWebView", "🔧 Bridge object: $authBridge")
+        android.util.Log.d("AdifyWebView", "🔧 Bridge name: ${HybridAuthBridge.BRIDGE_NAME}")
+        
         // Configure WebView settings
         configureWebView()
         
         // Inject JavaScript bridge BEFORE loading URL
         webView.addJavascriptInterface(authBridge, HybridAuthBridge.BRIDGE_NAME)
+        android.util.Log.d("AdifyWebView", "✅ JavaScript interface added: ${HybridAuthBridge.BRIDGE_NAME}")
         
         // Set content view
         val container = FrameLayout(this)
@@ -109,7 +114,38 @@ class MainActivity : ComponentActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                
+
+                // FORCE-HIJACK a-href links and buttons
+                // This ensures that native auth is ALWAYS used, bypassing web login.
+                val jsToInject = """
+                    javascript:(function() {
+                        function hijackAuth(event) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            var provider = this.getAttribute('data-provider') || 'google';
+                            if (window.HybridBridge && window.HybridBridge.requestAuth) {
+                                window.HybridBridge.requestAuth(provider);
+                            }
+                        }
+
+                        // Hijack Google button
+                        var googleButton = document.querySelector('a[href*="provider=google"]');
+                        if (googleButton) {
+                            googleButton.setAttribute('data-provider', 'google');
+                            googleButton.onclick = hijackAuth;
+                        }
+
+                        // Hijack Facebook button
+                        var facebookButton = document.querySelector('a[href*="provider=facebook"]');
+                        if (facebookButton) {
+                            facebookButton.setAttribute('data-provider', 'facebook');
+                            facebookButton.onclick = hijackAuth;
+                        }
+                    })();
+                """.trimIndent()
+
+                view?.evaluateJavascript(jsToInject, null)
+
                 // After page loads, check if we have a stored session
                 // If yes, inject it into the web app
                 if (sessionStorage.hasValidSession()) {
@@ -172,9 +208,6 @@ class MainActivity : ComponentActivity() {
                         )
                         
                         android.util.Log.d("AdifyWebView", "✅ Token stored in Keystore")
-                        
-                        // Inject token into web app
-                        authBridge.injectSessionIntoWebView()
                         
                         // Navigate to dashboard
                         webView.loadUrl("https://adify.adrevtechnologies.com/dashboard")

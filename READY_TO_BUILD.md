@@ -11,12 +11,14 @@
 ## PR #43 Changes (Successfully Merged)
 
 ### What Was Fixed
+
 - **Direct Supabase OAuth URL** - Bypasses web login page, goes straight to Google OAuth
 - **Better UX** - One-click login instead of two
 - **Chrome Custom Tabs** - Uses system browser (Google allows it)
 - **Deep Link Callback** - `adify://oauth/callback` receives token
 
 ### Key Change
+
 ```kotlin
 // HybridAuthBridge.kt - Direct OAuth flow
 val authUrl = "https://yvgdzwzyaxzwwunnmlhc.supabase.co/auth/v1/authorize" +
@@ -29,6 +31,7 @@ val authUrl = "https://yvgdzwzyaxzwwunnmlhc.supabase.co/auth/v1/authorize" +
 ## ✅ Layer Verification Complete
 
 ### 1. Native Android Layer (Android-App/)
+
 - ✅ **HybridAuthBridge.kt** - Direct Supabase OAuth URL implemented
 - ✅ **MainActivity.kt** - Deep link handler with token extraction
 - ✅ **SecureSessionStorage.kt** - Android Keystore encryption (AES256-GCM)
@@ -37,17 +40,20 @@ val authUrl = "https://yvgdzwzyaxzwwunnmlhc.supabase.co/auth/v1/authorize" +
 - ✅ **App Config** - `applicationId: com.adrevtechnologies.adify`, version 1.0
 
 ### 2. Frontend/Web Layer (frontend/src/)
+
 - ✅ **supabase.ts** - Hybrid detection + custom redirect URI
 - ✅ **hybridBridge.ts** - Native bridge interface defined
 - ✅ **Login.tsx** - Native-first auth flow (calls requestAuthFromNative)
 - ✅ **AuthContext.tsx** - Session management compatible
 
 ### 3. Backend API Layer (backend/src/)
+
 - ✅ **auth.ts** - Middleware validates Supabase tokens (any source)
 - ✅ **Prisma schema** - User models compatible
 - ✅ **No backend changes required** - OAuth handled by Supabase + native
 
 ### 4. Git/Deployment
+
 - ✅ **Local main** = `7d8eabc` (synced with origin)
 - ✅ **No uncommitted changes** - Clean working directory
 - ✅ **No branch mismatches** - All branches aligned
@@ -74,18 +80,21 @@ val authUrl = "https://yvgdzwzyaxzwwunnmlhc.supabase.co/auth/v1/authorize" +
 ## 📦 Build Instructions (Android Studio)
 
 ### 1. Open Project
+
 ```powershell
 # In Android Studio
 File → Open → C:\Ad-Rewards-App\Android-App
 ```
 
 ### 2. Sync Gradle
+
 ```
 File → Sync Project with Gradle Files
 Wait for sync to complete (~30 seconds)
 ```
 
 ### 3. Build Signed AAB
+
 ```
 Build → Generate Signed Bundle / APK
 → Android App Bundle
@@ -101,11 +110,13 @@ Keystore:
 ```
 
 ### 4. Output Location
+
 ```
 Android-App\app\build\outputs\bundle\release\app-release.aab
 ```
 
 ### 5. Upload to Google Play
+
 - Go to Google Play Console
 - Navigate: Release → Internal Testing (or Production)
 - Upload `app-release.aab`
@@ -128,6 +139,7 @@ After uploading to Internal Testing:
 8. ✅ Logout, login again → **Expected:** OAuth flow works
 
 ### Success Indicators
+
 - ✅ Chrome Custom Tabs opens with Google login
 - ✅ No Error 403: disallowed_useragent
 - ✅ App reopens after OAuth completes
@@ -135,6 +147,7 @@ After uploading to Internal Testing:
 - ✅ Token persists across app restarts
 
 ### Failure Indicators
+
 - ❌ Error 403 → Check using Chrome Custom Tabs (not WebView)
 - ❌ Redirect fails → Check Supabase redirect URL configuration
 - ❌ App doesn't reopen → Check deep link intent filter
@@ -145,16 +158,19 @@ After uploading to Internal Testing:
 ## 🚀 Migration Notes
 
 ### Database
+
 - ✅ **No migrations required** - OAuth change is native-only
 - ✅ Backend schema unchanged
 - ✅ Supabase tables unchanged
 
 ### Backend API
+
 - ✅ **No backend deployment required** - OAuth handled by Supabase
 - ✅ Backend validates tokens from any source (web or native)
 - ✅ No breaking changes
 
 ### Frontend Web
+
 - ✅ **No web deployment required** - Changes are hybrid-detection only
 - ✅ Web fallback still works (standard Supabase OAuth)
 - ✅ No breaking changes for web users
@@ -164,6 +180,7 @@ After uploading to Internal Testing:
 ## 📝 Key Technical Details
 
 ### OAuth Flow
+
 ```
 1. User clicks "Login with Google" → Web detects hybrid environment
 2. Web calls HybridBridge.requestAuth() → Native receives call
@@ -178,6 +195,7 @@ After uploading to Internal Testing:
 ```
 
 ### Security
+
 - **Chrome Custom Tabs** - User can verify URL in address bar
 - **Android Keystore** - Hardware-backed encryption (cannot extract keys)
 - **AES256-GCM** - Industry standard encryption
@@ -188,13 +206,13 @@ After uploading to Internal Testing:
 
 ## 🎯 What This Fixes
 
-| Issue | Status |
-|-------|--------|
-| Error 403: disallowed_useragent | ✅ FIXED - Uses Chrome Custom Tabs |
-| Two-click login (web page + OAuth) | ✅ FIXED - Direct OAuth URL |
-| WebView OAuth blocked by Google | ✅ FIXED - System browser used |
-| User can't verify URL | ✅ FIXED - Address bar visible in Chrome |
-| Token persistence | ✅ WORKING - Keystore storage |
+| Issue                              | Status                                   |
+| ---------------------------------- | ---------------------------------------- |
+| Error 403: disallowed_useragent    | ✅ FIXED - Uses Chrome Custom Tabs       |
+| Two-click login (web page + OAuth) | ✅ FIXED - Direct OAuth URL              |
+| WebView OAuth blocked by Google    | ✅ FIXED - System browser used           |
+| User can't verify URL              | ✅ FIXED - Address bar visible in Chrome |
+| Token persistence                  | ✅ WORKING - Keystore storage            |
 
 ---
 
@@ -217,7 +235,7 @@ cd Android-App        # Rebuild with previous version
 ✅ **No mismatches detected**  
 ✅ **Git synced with origin/main**  
 ✅ **Build configuration correct**  
-✅ **Documentation complete**  
+✅ **Documentation complete**
 
 🔴 **ONE MANUAL STEP:** Add `adify://oauth/callback` to Supabase redirect URLs
 
@@ -226,6 +244,7 @@ cd Android-App        # Rebuild with previous version
 ---
 
 **Next Steps:**
+
 1. Add redirect URL to Supabase (see above)
 2. Open Android-App/ in Android Studio
 3. Sync Gradle
@@ -236,6 +255,7 @@ cd Android-App        # Rebuild with previous version
 ---
 
 **Questions? See:**
+
 - [GOOGLE_OAUTH_FIX_SUMMARY.md](GOOGLE_OAUTH_FIX_SUMMARY.md) - Technical details
 - [OAUTH_FIX_MANUAL_ACTIONS.md](OAUTH_FIX_MANUAL_ACTIONS.md) - Manual steps
 - [BUILD_AAB_INSTRUCTIONS.md](Android-App/BUILD_AAB_INSTRUCTIONS.md) - Build guide
