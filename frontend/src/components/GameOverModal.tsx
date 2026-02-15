@@ -158,13 +158,13 @@ export default function GameOverModal({
           </div>
           {completed && (
             <div className="mt-2 text-green-400 font-semibold flex items-center justify-center gap-2">
-              <span>You earned</span>
+              <span>Session reward earned:</span>
               <img
                 src="/images/branding/Adcoin small 128x128.png"
                 alt="10 AdCoins earned"
                 className="w-6 h-6 inline"
               />
-              <span>10!</span>
+              <span>10 AdCoins!</span>
             </div>
           )}
         </div>
@@ -172,7 +172,7 @@ export default function GameOverModal({
         {!completed && (
           <div className="space-y-4">
             <div className="text-center text-gray-400 mb-4">
-              Choose to continue:
+              Complete the session challenge to continue:
             </div>
 
             {/* Watch Video Option */}
@@ -182,11 +182,11 @@ export default function GameOverModal({
               className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white font-bold py-4 px-6 rounded-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center justify-center space-x-2 mb-1">
-                <span className="text-xl">📺</span>
-                <span>Watch Video (Get 10 Coins)</span>
+                <span className="text-xl">🎯</span>
+                <span>Continue Session</span>
               </div>
               <div className="text-sm opacity-90">
-                Instant retry + earn coins
+                Retry attempt available • Earn 10 AdCoins
               </div>
             </button>
 
@@ -200,7 +200,7 @@ export default function GameOverModal({
                 <span className="text-xl">⏰</span>
                 <span>Wait 5 Minutes (Free)</span>
               </div>
-              <div className="text-sm opacity-90">No coins, just patience</div>
+              <div className="text-sm opacity-90">No rewards, just patience</div>
             </button>
 
             <div className="border-t border-gray-700 pt-4">

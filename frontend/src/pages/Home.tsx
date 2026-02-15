@@ -47,10 +47,12 @@ export default function Home() {
           <Card>
             <div className="text-center">
               <div className="text-5xl mb-4">📺</div>
-              <h3 className="text-xl font-bold text-white mb-2">Watch Ads</h3>
+              <h3 className="text-xl font-bold text-white mb-2">
+                Complete Sessions
+              </h3>
               <p className="text-gray-400">
-                Watch engaging video ads from our partners and earn money for
-                every completed view.
+                Participate in rewarded sessions from our partners and earn rewards
+                for every completion.
               </p>
             </div>
           </Card>
@@ -62,8 +64,8 @@ export default function Home() {
                 Earn Rewards
               </h3>
               <p className="text-gray-400">
-                Build your balance with every ad watched. Track your earnings in
-                real-time.
+                Build your balance through active participation. Track your
+                earnings in real-time.
               </p>
             </div>
           </Card>

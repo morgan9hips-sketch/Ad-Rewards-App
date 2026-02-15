@@ -15,14 +15,16 @@ export default function TermsOfService() {
 
           <h2 className="text-xl font-bold text-white mt-8 mb-4">1. Service Description</h2>
           <p className="text-gray-300 mb-4">
-            Ad Rewards is a rewards sharing platform that allows users to earn coins by watching advertisements provided through Google AdMob. Users can convert earned coins to cash and withdraw funds via PayPal.
+            Ad Rewards is a web-based rewards platform that allows users to earn virtual currency (AdCoins) by participating in rewarded sessions. Users can convert earned AdCoins to cash and withdraw funds via PayPal.
           </p>
           <p className="text-gray-300 mb-4">
             <strong>Important Clarifications:</strong>
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
+            <li><strong>Virtual Rewards:</strong> AdCoins are virtual rewards with no inherent monetary value until converted through our platform's revenue-sharing process.</li>
             <li><strong>Revenue Sharing, Not Financial Services:</strong> We share advertising revenue with users. We do not provide financial services, loans, investments, or guaranteed income.</li>
-            <li><strong>No Guaranteed Earnings:</strong> Earnings depend entirely on advertising revenue received from Google AdMob, which varies based on advertiser demand, geographic location, ad performance, and other market factors beyond our control.</li>
+            <li><strong>No Guaranteed Earnings:</strong> Earnings depend entirely on advertising revenue received, which varies based on advertiser demand, geographic location, ad performance, and other market factors beyond our control.</li>
+            <li><strong>Session-Based Participation:</strong> Rewards are earned through active participation in sessions. Advertisements may appear during sessions to support the platform.</li>
             <li><strong>Payment Processing:</strong> PayPal is our payment processor. We do not handle money transmission directly. All payments are subject to PayPal's terms and conditions.</li>
             <li><strong>Platform Purpose:</strong> This is a rewards program for entertainment and supplemental income, not a primary income source or employment relationship.</li>
           </ul>
@@ -50,7 +52,7 @@ export default function TermsOfService() {
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li>These Terms of Service</li>
             <li>Our <Link to="/privacy" className="text-blue-400 hover:text-blue-300 underline">Privacy Policy</Link></li>
-            <li>Google AdMob's policies and terms of service</li>
+            <li>Google's advertising policies and terms of service</li>
             <li>PayPal's terms of service and acceptable use policies</li>
             <li>All applicable local, state, national, and international laws</li>
           </ul>
@@ -60,39 +62,42 @@ export default function TermsOfService() {
             You must NOT:
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
-            <li>Use bots, scripts, automation tools, or any artificial means to view ads or generate coins</li>
+            <li>Use bots, scripts, automation tools, or any artificial means to participate in sessions or generate AdCoins</li>
             <li>Create fake accounts or use another person's account</li>
-            <li>Generate fraudulent ad views or clicks</li>
-            <li>Use VPNs, proxies, or other tools to manipulate your location for higher ad revenue</li>
+            <li>Generate fraudulent interactions or clicks</li>
+            <li>Use VPNs, proxies, or other tools to manipulate your location for higher revenue</li>
             <li>Attempt to manipulate, exploit, or abuse the rewards system</li>
             <li>Share, sell, or transfer your account to another person</li>
             <li>Interfere with or disrupt the service or servers</li>
             <li>Reverse engineer, decompile, or attempt to extract source code</li>
-            <li>Violate Google AdMob's policies, including but not limited to: clicking your own ads, encouraging others to click ads, or engaging in ad fraud</li>
+            <li>Engage in any activities that violate advertising partner policies, including incentivized clicking or ad fraud</li>
           </ul>
 
           <h2 className="text-xl font-bold text-white mt-8 mb-4">4. Rewards Program</h2>
           
-          <h3 className="text-lg font-semibold text-white mt-6 mb-3">4.1 Earning Coins</h3>
+          <h3 className="text-lg font-semibold text-white mt-6 mb-3">4.1 Earning AdCoins</h3>
           <p className="text-gray-300 mb-4">
-            <strong>Coin Issuance:</strong> You earn 100 coins for each advertisement you watch in its entirety. Coins are credited to your account upon successful completion of the ad.
+            <strong>AdCoin Issuance:</strong> You earn AdCoins by completing rewarded sessions. The amount earned per session may vary. AdCoins are virtual rewards credited to your account upon successful completion of the session.
           </p>
           <p className="text-gray-300 mb-4">
-            <strong>Ad Availability:</strong> Ad availability depends on advertiser demand and may vary by location, time of day, and other factors. We do not guarantee a specific number of ads will be available.
+            <strong>Session Availability:</strong> Session availability depends on advertiser demand and may vary by location, time of day, and other factors. We do not guarantee a specific number of sessions will be available.
+          </p>
+          <p className="text-gray-300 mb-4">
+            <strong>Advertising Disclosure:</strong> Advertisements may appear during sessions to support the platform. You are never required or incentivized to click on advertisements.
           </p>
 
-          <h3 className="text-lg font-semibold text-white mt-6 mb-3">4.2 Coin to Cash Conversion</h3>
+          <h3 className="text-lg font-semibold text-white mt-6 mb-3">4.2 AdCoin to Cash Conversion</h3>
           <p className="text-gray-300 mb-4">
-            <strong>Conversion Process:</strong> Coins are converted to cash on a monthly basis, typically within the first 5 business days of each month.
+            <strong>Conversion Process:</strong> AdCoins are converted to cash on a monthly basis, typically within the first 5 business days of each month.
           </p>
           <p className="text-gray-300 mb-4">
             <strong>Conversion Rate Calculation:</strong> The conversion rate is calculated using the following formula:
           </p>
           <div className="bg-gray-800 p-4 rounded mb-4 font-mono text-sm text-gray-200">
-            Conversion Rate = (Total AdMob Revenue × 85%) ÷ Total Coins Earned Across All Users
+            Conversion Rate = (Total Platform Revenue × 85%) ÷ Total AdCoins Earned Across All Users
           </div>
           <p className="text-gray-300 mb-4">
-            <strong>Variable Rate:</strong> The conversion rate varies each month based on actual advertising revenue received from Google AdMob. We retain 15% to cover operational costs, fraud prevention, payment processing fees, and platform maintenance.
+            <strong>Variable Rate:</strong> The conversion rate varies each month based on actual advertising revenue received. We retain 15% to cover operational costs, fraud prevention, payment processing fees, and platform maintenance.
           </p>
           <p className="text-gray-300 mb-4">
             <strong>No Guarantee:</strong> We make no guarantee regarding the conversion rate or the amount you will earn. Rates may increase or decrease based on market conditions entirely outside our control.
