@@ -26,8 +26,6 @@ export default function GameOverModal({
   const [processing, setProcessing] = useState(false)
 
   // Note: onRetryWithVideo is defined for future AdMob integration
-  // @ts-ignore - Will be used when AdMob is integrated
-  const _onRetryWithVideo = onRetryWithVideo
 
   const handleWatchVideo = async () => {
     try {

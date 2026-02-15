@@ -5,13 +5,13 @@
 
 ## 1. Introduction and Agreement to Terms
 
-Welcome to Adify, a mobile advertising rewards platform operated by AdRev Technologies (Pty) Ltd ("Company," "we," "us," or "our"), a South African registered company. These Terms of Service ("Terms," "ToS," or "Agreement") constitute a legally binding contract between you ("User," "you," or "your") and AdRev Technologies (Pty) Ltd governing your access to and use of the Adify mobile application, website, and related services (collectively, the "Platform" or "Service").
+Welcome to Adify, a rewards platform operated by AdRev Technologies (Pty) Ltd ("Company," "we," "us," or "our"), a South African registered company. These Terms of Service ("Terms," "ToS," or "Agreement") constitute a legally binding contract between you ("User," "you," or "your") and AdRev Technologies (Pty) Ltd governing your access to and use of the Adify web application, mobile application, and related services (collectively, the "Platform" or "Service").
 
-By creating an account, accessing, or using any part of the Adify Platform, you acknowledge that you have read, understood, and agree to be bound by these Terms, as well as our Privacy Policy, Cookie Policy, AdMob Disclosure, and all other policies incorporated herein by reference. If you do not agree to these Terms, you must immediately cease all use of the Platform and may not create an account.
+By creating an account, accessing, or using any part of the Adify Platform, you acknowledge that you have read, understood, and agree to be bound by these Terms, as well as our Privacy Policy, Cookie Policy, and all other policies incorporated herein by reference. If you do not agree to these Terms, you must immediately cease all use of the Platform and may not create an account.
 
 These Terms apply to all users of the Platform, including but not limited to casual browsers, registered users, Elite subscribers, and any other participants in the Adify ecosystem. We reserve the right to modify these Terms at any time, and such modifications will become effective immediately upon posting to the Platform. Your continued use of the Platform after any such changes constitutes your acceptance of the revised Terms.
 
-The Platform is designed to create a mutually beneficial ecosystem where users can earn rewards by engaging with advertisements, playing games, and referring others, while advertisers gain access to an engaged audience. This Agreement sets forth the rules, obligations, rights, and limitations governing this relationship.
+The Platform is designed to create a mutually beneficial ecosystem where users can earn rewards by engaging with sessions, playing games, and referring others, while advertisers gain access to an engaged audience. This Agreement sets forth the rules, obligations, rights, and limitations governing this relationship.
 
 ## 2. Definitions
 
@@ -73,7 +73,13 @@ Each individual is permitted only one (1) active account on the Platform. Creati
 
 ### 4.1 Platform Overview
 
-Adify operates as a rewards-based advertising platform that connects users with advertisers through Google AdMob integration. The Platform generates revenue through advertisements displayed to users, and a portion of this revenue is distributed to users in the form of AdCoins based on their engagement activities.
+Adify operates as a rewards-based platform that connects users with advertisers. The Platform generates revenue through advertising partnerships, and a portion of this revenue is distributed to users in the form of AdCoins based on their engagement activities. Advertisements may appear during user sessions to support the platform.
+
+**Important:** Different advertising technologies are used based on the platform:
+- **Web Platform:** Google AdSense
+- **Mobile Platform:** Google AdMob and/or Unity Ads
+
+Users are never required or incentivized to click on advertisements. Rewards are earned through active participation in sessions and platform activities.
 
 ### 4.2 The AdCoins System
 
