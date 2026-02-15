@@ -38,13 +38,13 @@ export function initializeGA4(): void {
 
   // Initialize dataLayer and gtag function
   window.dataLayer = window.dataLayer || []
-  window.gtag = function gtag() {
-    window.dataLayer.push(arguments)
+  window.gtag = function (...args: any[]) {
+    window.dataLayer.push(args)
   }
 
   // Configure GA4
   window.gtag('js', new Date())
   window.gtag('config', measurementId)
 
-  console.log('GA4: Initialized with measurement ID:', measurementId)
+  console.log('GA4: Initialized successfully')
 }
