@@ -25,18 +25,18 @@ export default function GameOverModal({
   const [showWaitTimer, setShowWaitTimer] = useState(false)
   const [processing, setProcessing] = useState(false)
 
-  // Note: onRetryWithVideo is defined for future AdMob integration
+  // Note: onRetryWithVideo is defined for future ad integration on mobile platform
 
   const handleWatchVideo = async () => {
     try {
       setProcessing(true)
 
-      // TODO: Integrate AdMob Rewarded Ad here
+      // TODO: Integrate ad service here for mobile platform
       // You need to:
-      // 1. Import AdMob from Capacitor: import { AdMob } from '@capacitor-community/admob'
-      // 2. Call AdMob.showRewardedVideo()
-      // 3. Get the real admobImpressionId from the ad callback
-      // For now, this will fail on backend validation without real AdMob integration
+      // 1. Import ad service from Capacitor (e.g., AdMob)
+      // 2. Call ad service to show rewarded video
+      // 3. Get the real impression ID from the ad callback
+      // For now, this will fail on backend validation without real ad integration
 
       const token = session?.access_token
       if (!token) {
@@ -45,17 +45,17 @@ export default function GameOverModal({
         return
       }
 
-      // This requires real AdMob integration - see ADMOB_IMPLEMENTATION_COMPLETE.md
-      console.error('AdMob integration required for retry video feature')
+      // This requires real ad integration - see platform-specific documentation
+      console.error('Ad integration required for retry video feature')
       alert(
-        'Ad viewing feature requires AdMob setup. Please complete mobile app integration.',
+        'Ad viewing feature requires ad service setup. Please complete mobile app integration.',
       )
       setProcessing(false)
       return
 
-      // UNCOMMENT AFTER ADMOB INTEGRATION:
-      // const adResult = await AdMob.showRewardedVideo({ adUnitId: 'your-ad-unit-id' })
-      // const admobImpressionId = adResult.impressionId
+      // UNCOMMENT AFTER AD INTEGRATION (mobile platform):
+      // const adResult = await AdService.showRewardedVideo({ adUnitId: 'your-ad-unit-id' })
+      // const impressionId = adResult.impressionId
       //
       // const res = await fetch(`${API_BASE_URL}/api/game/retry-video`, {
       //   method: 'POST',
