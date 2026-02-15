@@ -5,6 +5,7 @@ import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 import VideoCapProgress from '../components/VideoCapProgress'
 import InterstitialPrompt from '../components/InterstitialPrompt'
+import RewardDisclosure from '../components/RewardDisclosure'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 import admobService from '../services/admobService'
@@ -225,9 +226,12 @@ export default function Ads() {
 
   return (
     <div className="container mx-auto px-4 py-6 pb-32">
-      <h1 className="text-3xl font-bold text-white mb-6">
-        Watch Ads & Earn 💰
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-white">
+          Earn Rewards 💰
+        </h1>
+        <RewardDisclosure />
+      </div>
 
       {/* Video cap progress */}
       <VideoCapProgress
@@ -253,9 +257,9 @@ export default function Ads() {
         <div className="text-center py-8">
           <div className="text-6xl mb-4">🎬</div>
           <h2 className="text-2xl font-bold text-white mb-2">
-            Rewarded Video Ad
+            High-Reward Session
           </h2>
-          <p className="text-gray-400 mb-6">Watch a video ad and earn coins!</p>
+          <p className="text-gray-400 mb-6">Earn up to 100 AdCoins by completing this session</p>
 
           <div className="bg-gray-800 rounded-lg p-4 mb-6 max-w-md mx-auto">
             <div className="flex items-center justify-center space-x-4">
@@ -296,7 +300,7 @@ export default function Ads() {
               disabled={watching || !videoCapStatus.canWatchVideo}
               className="w-full max-w-md mx-auto bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
             >
-              {watching ? 'Loading Ad...' : 'Watch Video Ad'}
+              {watching ? 'Loading Session...' : 'Start High-Reward Session'}
             </Button>
           )}
         </div>
@@ -308,19 +312,19 @@ export default function Ads() {
         <ul className="space-y-2 text-gray-400 text-sm">
           <li className="flex items-start">
             <span className="text-green-500 mr-2">1.</span>
-            <span>Click "Watch Video Ad" to load an advertisement</span>
+            <span>Start a high-reward session by clicking the button above</span>
           </li>
           <li className="flex items-start">
             <span className="text-green-500 mr-2">2.</span>
-            <span>Watch the full video (usually 15-30 seconds)</span>
+            <span>Complete the session activity (usually 15-30 seconds)</span>
           </li>
           <li className="flex items-start">
             <span className="text-green-500 mr-2">3.</span>
-            <span>Earn 100 coins immediately (85% of ad revenue)</span>
+            <span>Earn up to 100 AdCoins for session completion</span>
           </li>
           <li className="flex items-start">
             <span className="text-green-500 mr-2">4.</span>
-            <span>Coins convert to cash monthly based on AdMob revenue</span>
+            <span>AdCoins convert to cash monthly based on platform revenue</span>
           </li>
         </ul>
       </Card>

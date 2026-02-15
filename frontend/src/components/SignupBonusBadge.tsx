@@ -115,7 +115,7 @@ export default function SignupBonusBadge() {
         </Button>
 
         <p className="text-gray-400 text-xs text-center mt-3">
-          Start earning by watching ads and playing games!
+          Start earning by participating in sessions and playing games!
         </p>
       </div>
     </div>

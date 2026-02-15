@@ -25,20 +25,18 @@ export default function GameOverModal({
   const [showWaitTimer, setShowWaitTimer] = useState(false)
   const [processing, setProcessing] = useState(false)
 
-  // Note: onRetryWithVideo is defined for future AdMob integration
-  // @ts-ignore - Will be used when AdMob is integrated
-  const _onRetryWithVideo = onRetryWithVideo
+  // Note: onRetryWithVideo is defined for future ad integration on mobile platform
 
   const handleWatchVideo = async () => {
     try {
       setProcessing(true)
 
-      // TODO: Integrate AdMob Rewarded Ad here
+      // TODO: Integrate ad service here for mobile platform
       // You need to:
-      // 1. Import AdMob from Capacitor: import { AdMob } from '@capacitor-community/admob'
-      // 2. Call AdMob.showRewardedVideo()
-      // 3. Get the real admobImpressionId from the ad callback
-      // For now, this will fail on backend validation without real AdMob integration
+      // 1. Import ad service from Capacitor (e.g., AdMob)
+      // 2. Call ad service to show rewarded video
+      // 3. Get the real impression ID from the ad callback
+      // For now, this will fail on backend validation without real ad integration
 
       const token = session?.access_token
       if (!token) {
@@ -47,17 +45,17 @@ export default function GameOverModal({
         return
       }
 
-      // This requires real AdMob integration - see ADMOB_IMPLEMENTATION_COMPLETE.md
-      console.error('AdMob integration required for retry video feature')
+      // This requires real ad integration - see platform-specific documentation
+      console.error('Ad integration required for retry video feature')
       alert(
-        'Ad viewing feature requires AdMob setup. Please complete mobile app integration.',
+        'Ad viewing feature requires ad service setup. Please complete mobile app integration.',
       )
       setProcessing(false)
       return
 
-      // UNCOMMENT AFTER ADMOB INTEGRATION:
-      // const adResult = await AdMob.showRewardedVideo({ adUnitId: 'your-ad-unit-id' })
-      // const admobImpressionId = adResult.impressionId
+      // UNCOMMENT AFTER AD INTEGRATION (mobile platform):
+      // const adResult = await AdService.showRewardedVideo({ adUnitId: 'your-ad-unit-id' })
+      // const impressionId = adResult.impressionId
       //
       // const res = await fetch(`${API_BASE_URL}/api/game/retry-video`, {
       //   method: 'POST',
@@ -158,13 +156,13 @@ export default function GameOverModal({
           </div>
           {completed && (
             <div className="mt-2 text-green-400 font-semibold flex items-center justify-center gap-2">
-              <span>You earned</span>
+              <span>Session reward earned:</span>
               <img
                 src="/images/branding/Adcoin small 128x128.png"
                 alt="10 AdCoins earned"
                 className="w-6 h-6 inline"
               />
-              <span>10!</span>
+              <span>10 AdCoins!</span>
             </div>
           )}
         </div>
@@ -172,7 +170,7 @@ export default function GameOverModal({
         {!completed && (
           <div className="space-y-4">
             <div className="text-center text-gray-400 mb-4">
-              Choose to continue:
+              Complete the session challenge to continue:
             </div>
 
             {/* Watch Video Option */}
@@ -182,11 +180,11 @@ export default function GameOverModal({
               className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white font-bold py-4 px-6 rounded-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center justify-center space-x-2 mb-1">
-                <span className="text-xl">📺</span>
-                <span>Watch Video (Get 10 Coins)</span>
+                <span className="text-xl">🎯</span>
+                <span>Continue Session</span>
               </div>
               <div className="text-sm opacity-90">
-                Instant retry + earn coins
+                Retry attempt available • Earn 10 AdCoins
               </div>
             </button>
 
@@ -200,7 +198,7 @@ export default function GameOverModal({
                 <span className="text-xl">⏰</span>
                 <span>Wait 5 Minutes (Free)</span>
               </div>
-              <div className="text-sm opacity-90">No coins, just patience</div>
+              <div className="text-sm opacity-90">No rewards, just patience</div>
             </button>
 
             <div className="border-t border-gray-700 pt-4">

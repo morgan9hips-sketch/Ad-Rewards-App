@@ -106,6 +106,26 @@ export default function PrivacyPolicy() {
             <li>Generate aggregated, anonymized statistics for business purposes</li>
           </ul>
 
+          <h2 className="text-xl font-bold text-white mt-8 mb-4">2.5 Advertising Technologies by Platform</h2>
+          <p className="text-gray-300 mb-4">
+            We use different advertising technologies depending on the platform you access our service from:
+          </p>
+          <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
+            <li><strong>Web Platform:</strong> Google AdSense for web-based advertising</li>
+            <li><strong>Mobile Platform:</strong> Unity Ads and/or Google AdMob for mobile app advertising</li>
+          </ul>
+          <p className="text-gray-300 mb-4">
+            Data handling and privacy practices may differ slightly between platforms based on the specific advertising technology used. Each advertising partner has its own privacy policy and data practices:
+          </p>
+          <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
+            <li>Google AdSense Privacy Policy: <a href="https://policies.google.com/privacy" className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a></li>
+            <li>Google AdMob Privacy Policy: <a href="https://support.google.com/admob/answer/6128543" className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">AdMob Privacy Information</a></li>
+            <li>Unity Ads Privacy Policy: <a href="https://unity.com/legal/privacy-policy" className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">unity.com/legal/privacy-policy</a></li>
+          </ul>
+          <p className="text-gray-300 mb-4">
+            <strong>Important:</strong> We do not incentivize users to click on advertisements. Rewards are earned through session participation, not through clicking ads. Any ad interactions must be genuine and voluntary.
+          </p>
+
           <h2 className="text-xl font-bold text-white mt-8 mb-4">3. Legal Basis for Processing (GDPR)</h2>
           
           <p className="text-gray-300 mb-4">
@@ -129,7 +149,7 @@ export default function PrivacyPolicy() {
             We share data with trusted third-party service providers who assist us in operating the service:
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
-            <li><strong>Google AdMob:</strong> Delivers advertisements and tracks ad revenue. AdMob collects device information, location data, and ad interaction data. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">Google's Privacy Policy</a>.</li>
+            <li><strong>Advertising Partners:</strong> We use Google AdSense (web) and Google AdMob/Unity Ads (mobile) to deliver advertisements. These partners collect device information, location data, and ad interaction data. See their respective privacy policies for details.</li>
             <li><strong>PayPal:</strong> Processes withdrawal payments. We share your PayPal email address and payment amount. See <a href="https://www.paypal.com/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">PayPal's Privacy Policy</a>.</li>
             <li><strong>Cloud Hosting Providers:</strong> Store and process data on secure servers.</li>
           </ul>

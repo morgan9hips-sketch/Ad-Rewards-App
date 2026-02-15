@@ -94,7 +94,7 @@ router.post('/end', async (req: AuthRequest, res) => {
           userId,
           type: 'game_completion',
           coinsChange: GAME_COMPLETION_COINS,
-          description: `Mini game completed - Score: ${score}`,
+          description: `Session reward - Game completed (Score: ${score})`,
         },
       })
     }
@@ -224,7 +224,7 @@ router.post('/retry-video', async (req: AuthRequest, res) => {
         userId,
         type: 'retry_video',
         coinsChange: RETRY_VIDEO_COINS,
-        description: 'Game retry video watched',
+        description: 'Retry reward - Session continuation',
       },
     })
 

@@ -83,14 +83,15 @@ We collect several types of information to provide, maintain, and improve our se
 - Analytics cookies for usage statistics
 - See our Cookie Policy for detailed information
 
-### 2.3 Google AdMob Data
+### 2.3 Advertising Partner Data
 
-Through our integration with Google AdMob, we collect:
+Through our integrations with advertising partners, we collect:
 
-**Google Advertising ID (GAID) / IDFA:**
-- Mobile advertising identifier used by Google for personalized advertising
-- Allows ad tracking across apps for more relevant advertisements
-- Users can reset or disable this identifier through device settings
+**Advertising Identifiers:**
+- Device advertising identifiers used for personalized advertising (varies by platform)
+- Mobile Advertising ID (GAID/IDFA) on mobile devices
+- Web browser identifiers and cookies on web platforms
+- Users can reset or disable advertising identifiers through device settings
 
 **Ad Interaction Data:**
 - Ad impressions (number of ads viewed)
@@ -99,19 +100,26 @@ Through our integration with Google AdMob, we collect:
 - Ad performance metrics
 - Ad revenue data (aggregated)
 
-**AdMob Analytics:**
-- Demographic information inferred by Google (age range, gender, interests)
-- Device and network information collected by AdMob
+**Advertising Analytics:**
+- Demographic information inferred by advertising partners (age range, gender, interests)
+- Device and network information collected by advertising partners
 - Geographic information used for ad targeting
 
 **Third-Party Advertising Partners:**
-- Google AdMob shares data with its advertising partners
+- Advertising partners share data with their advertising networks
 - These partners may use cookies and tracking technologies
-- See Google's Privacy Policy and AdMob's data practices for details
+- See each partner's privacy policy for details on their data practices
 
-**Important Note:** AdMob data collection is governed by Google's Privacy Policy. We recommend reviewing:
+**Platform-Specific Technologies:**
+- **Web Platform:** Google AdSense
+- **Mobile Platform:** Google AdMob and/or Unity Ads
+
+**Important Note:** Advertising data collection is governed by each partner's privacy policy. We recommend reviewing:
 - Google Privacy Policy: https://policies.google.com/privacy
 - Google AdMob Partner Information: https://support.google.com/admob/answer/6128543
+- Unity Ads Privacy Policy: https://unity.com/legal/privacy-policy
+
+**User Control:** Users are never required or incentivized to click on advertisements. All ad interactions must be genuine and voluntary.
 
 ### 2.4 Information from Third Parties
 
@@ -191,9 +199,9 @@ We use the information we collect for the following purposes:
 
 ### 3.5 Advertising and Monetization
 
-- **Ad Delivery:** To display relevant advertisements through Google AdMob
+- **Ad Delivery:** To display relevant advertisements through our advertising partners
 - **Ad Performance:** To track advertising effectiveness and revenue
-- **Revenue Sharing:** To calculate appropriate user earnings from ad revenue
+- **Revenue Sharing:** To calculate appropriate user earnings from advertising revenue
 - **Advertiser Reporting:** To provide aggregated, anonymized reports to advertisers
 
 ### 3.6 Legal Compliance
@@ -286,11 +294,14 @@ We share your personal information only in the following circumstances:
 
 ### 5.1 Service Providers and Partners
 
-**Google AdMob (Advertising Platform):**
-- **Data Shared:** Device identifiers, ad interaction data, location (country), demographic data inferred by Google
+**Advertising Partners:**
+- **Data Shared:** Device identifiers, ad interaction data, location (country), demographic data
 - **Purpose:** Ad delivery, targeting, and revenue generation
-- **Privacy Policy:** https://policies.google.com/privacy
-- **Contractual Protections:** Data Processing Agreement with Google
+- **Web Platform:** Google AdSense - https://policies.google.com/privacy
+- **Mobile Platform:** Google AdMob and/or Unity Ads
+  - AdMob: https://policies.google.com/privacy
+  - Unity: https://unity.com/legal/privacy-policy
+- **Contractual Protections:** Data Processing Agreements with advertising partners
 
 **PayPal (Payment Processor):**
 - **Data Shared:** Name, email, payment amounts, transaction details

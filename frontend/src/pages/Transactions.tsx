@@ -54,11 +54,13 @@ export default function Transactions() {
 
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-      coin_earned: 'Coins Earned',
+      coin_earned: 'Session Reward',
       coin_conversion: '💱 Coin Conversion',
       withdrawal: '💸 Withdrawal',
       admin_adjustment: '⚙️ Admin Adjustment',
       badge_reward: '🏆 Badge Reward',
+      game_completion: '🎮 Session Reward',
+      retry_video: '🔄 Retry Reward',
     }
     return labels[type] || type
   }
@@ -70,6 +72,8 @@ export default function Transactions() {
       withdrawal: 'text-red-500',
       admin_adjustment: 'text-purple-500',
       badge_reward: 'text-green-500',
+      game_completion: 'text-yellow-500',
+      retry_video: 'text-yellow-500',
     }
     return colors[type] || 'text-gray-400'
   }
