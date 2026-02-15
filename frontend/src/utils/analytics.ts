@@ -24,6 +24,12 @@ export function initializeGA4(): void {
     return
   }
 
+  // Validate measurement ID format (GA4 format: G-XXXXXXXXXX)
+  if (!/^G-[A-Z0-9]{10}$/i.test(measurementId)) {
+    console.error('GA4: Invalid measurement ID format. Expected format: G-XXXXXXXXXX')
+    return
+  }
+
   // Prevent multiple initializations
   if (window.gtag) {
     console.log('GA4: Already initialized, skipping')
