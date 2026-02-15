@@ -33,6 +33,7 @@
 **Go to:** https://supabase.com/dashboard/project/yvgdzwzyaxzwwunnmlhc/auth/url-configuration
 
 **Check if you already have wildcard domain configured:**
+
 - If you see `https://*.adrevtechnologies.com/*` → You're already set for web OAuth ✅
 - You ONLY need to add the Android deep link: `adify://oauth/callback`
 
