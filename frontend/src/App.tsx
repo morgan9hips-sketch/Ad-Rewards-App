@@ -10,6 +10,7 @@ import CookieConsent from './components/CookieConsent'
 import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
 import BetaBanner from './components/BetaBanner'
+import LocationPermissionModal from './components/LocationPermissionModal'
 import LoadingSpinner from './components/LoadingSpinner'
 
 // Pages
@@ -256,6 +257,7 @@ function AppContent() {
       )}
       <Footer />
       <CookieConsent />
+      <LocationPermissionModal />
     </div>
   )
 }
