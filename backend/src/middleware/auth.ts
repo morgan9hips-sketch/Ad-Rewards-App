@@ -23,6 +23,18 @@ function generateWalletId(): string {
   return `ADC-${random}`
 }
 
+/**
+ * Check if user should be marked as beta user
+ * Beta users get 1.5x multiplier but only for signups before cutoff date
+ */
+function shouldBeBetaUser(): boolean {
+  // Beta program cutoff date: March 1, 2026
+  const betaCutoffDate = new Date('2026-03-01T00:00:00Z')
+  const now = new Date()
+  
+  return now < betaCutoffDate
+}
+
 export async function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     // List of public routes that don't require authentication
@@ -86,8 +98,8 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
           revenueCountry: countryCode, // Locked - determines revenue pool
           walletId: walletId,
           currency: currency,
-          isBetaUser: true,
-          betaMultiplier: 1.5,
+          isBetaUser: shouldBeBetaUser(),
+          betaMultiplier: shouldBeBetaUser() ? 1.5 : 1.0,
         },
       })
       

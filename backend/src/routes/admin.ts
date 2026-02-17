@@ -851,12 +851,13 @@ router.post('/revenue/create-pools', logAdminAction('CREATE_REVENUE_POOLS'), asy
       return res.status(400).json({ error: 'Missing required fields: month, monetagRevenueUsd' })
     }
 
-    if (monetagRevenueUsd <= 0) {
-      return res.status(400).json({ error: 'Revenue must be positive' })
+    const revenueAmount = parseFloat(monetagRevenueUsd)
+    if (isNaN(revenueAmount) || revenueAmount <= 0) {
+      return res.status(400).json({ error: 'Revenue must be a positive number' })
     }
 
     // Create pools
-    await createMonthlyRevenuePools(month, parseFloat(monetagRevenueUsd))
+    await createMonthlyRevenuePools(month, revenueAmount)
 
     res.json({
       success: true,

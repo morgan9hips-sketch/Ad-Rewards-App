@@ -3,6 +3,10 @@ import { awardCoins } from './transactionService.js'
 
 const prisma = new PrismaClient()
 
+// Revenue sharing constants
+const BASE_COIN_VALUE_USD = 0.01 // Assumed base conversion rate per coin
+const USER_REVENUE_SHARE = 0.85 // 85% of revenue goes to users
+
 /**
  * Monetag Ad Zone Configuration
  * 
@@ -90,7 +94,7 @@ export async function trackMonetagImpression(
 
     // Track beta debt for future 1.5x payout
     if (isBetaUser) {
-      const debtIncrease = config.coins * 0.01 * 0.85 * betaMultiplier
+      const debtIncrease = config.coins * BASE_COIN_VALUE_USD * USER_REVENUE_SHARE * betaMultiplier
 
       await prisma.betaDebt.upsert({
         where: { userId },
