@@ -10,7 +10,6 @@ import CookieConsent from './components/CookieConsent'
 import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
 import BetaBanner from './components/BetaBanner'
-import AdBanner from './components/AdBanner'
 import LoadingSpinner from './components/LoadingSpinner'
 
 // Pages
@@ -252,7 +251,6 @@ function AppContent() {
 
       {isAuthenticated && (
         <>
-          <AdBanner />
           <BottomNavigation />
         </>
       )}
