@@ -10,7 +10,7 @@ import CookieConsent from './components/CookieConsent'
 import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
 import BetaBanner from './components/BetaBanner'
-import AdBanner from './components/AdBanner'
+import LocationPermissionModal from './components/LocationPermissionModal'
 import LoadingSpinner from './components/LoadingSpinner'
 
 // Pages
@@ -30,6 +30,7 @@ import Subscriptions from './pages/Subscriptions'
 import Referrals from './pages/Referrals'
 import AdminPanel from './pages/AdminPanel'
 import AdminConversions from './pages/AdminConversions'
+import AdminRevenue from './pages/AdminRevenue'
 import AdminLogs from './pages/AdminLogs'
 import AdminExpiryIncome from './pages/AdminExpiryIncome'
 import Transactions from './pages/Transactions'
@@ -233,6 +234,14 @@ function AppContent() {
           }
         />
         <Route
+          path="/admin/revenue"
+          element={
+            <ProtectedRoute requireAdmin>
+              <AdminRevenue />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admin/logs"
           element={
             <ProtectedRoute requireAdmin>
@@ -252,12 +261,12 @@ function AppContent() {
 
       {isAuthenticated && (
         <>
-          <AdBanner />
           <BottomNavigation />
         </>
       )}
       <Footer />
       <CookieConsent />
+      <LocationPermissionModal />
     </div>
   )
 }
