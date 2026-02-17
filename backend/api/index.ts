@@ -44,22 +44,22 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-// Mount routes with /api prefix
-app.use('/api/user', userRoutes)
-app.use('/api/ads', adsRoutes)
-app.use('/api/withdrawals', withdrawalRoutes)
-app.use('/api/leaderboard', leaderboardRoutes)
-app.use('/api/badges', badgesRoutes)
-app.use('/api/admin', adminRoutes)
-app.use('/api/videos', videosRoutes)
-app.use('/api/subscriptions', subscriptionsRoutes)
-app.use('/api/payouts', payoutsRoutes)
-app.use('/api/game', gameRoutes)
-app.use('/api/referrals', referralsRoutes)
-app.use('/api/coin-valuation', coinValuationRoutes)
-app.use('/api/platform', platformRoutes)
-app.use('/api/legal', legalRoutes)
-app.use('/api/geo-resolve', geoRoutes)
+// Mount routes with /api prefix (with authentication where needed)
+app.use('/api/user', authenticate, userRoutes)
+app.use('/api/ads', authenticate, adsRoutes)
+app.use('/api/withdrawals', authenticate, withdrawalRoutes)
+app.use('/api/leaderboard', leaderboardRoutes) // Public
+app.use('/api/badges', authenticate, badgesRoutes)
+app.use('/api/admin', authenticate, adminRoutes)
+app.use('/api/videos', authenticate, videosRoutes)
+app.use('/api/subscriptions', authenticate, subscriptionsRoutes)
+app.use('/api/payouts', authenticate, payoutsRoutes)
+app.use('/api/game', authenticate, gameRoutes)
+app.use('/api/referrals', referralsRoutes) // Has public routes, uses middleware internally
+app.use('/api/coin-valuation', authenticate, coinValuationRoutes)
+app.use('/api/platform', platformRoutes) // Public
+app.use('/api/legal', legalRoutes) // Public
+app.use('/api/geo-resolve', geoRoutes) // Public
 
 // Error handling middleware
 app.use((err: any, req: any, res: any, next: any) => {
