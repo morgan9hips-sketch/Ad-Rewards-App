@@ -30,6 +30,7 @@ import Subscriptions from './pages/Subscriptions'
 import Referrals from './pages/Referrals'
 import AdminPanel from './pages/AdminPanel'
 import AdminConversions from './pages/AdminConversions'
+import AdminRevenue from './pages/AdminRevenue'
 import AdminLogs from './pages/AdminLogs'
 import AdminExpiryIncome from './pages/AdminExpiryIncome'
 import Transactions from './pages/Transactions'
@@ -229,6 +230,14 @@ function AppContent() {
           element={
             <ProtectedRoute requireAdmin>
               <AdminConversions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/revenue"
+          element={
+            <ProtectedRoute requireAdmin>
+              <AdminRevenue />
             </ProtectedRoute>
           }
         />
