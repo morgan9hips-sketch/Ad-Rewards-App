@@ -48,6 +48,12 @@ export default function AdminPanel() {
         <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
         <div className="space-y-2">
           <button 
+            onClick={() => navigate('/admin/revenue')}
+            className="w-full text-left px-4 py-3 bg-gradient-to-r from-purple-800 to-pink-800 hover:from-purple-700 hover:to-pink-700 rounded-lg text-white transition-colors font-semibold"
+          >
+            💰 Monetag Revenue Management
+          </button>
+          <button 
             onClick={() => navigate('/admin/conversions')}
             className="w-full text-left px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-white transition-colors"
           >

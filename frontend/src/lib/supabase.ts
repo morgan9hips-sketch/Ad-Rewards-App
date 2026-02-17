@@ -38,6 +38,12 @@ export const auth = {
       },
     }),
 
+  signInWithPassword: ({ email, password }: { email: string; password: string }) =>
+    supabase.auth.signInWithPassword({ email, password }),
+
+  signInWithOtp: ({ email, options }: { email: string; options?: any }) =>
+    supabase.auth.signInWithOtp({ email, options }),
+
   signOut: () => supabase.auth.signOut(),
 
   getUser: () => supabase.auth.getUser(),

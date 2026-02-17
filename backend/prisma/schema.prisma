@@ -69,9 +69,16 @@ model UserProfile {
   cashWalletActivatedAt DateTime? @map("cash_wallet_activated_at")
 
   // Revenue location tracking (from AdMob - VPN-proof)
-  revenueCountry   String?  @map("revenue_country") // Primary earning country
+  revenueCountry   String?  @map("revenue_country") // Primary earning country (locked)
   revenueCountries String[] @default([]) @map("revenue_countries") // All countries earned from
   signupCountry    String?  @map("signup_country") @db.Char(2) // Country at signup
+
+  // New Monetag fields
+  signupIp       String? @map("signup_ip")
+  walletId       String? @unique @map("wallet_id") // Format: ADC-12345678
+  currency       String? @default("USD") // Based on country
+  isBetaUser     Boolean @default(true) @map("is_beta_user")
+  betaMultiplier Float   @default(1.5) @map("beta_multiplier")
 
   // Display preferences (user-friendly)
   displayCountry     String? @map("display_country")
@@ -84,12 +91,12 @@ model UserProfile {
   suspiciousActivity  Boolean @default(false) @map("suspicious_activity")
 
   // Geo-resolution (one-time IP-based assignment for currency/payout)
-  countryName    String?   @map("country_name")
-  currencyCode   String?   @map("currency_code")
-  ipAddress      String?   @map("ip_address")
-  geoResolved    Boolean   @default(false) @map("geo_resolved")
-  geoSource      String?   @map("geo_source")
-  geoResolvedAt  DateTime? @map("geo_resolved_at")
+  countryName   String?   @map("country_name")
+  currencyCode  String?   @map("currency_code")
+  ipAddress     String?   @map("ip_address")
+  geoResolved   Boolean   @default(false) @map("geo_resolved")
+  geoSource     String?   @map("geo_source")
+  geoResolvedAt DateTime? @map("geo_resolved_at")
 
   adsWatched Int      @default(0) @map("ads_watched")
   tier       UserTier @default(Free)
@@ -154,6 +161,8 @@ model UserProfile {
   referralsReceived   Referral[]           @relation("Referee")
   signupBonus         SignupBonus?
   gameSessions        GameSession[]
+  betaDebt            BetaDebt?
+  monetagImpressions  MontagImpression[]
 
   @@index([totalCoinsEarned(sort: Desc), showOnLeaderboard])
   @@index([lastLogin])
@@ -535,4 +544,60 @@ model Notification {
   @@index([event])
   @@index([sentAt])
   @@map("notifications")
+}
+
+model MontagImpression {
+  id                   Int         @id @default(autoincrement())
+  userId               String      @map("user_id")
+  user                 UserProfile @relation(fields: [userId], references: [userId])
+  adType               String      @map("ad_type") // 'rewarded', 'push', 'banner', 'vignette', 'inpage'
+  adZoneId             String      @map("ad_zone_id")
+  userSharePercent     Int         @map("user_share_percent") // 0 or 85
+  platformSharePercent Int         @map("platform_share_percent") // 100 or 15
+  estimatedRevenueUsd  Float       @default(0) @map("estimated_revenue_usd")
+  countryCode          String      @map("country_code")
+  isBetaMode           Boolean     @map("is_beta_mode")
+  betaMultiplier       Float       @map("beta_multiplier")
+  coinsAwarded         Int         @default(0) @map("coins_awarded")
+  createdAt            DateTime    @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@index([countryCode, adType])
+  @@map("monetag_impressions")
+}
+
+model RevenuePool {
+  id               Int       @id @default(autoincrement())
+  month            String
+  countryCode      String    @map("country_code")
+  totalRevenueUsd  Float     @map("total_revenue_usd")
+  userShareUsd     Float     @map("user_share_usd") // 85%
+  platformShareUsd Float     @map("platform_share_usd") // 15%
+  totalCoinsIssued BigInt    @map("total_coins_issued")
+  conversionRate   Float     @map("conversion_rate") // USD per coin
+  impressionCount  Int       @map("impression_count")
+  status           String    @default("pending") // pending, distributing, completed
+  startDate        DateTime  @map("start_date")
+  endDate          DateTime  @map("end_date")
+  distributedAt    DateTime? @map("distributed_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  @@unique([month, countryCode])
+  @@index([status])
+  @@map("revenue_pools")
+}
+
+model BetaDebt {
+  id               Int         @id @default(autoincrement())
+  userId           String      @unique @map("user_id")
+  user             UserProfile @relation(fields: [userId], references: [userId])
+  totalCoinsEarned BigInt      @default(0) @map("total_coins_earned")
+  estimatedDebtUsd Float       @default(0) @map("estimated_debt_usd")
+  multiplier       Float       @default(1.5)
+  isPaid           Boolean     @default(false) @map("is_paid")
+  paidAt           DateTime?   @map("paid_at")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  @@map("beta_debts")
 }
