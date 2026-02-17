@@ -78,7 +78,7 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
       // Generate unique wallet ID
       let walletId = generateWalletId()
       
-      // Ensure wallet ID is unique
+      // Ensure wallet ID is unique (max 10 attempts)
       let attempts = 0
       while (attempts < 10) {
         const existing = await prisma.userProfile.findUnique({
@@ -87,6 +87,11 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
         if (!existing) break
         walletId = generateWalletId()
         attempts++
+      }
+      
+      // If still not unique after 10 attempts, throw error
+      if (attempts >= 10) {
+        throw new Error('Failed to generate unique wallet ID after 10 attempts')
       }
 
       userProfile = await prisma.userProfile.create({

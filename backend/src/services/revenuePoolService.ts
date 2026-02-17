@@ -2,6 +2,10 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+// Revenue sharing constants
+const USER_REVENUE_SHARE = 0.85 // 85% of revenue goes to users
+const PLATFORM_REVENUE_SHARE = 0.15 // 15% of revenue goes to platform
+
 /**
  * Create monthly revenue pools by country
  */
@@ -26,8 +30,8 @@ export async function createMonthlyRevenuePools(
 
   for (const country of countries) {
     const countryRevenue = country._sum.estimatedRevenueUsd || 0
-    const userShare = countryRevenue * 0.85
-    const platformShare = countryRevenue * 0.15
+    const userShare = countryRevenue * USER_REVENUE_SHARE
+    const platformShare = countryRevenue * PLATFORM_REVENUE_SHARE
 
     // Get total coins earned in this country
     const totalCoins = await prisma.montagImpression.aggregate({

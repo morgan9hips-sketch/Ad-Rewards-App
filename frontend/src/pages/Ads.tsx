@@ -43,28 +43,31 @@ export default function Ads() {
   const [successMessage, setSuccessMessage] = useState<string>('')
 
   useEffect(() => {
-    initializeMonetagAds()
     fetchVideoCapStatus()
     fetchUserProfile()
   }, [])
 
-  const initializeMonetagAds = () => {
-    // Initialize Monetag OnClick for rewarded ad
-    if (session?.access_token) {
-      monetagService.initOnClickAd(
-        'watch-ad-button',
-        session.access_token,
-        (coins) => {
-          setSuccessMessage(`🎉 You earned ${coins} coins!`)
-          setTimeout(() => setSuccessMessage(''), 5000)
-          fetchVideoCapStatus()
-        },
-        (error) => {
-          console.error('OnClick error:', error)
-        }
-      )
+  useEffect(() => {
+    // Initialize Monetag OnClick after video cap status is loaded
+    // This ensures the button is rendered
+    if (session?.access_token && videoCapStatus) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        monetagService.initOnClickAd(
+          'watch-ad-button',
+          session.access_token!,
+          (coins) => {
+            setSuccessMessage(`🎉 You earned ${coins} coins!`)
+            setTimeout(() => setSuccessMessage(''), 5000)
+            fetchVideoCapStatus()
+          },
+          (error) => {
+            console.error('OnClick error:', error)
+          }
+        )
+      }, 100)
     }
-  }
+  }, [session, videoCapStatus])
 
   const fetchUserProfile = async () => {
     try {

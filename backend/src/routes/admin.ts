@@ -853,7 +853,7 @@ router.post('/revenue/create-pools', logAdminAction('CREATE_REVENUE_POOLS'), asy
 
     const revenueAmount = parseFloat(monetagRevenueUsd)
     if (isNaN(revenueAmount) || revenueAmount <= 0) {
-      return res.status(400).json({ error: 'Revenue must be a positive number' })
+      return res.status(400).json({ error: 'Revenue must be greater than zero' })
     }
 
     // Create pools
