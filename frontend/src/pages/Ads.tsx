@@ -8,7 +8,7 @@ import InterstitialPrompt from '../components/InterstitialPrompt'
 import RewardDisclosure from '../components/RewardDisclosure'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
-import admobService from '../services/admobService'
+import monetagService from '../services/monetagService'
 
 interface VideoCapStatus {
   tier: string
@@ -25,6 +25,11 @@ interface VideoCapStatus {
   }
 }
 
+interface UserProfile {
+  isBetaUser: boolean
+  betaMultiplier: number
+}
+
 export default function Ads() {
   const navigate = useNavigate()
   const { session } = useAuth()
@@ -32,19 +37,54 @@ export default function Ads() {
   const [videoCapStatus, setVideoCapStatus] = useState<VideoCapStatus | null>(
     null,
   )
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [watching, setWatching] = useState(false)
   const [showingInterstitial, setShowingInterstitial] = useState(false)
+  const [successMessage, setSuccessMessage] = useState<string>('')
 
   useEffect(() => {
-    initializeAdMob()
+    initializeMonetagAds()
     fetchVideoCapStatus()
+    fetchUserProfile()
   }, [])
 
-  const initializeAdMob = async () => {
+  const initializeMonetagAds = () => {
+    // Initialize Monetag OnClick for rewarded ad
+    if (session?.access_token) {
+      monetagService.initOnClickAd(
+        'watch-ad-button',
+        session.access_token,
+        (coins) => {
+          setSuccessMessage(`🎉 You earned ${coins} coins!`)
+          setTimeout(() => setSuccessMessage(''), 5000)
+          fetchVideoCapStatus()
+        },
+        (error) => {
+          console.error('OnClick error:', error)
+        }
+      )
+    }
+  }
+
+  const fetchUserProfile = async () => {
     try {
-      await admobService.initialize()
+      const token = session?.access_token
+      if (!token) return
+
+      const API_URL = API_BASE_URL
+      const res = await fetch(`${API_URL}/api/user/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setUserProfile({
+          isBetaUser: data.isBetaUser || false,
+          betaMultiplier: data.betaMultiplier || 1.0,
+        })
+      }
     } catch (error) {
-      console.error('Failed to initialize AdMob:', error)
+      console.error('Error fetching user profile:', error)
     }
   }
 
@@ -69,118 +109,17 @@ export default function Ads() {
     }
   }
 
-  const handleWatchRewardedVideo = async () => {
-    if (!videoCapStatus?.canWatchVideo) return
-
-    setWatching(true)
-    try {
-      // Load and show rewarded ad
-      await admobService.loadRewardedAd()
-
-      await admobService.showRewardedAd(
-        async (reward) => {
-          console.log('Rewarded:', reward)
-          // Send impression data to backend
-          await trackAdCompletion('rewarded')
-        },
-        () => {
-          console.log('Ad closed')
-          setWatching(false)
-          // Refresh video cap status
-          fetchVideoCapStatus()
-        },
-        (error) => {
-          console.error('Ad failed:', error)
-          setWatching(false)
-        },
-      )
-    } catch (error) {
-      console.error('Error showing rewarded video:', error)
-      setWatching(false)
-    }
-  }
-
   const handleWatchInterstitial = async () => {
     setShowingInterstitial(true)
     try {
-      // Load and show interstitial ad
-      await admobService.loadInterstitialAd()
-
-      await admobService.showInterstitialAd(
-        async () => {
-          console.log('Interstitial closed')
-          // Record interstitial watch
-          await recordInterstitialWatch()
-          setShowingInterstitial(false)
-          // Refresh video cap status
-          fetchVideoCapStatus()
-        },
-        (error) => {
-          console.error('Interstitial failed:', error)
-          setShowingInterstitial(false)
-        },
-      )
+      // For now, just simulate interstitial
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await recordInterstitialWatch()
+      setShowingInterstitial(false)
+      fetchVideoCapStatus()
     } catch (error) {
       console.error('Error showing interstitial:', error)
       setShowingInterstitial(false)
-    }
-  }
-
-  const trackAdCompletion = async (adType: 'rewarded' | 'interstitial') => {
-    try {
-      const token = session?.access_token
-      if (!token) return
-
-      const API_URL = API_BASE_URL
-      const impressionData = admobService.generateImpressionData(adType)
-
-      // Track ad completion
-      await fetch(`${API_URL}/api/ads/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          adUnitId:
-            adType === 'rewarded'
-              ? import.meta.env.VITE_ADMOB_REWARDED_ID
-              : import.meta.env.VITE_ADMOB_INTERSTITIAL_ID,
-          watchedSeconds: adType === 'rewarded' ? 30 : 15,
-          ...impressionData,
-        }),
-      })
-
-      // Track impression for revenue tracking
-      await fetch(`${API_URL}/api/ads/track-impression`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          adType,
-          adUnitId:
-            adType === 'rewarded'
-              ? import.meta.env.VITE_ADMOB_REWARDED_ID
-              : import.meta.env.VITE_ADMOB_INTERSTITIAL_ID,
-          revenueUsd: impressionData.estimatedEarnings,
-          country: impressionData.countryCode,
-          currency: impressionData.currency,
-        }),
-      })
-
-      // Record video watch
-      await fetch(`${API_URL}/api/videos/watch-complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ adType }),
-      })
-    } catch (error) {
-      console.error('Error tracking ad completion:', error)
     }
   }
 
@@ -233,17 +172,26 @@ export default function Ads() {
         <RewardDisclosure />
       </div>
 
+      {/* Success message */}
+      {successMessage && (
+        <div className="mb-4 bg-green-900/30 border border-green-600/50 rounded-lg p-4">
+          <p className="text-green-400 text-center font-semibold">
+            {successMessage}
+          </p>
+        </div>
+      )}
+
       {/* Video cap progress */}
       <VideoCapProgress
-        videosWatched={videoCapStatus.videosWatched}
-        dailyLimit={videoCapStatus.dailyLimit}
-        tier={videoCapStatus.tier}
-        resetTime={videoCapStatus.display.resetTime}
-        needsInterstitial={videoCapStatus.needsInterstitial}
+        videosWatched={videoCapStatus?.videosWatched || 0}
+        dailyLimit={videoCapStatus?.dailyLimit || 0}
+        tier={videoCapStatus?.tier || 'Free'}
+        resetTime={videoCapStatus?.display.resetTime || ''}
+        needsInterstitial={videoCapStatus?.needsInterstitial || false}
       />
 
       {/* Interstitial prompt for Free tier */}
-      {videoCapStatus.needsInterstitial && (
+      {videoCapStatus?.needsInterstitial && (
         <div className="mb-4">
           <InterstitialPrompt
             onWatchAd={handleWatchInterstitial}
@@ -252,14 +200,27 @@ export default function Ads() {
         </div>
       )}
 
-      {/* Rewarded video card */}
+      {/* Rewarded video card - Monetag OnClick */}
       <Card>
         <div className="text-center py-8">
           <div className="text-6xl mb-4">🎬</div>
           <h2 className="text-2xl font-bold text-white mb-2">
             High-Reward Session
           </h2>
-          <p className="text-gray-400 mb-6">Earn up to 100 AdCoins by completing this session</p>
+          <p className="text-gray-400 mb-6">Earn 100 AdCoins per session</p>
+
+          {/* Beta bonus banner */}
+          {userProfile?.isBetaUser && (
+            <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-2 border-purple-600/50 rounded-lg p-4 mb-6 max-w-md mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="text-2xl">🎉</span>
+                <span className="text-xl font-bold text-purple-400">BETA BONUS</span>
+              </div>
+              <p className="text-gray-300 text-sm">
+                You'll receive {userProfile.betaMultiplier}x cash value when revenue is distributed!
+              </p>
+            </div>
+          )}
 
           <div className="bg-gray-800 rounded-lg p-4 mb-6 max-w-md mx-auto">
             <div className="flex items-center justify-center space-x-4">
@@ -282,13 +243,13 @@ export default function Ads() {
             </div>
           </div>
 
-          {videoCapStatus.remaining === 0 ? (
+          {videoCapStatus?.remaining === 0 ? (
             <div className="bg-red-900/30 border border-red-600/50 rounded-lg p-4">
               <p className="text-red-400">
                 🚫 Daily limit reached. Come back tomorrow!
               </p>
             </div>
-          ) : videoCapStatus.needsInterstitial ? (
+          ) : videoCapStatus?.needsInterstitial ? (
             <div className="bg-yellow-900/30 border border-yellow-600/50 rounded-lg p-4">
               <p className="text-yellow-400">
                 ⚠️ Watch the interstitial ad above first
@@ -296,8 +257,8 @@ export default function Ads() {
             </div>
           ) : (
             <Button
-              onClick={handleWatchRewardedVideo}
-              disabled={watching || !videoCapStatus.canWatchVideo}
+              id="watch-ad-button"
+              disabled={watching || !videoCapStatus?.canWatchVideo}
               className="w-full max-w-md mx-auto bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
             >
               {watching ? 'Loading Session...' : 'Start High-Reward Session'}
@@ -320,17 +281,25 @@ export default function Ads() {
           </li>
           <li className="flex items-start">
             <span className="text-green-500 mr-2">3.</span>
-            <span>Earn up to 100 AdCoins for session completion</span>
+            <span>Earn 100 AdCoins instantly for session completion</span>
           </li>
           <li className="flex items-start">
             <span className="text-green-500 mr-2">4.</span>
             <span>AdCoins convert to cash monthly based on platform revenue</span>
           </li>
+          {userProfile?.isBetaUser && (
+            <li className="flex items-start">
+              <span className="text-purple-500 mr-2">🎉</span>
+              <span className="text-purple-400 font-semibold">
+                As a beta user, your cash value will be multiplied by {userProfile.betaMultiplier}x!
+              </span>
+            </li>
+          )}
         </ul>
       </Card>
 
       {/* Upgrade prompt for Bronze users */}
-      {videoCapStatus.tier === 'Bronze' && (
+      {videoCapStatus?.tier === 'Bronze' && (
         <Card className="mt-4 bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-2 border-purple-600/50">
           <div className="text-center">
             <h3 className="text-xl font-bold text-white mb-2">
