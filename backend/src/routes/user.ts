@@ -454,4 +454,47 @@ router.delete('/account', async (req: AuthRequest, res) => {
   }
 })
 
+// Update user location from geolocation
+router.post('/update-location', async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id
+    const { latitude, longitude } = req.body
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: 'Missing latitude or longitude' })
+    }
+
+    // Use geoService to detect country from coordinates
+    const { getUserLocationInfoFromCoordinates } = await import('../services/geoService.js')
+    const locationInfo = getUserLocationInfoFromCoordinates(
+      parseFloat(latitude),
+      parseFloat(longitude)
+    )
+
+    if (locationInfo.countryCode) {
+      // Update user profile with verified country
+      await prisma.userProfile.update({
+        where: { userId },
+        data: {
+          country: locationInfo.countryCode,
+          countryCode: locationInfo.countryCode,
+          lastDetectedCountry: locationInfo.countryCode,
+          // Don't update revenueCountry if already set (locked)
+        },
+      })
+
+      res.json({
+        success: true,
+        countryCode: locationInfo.countryCode,
+        currency: locationInfo.currency,
+      })
+    } else {
+      res.status(400).json({ error: 'Could not determine country from coordinates' })
+    }
+  } catch (error) {
+    console.error('Error updating location:', error)
+    res.status(500).json({ error: 'Failed to update location' })
+  }
+})
+
 export default router

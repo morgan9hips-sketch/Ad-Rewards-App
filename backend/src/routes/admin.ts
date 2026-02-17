@@ -5,6 +5,12 @@ import { requireAdmin } from '../middleware/requireAdmin.js'
 import { logAdminAction } from '../middleware/logAdminAction.js'
 import { convertCoinsToUSD } from '../services/transactionService.js'
 import { updateExchangeRates, getExchangeRate } from '../services/currencyService.js'
+import {
+  createMonthlyRevenuePools,
+  distributeRevenueToUsers,
+  getTotalBetaDebt,
+  getRevenuePools,
+} from '../services/revenuePoolService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -828,6 +834,97 @@ router.get('/expired-balances', logAdminAction('VIEW_EXPIRED_BALANCES'), async (
   } catch (error) {
     console.error('Error fetching expired balances:', error)
     res.status(500).json({ error: 'Failed to fetch expired balances' })
+  }
+})
+
+// ==================== MONETAG REVENUE MANAGEMENT ====================
+
+/**
+ * Create monthly revenue pools from Monetag revenue
+ */
+router.post('/revenue/create-pools', logAdminAction('CREATE_REVENUE_POOLS'), async (req: AuthRequest, res) => {
+  try {
+    const { month, monetagRevenueUsd } = req.body
+
+    // Validate input
+    if (!month || !monetagRevenueUsd) {
+      return res.status(400).json({ error: 'Missing required fields: month, monetagRevenueUsd' })
+    }
+
+    if (monetagRevenueUsd <= 0) {
+      return res.status(400).json({ error: 'Revenue must be positive' })
+    }
+
+    // Create pools
+    await createMonthlyRevenuePools(month, parseFloat(monetagRevenueUsd))
+
+    res.json({
+      success: true,
+      message: 'Revenue pools created successfully',
+    })
+  } catch (error) {
+    console.error('Error creating revenue pools:', error)
+    res.status(500).json({ error: 'Failed to create revenue pools' })
+  }
+})
+
+/**
+ * Distribute revenue from a specific pool to users
+ */
+router.post('/revenue/distribute/:poolId', logAdminAction('DISTRIBUTE_REVENUE'), async (req: AuthRequest, res) => {
+  try {
+    const poolId = parseInt(req.params.poolId)
+
+    if (isNaN(poolId)) {
+      return res.status(400).json({ error: 'Invalid pool ID' })
+    }
+
+    await distributeRevenueToUsers(poolId)
+
+    res.json({
+      success: true,
+      message: 'Revenue distributed successfully',
+    })
+  } catch (error) {
+    console.error('Error distributing revenue:', error)
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Failed to distribute revenue' 
+    })
+  }
+})
+
+/**
+ * Get total beta debt owed to users
+ */
+router.get('/stats/beta-debt', async (req: AuthRequest, res) => {
+  try {
+    const totalDebt = await getTotalBetaDebt()
+
+    res.json({
+      totalBetaDebtUsd: totalDebt,
+    })
+  } catch (error) {
+    console.error('Error fetching beta debt:', error)
+    res.status(500).json({ error: 'Failed to fetch beta debt' })
+  }
+})
+
+/**
+ * Get all revenue pools (optionally filtered by status)
+ */
+router.get('/revenue/pools', async (req: AuthRequest, res) => {
+  try {
+    const { status } = req.query
+
+    const pools = await getRevenuePools(status as string | undefined)
+
+    res.json({
+      pools,
+      total: pools.length,
+    })
+  } catch (error) {
+    console.error('Error fetching revenue pools:', error)
+    res.status(500).json({ error: 'Failed to fetch revenue pools' })
   }
 })
 

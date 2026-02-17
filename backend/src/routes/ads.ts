@@ -11,6 +11,7 @@ import {
   trackUserRevenueCountry,
   updateUserLocation
 } from '../services/fraudDetection.js'
+import { trackMonetagImpression, getAdType } from '../services/monetagService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -288,6 +289,49 @@ router.post('/track-impression', async (req: AuthRequest, res) => {
     })
   } catch (error) {
     console.error('Error tracking ad impression:', error)
+    res.status(500).json({
+      success: false,
+      error: 'Failed to track ad impression',
+    })
+  }
+})
+
+// Track Monetag ad impression (NEW for Monetag integration)
+router.post('/track-monetag', async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id
+    const {
+      adZoneId,  // "10618699", "10618702", etc.
+      adType,    // "rewarded", "push", "banner", etc.
+      revenueUsd // Optional - for manual entry
+    } = req.body
+
+    // Validate required fields
+    if (!adZoneId || !adType) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: adZoneId, adType',
+      })
+    }
+
+    // Track the impression and award coins if applicable
+    const result = await trackMonetagImpression(
+      userId,
+      adZoneId,
+      revenueUsd ? parseFloat(revenueUsd) : undefined
+    )
+
+    res.json({
+      success: true,
+      coinsAwarded: result.coinsAwarded,
+      isBetaUser: result.isBetaUser,
+      betaMultiplier: result.betaMultiplier,
+      message: result.coinsAwarded > 0 
+        ? `You earned ${result.coinsAwarded} coins!` 
+        : 'Ad impression tracked',
+    })
+  } catch (error) {
+    console.error('Error tracking Monetag impression:', error)
     res.status(500).json({
       success: false,
       error: 'Failed to track ad impression',

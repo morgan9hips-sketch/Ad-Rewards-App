@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import { createClient } from '@supabase/supabase-js'
 import { PrismaClient, UserRole } from '@prisma/client'
+import { getClientIP, detectCountryFromIP } from '../services/geoService.js'
+import { getCurrencyForCountry } from '../services/currencyService.js'
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -11,6 +13,14 @@ const prisma = new PrismaClient()
 
 export interface AuthRequest extends Request {
   user?: { id: string; email: string; role?: UserRole }
+}
+
+/**
+ * Generate unique wallet ID in format: ADC-12345678
+ */
+function generateWalletId(): string {
+  const random = Math.floor(10000000 + Math.random() * 90000000)
+  return `ADC-${random}`
 }
 
 export async function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
@@ -42,11 +52,47 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
       return res.status(401).json({ error: 'Invalid token' })
     }
 
-    // Fetch user role from database
-    const userProfile = await prisma.userProfile.findUnique({
+    // Fetch or create user profile
+    let userProfile = await prisma.userProfile.findUnique({
       where: { userId: user.id },
-      select: { role: true },
     })
+
+    // Auto-create profile if missing
+    if (!userProfile) {
+      const ip = getClientIP(req)
+      const countryCode = detectCountryFromIP(ip) || 'US'
+      const currency = getCurrencyForCountry(countryCode)
+      
+      // Generate unique wallet ID
+      let walletId = generateWalletId()
+      
+      // Ensure wallet ID is unique
+      let attempts = 0
+      while (attempts < 10) {
+        const existing = await prisma.userProfile.findUnique({
+          where: { walletId }
+        })
+        if (!existing) break
+        walletId = generateWalletId()
+        attempts++
+      }
+
+      userProfile = await prisma.userProfile.create({
+        data: {
+          userId: user.id,
+          email: user.email!,
+          signupIp: ip,
+          signupCountry: countryCode,
+          revenueCountry: countryCode, // Locked - determines revenue pool
+          walletId: walletId,
+          currency: currency,
+          isBetaUser: true,
+          betaMultiplier: 1.5,
+        },
+      })
+      
+      console.log(`✅ Auto-created profile for user ${user.id} with wallet ${walletId}`)
+    }
 
     req.user = { 
       id: user.id, 
@@ -55,6 +101,7 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
     }
     next()
   } catch (error) {
+    console.error('Authentication error:', error)
     res.status(401).json({ error: 'Authentication failed' })
   }
 }
