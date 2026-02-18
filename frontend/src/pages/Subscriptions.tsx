@@ -85,7 +85,7 @@ export default function Subscriptions() {
       const token = session?.access_token
       if (!token) return
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+      const API_URL = import.meta.env.VITE_API_URL || 'https://api.adrevtechnologies.com'
       const res = await fetch(`${API_URL}/api/subscriptions/cancel`, {
         method: 'POST',
         headers: {
