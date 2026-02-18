@@ -1,9 +1,24 @@
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { useEffect } from 'react'
 import Button from '../components/Button'
 import Card from '../components/Card'
 
 export default function Home() {
   const navigate = useNavigate()
+  const { isAuthenticated, loading } = useAuth()
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [isAuthenticated, loading, navigate])
+
+  // Show nothing while checking auth or redirecting
+  if (loading || isAuthenticated) {
+    return null
+  }
 
   return (
     <div className="min-h-screen bg-black">
@@ -51,8 +66,8 @@ export default function Home() {
                 Complete Sessions
               </h3>
               <p className="text-gray-400">
-                Participate in rewarded sessions from our partners and earn rewards
-                for every completion.
+                Participate in rewarded sessions from our partners and earn
+                rewards for every completion.
               </p>
             </div>
           </Card>
