@@ -19,9 +19,11 @@ export default function Signup() {
   const [referrerName, setReferrerName] = useState<string | null>(null)
 
   useEffect(() => {
-    // Check if user is already logged in
+    // Sign out any existing session before showing signup
     if (session) {
-      navigate('/dashboard')
+      supabase.auth.signOut().then(() => {
+        // Now show signup form
+      })
       return
     }
 
@@ -224,3 +226,4 @@ export default function Signup() {
     </div>
   )
 }
+
