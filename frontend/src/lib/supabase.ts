@@ -30,7 +30,23 @@ export const auth = {
       },
     }),
 
+  signUpWithGoogle: () =>
+    supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectUri,
+      },
+    }),
+
   signInWithFacebook: () =>
+    supabase.auth.signInWithOAuth({
+      provider: 'facebook',
+      options: {
+        redirectTo: redirectUri,
+      },
+    }),
+
+  signUpWithFacebook: () =>
     supabase.auth.signInWithOAuth({
       provider: 'facebook',
       options: {

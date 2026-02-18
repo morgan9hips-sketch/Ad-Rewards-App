@@ -163,9 +163,8 @@ export default function Login() {
           </div>
         ) : (
           <>
-            {/* TEMPORARILY HIDE OAuth - using email only until OAuth is configured */}
             {/* Mode toggle */}
-            {/* <div className="flex gap-2 mb-6">
+            <div className="flex gap-2 mb-6">
               <Button
                 fullWidth
                 variant={mode === 'oauth' ? 'primary' : 'secondary'}
@@ -180,11 +179,10 @@ export default function Login() {
               >
                 Email Login
               </Button>
-            </div> */}
+            </div>
 
-            {/* {mode === 'oauth' ? ( */}
-            {/* OAuth Login - TEMPORARILY DISABLED */}
-            {/* <div className="space-y-3">
+            {mode === 'oauth' ? (
+              <div className="space-y-3">
                 <Button
                   fullWidth
                   onClick={handleGoogleLogin}
@@ -201,8 +199,8 @@ export default function Login() {
                   📘 Continue with Facebook
                 </Button>
               </div>
-            ) : ( */}
-            {/* Email/Password Login */}
+            ) : (
+              {/* Email/Password Login */}
             <div className="space-y-4">
               <form onSubmit={handleEmailPasswordLogin} className="space-y-3">
                 <div>
@@ -261,7 +259,7 @@ export default function Login() {
                 link in your email!
               </p>
             </div>
-
+            )}
           </>
         )}
 

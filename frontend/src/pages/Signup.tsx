@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { supabase } from '../lib/supabase'
+import { supabase, auth } from '../lib/supabase'
 import { API_BASE_URL } from '../config/api'
 import Button from '../components/Button'
 import PasswordInput from '../components/PasswordInput'
 import LoadingSpinner from '../components/LoadingSpinner'
+import {
+  isHybridEnvironment,
+  requestAuthFromNative,
+} from '../utils/hybridBridge'
+
+type SignupMode = 'oauth' | 'email'
 
 export default function Signup() {
   const navigate = useNavigate()
   const { session } = useAuth()
+  const [mode, setMode] = useState<SignupMode>('email')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -18,6 +25,7 @@ export default function Signup() {
   const [referralCode, setReferralCode] = useState<string | null>(null)
   const [referrerName, setReferrerName] = useState<string | null>(null)
   const [clearingSession, setClearingSession] = useState(false)
+  const isHybrid = isHybridEnvironment()
 
   const clearSupabaseStorage = () => {
     try {
@@ -90,6 +98,46 @@ export default function Signup() {
       localStorage.removeItem('referralCode')
     } catch (error) {
       console.error('Error tracking referral:', error)
+    }
+  }
+
+  const handleGoogleSignup = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      if (isHybrid) {
+        console.log(
+          '🔐 Hybrid environment detected - requesting auth from native',
+        )
+        requestAuthFromNative()
+        return
+      }
+
+      const { error } = await auth.signUpWithGoogle()
+      if (error) throw error
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Google signup failed')
+      setLoading(false)
+    }
+  }
+
+  const handleFacebookSignup = async () => {
+    setError('')
+    setLoading(true)
+    try {
+      if (isHybrid) {
+        console.log(
+          '🔐 Hybrid environment detected - requesting auth from native',
+        )
+        requestAuthFromNative()
+        return
+      }
+
+      const { error } = await auth.signUpWithFacebook()
+      if (error) throw error
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Facebook signup failed')
+      setLoading(false)
     }
   }
 
@@ -193,63 +241,97 @@ export default function Signup() {
             </div>
           )}
 
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-                placeholder="your@email.com"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Password
-              </label>
-              <PasswordInput
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Must be at least 8 characters
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Confirm Password
-              </label>
-              <PasswordInput
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-              />
-            </div>
-
-            <div className="text-xs text-gray-400 text-center">
-              By signing up, you agree to our{' '}
-              <a href="/terms" className="text-blue-400 hover:underline">
-                Terms of Service
-              </a>{' '}
-              and{' '}
-              <a href="/privacy" className="text-blue-400 hover:underline">
-                Privacy Policy
-              </a>
-            </div>
-
-            <Button type="submit" fullWidth disabled={loading}>
-              {loading ? <LoadingSpinner size="small" /> : 'Create Account'}
+          {/* Mode toggle */}
+          <div className="flex gap-2 mb-6">
+            <Button
+              fullWidth
+              variant={mode === 'oauth' ? 'primary' : 'secondary'}
+              onClick={() => setMode('oauth')}
+            >
+              Social Signup
             </Button>
-          </form>
+            <Button
+              fullWidth
+              variant={mode === 'email' ? 'primary' : 'secondary'}
+              onClick={() => setMode('email')}
+            >
+              Email Signup
+            </Button>
+          </div>
+
+          {mode === 'oauth' ? (
+            <div className="space-y-3">
+              <Button fullWidth onClick={handleGoogleSignup} disabled={loading}>
+                🔍 Sign up with Google
+              </Button>
+              <Button
+                fullWidth
+                variant="secondary"
+                onClick={handleFacebookSignup}
+                disabled={loading}
+              >
+                📘 Sign up with Facebook
+              </Button>
+            </div>
+          ) : (
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                  placeholder="your@email.com"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Password
+                </label>
+                <PasswordInput
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Must be at least 8 characters
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Confirm Password
+                </label>
+                <PasswordInput
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+
+              <div className="text-xs text-gray-400 text-center">
+                By signing up, you agree to our{' '}
+                <a href="/terms" className="text-blue-400 hover:underline">
+                  Terms of Service
+                </a>{' '}
+                and{' '}
+                <a href="/privacy" className="text-blue-400 hover:underline">
+                  Privacy Policy
+                </a>
+              </div>
+
+              <Button type="submit" fullWidth disabled={loading}>
+                {loading ? <LoadingSpinner size="small" /> : 'Create Account'}
+              </Button>
+            </form>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
