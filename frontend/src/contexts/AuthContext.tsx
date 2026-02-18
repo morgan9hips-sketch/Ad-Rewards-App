@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       setGeoResolving(true)
-      const response = await fetch(`${API_BASE_URL}/api/geo/resolve`, {
+      const response = await fetch(`${API_BASE_URL}/api/geo-resolve/resolve`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
