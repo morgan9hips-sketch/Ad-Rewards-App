@@ -265,8 +265,7 @@ function AppContent() {
         </>
       )}
       <Footer />
-      <CookieConsent />
-      <LocationPermissionModal />
+      <CookieConsent />
     </div>
   )
 }
@@ -284,3 +283,4 @@ function App() {
 }
 
 export default App
+

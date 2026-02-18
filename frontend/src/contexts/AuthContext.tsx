@@ -73,14 +73,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const resolveGeo = async (token: string, alreadyResolved: boolean) => {
+    // Always allow user through immediately
+    setGeoResolved(true)
+    
     // Skip API call if user is already geo-resolved
     if (alreadyResolved) {
-      setGeoResolved(true)
       return true
     }
 
+    // Do geo resolution in background (non-blocking)
     try {
-      setGeoResolving(true)
       const response = await fetch(`${API_BASE_URL}/api/geo-resolve/resolve`, {
         method: 'POST',
         headers: {
@@ -92,22 +94,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         const data = await response.json()
-        setGeoResolved(true) // Always allow through
-        return data.resolved || false
-      } else {
-        console.error('Geo resolution failed')
-        // Allow user to proceed even if geo-resolution fails (as per requirements)
-        setGeoResolved(true)
-        return true
+        console.log('Geo resolved:', data)
       }
     } catch (error) {
-      console.error('Failed to resolve geo:', error)
-      // Allow user to proceed even if geo-resolution fails (as per requirements)
-      setGeoResolved(true)
-      return true
-    } finally {
-      setGeoResolving(false)
+      console.error('Background geo resolution failed:', error)
     }
+    
+    return true
   }
 
   const sendTokenToAndroid = (token: string) => {
@@ -366,3 +359,4 @@ export function useAuth() {
   if (!context) throw new Error('useAuth must be used within AuthProvider')
   return context
 }
+
