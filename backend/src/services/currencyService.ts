@@ -169,16 +169,20 @@ export function getCurrencyForCountry(countryCode: string): string {
 
 /**
  * Fetch latest exchange rates from API and update database
+ * NON-CRITICAL: Returns silently if API fails to prevent backend crashes
  */
 export async function updateExchangeRates(): Promise<void> {
   try {
     const apiUrl =
       process.env.EXCHANGE_RATE_API_URL ||
       'https://api.exchangerate-api.com/v4/latest/USD'
-    const response = await axios.get(apiUrl)
+    
+    // Set timeout to prevent hanging
+    const response = await axios.get(apiUrl, { timeout: 5000 })
 
     if (!response.data || !response.data.rates) {
-      throw new Error('Invalid response from exchange rate API')
+      console.warn('Invalid response from exchange rate API, skipping update')
+      return // Don't throw - use cached rates
     }
 
     const rates = response.data.rates
@@ -215,8 +219,8 @@ export async function updateExchangeRates(): Promise<void> {
       `✅ Exchange rates updated successfully for ${today.toISOString().split('T')[0]}`,
     )
   } catch (error) {
-    console.error('❌ Failed to update exchange rates:', error)
-    throw error
+    // Don't throw - let app continue with cached/fallback rates
+    console.error('❌ Failed to update exchange rates (non-critical):', error)
   }
 }
 
