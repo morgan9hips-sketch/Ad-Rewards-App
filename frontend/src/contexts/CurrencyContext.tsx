@@ -53,14 +53,17 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
           navigator.geolocation.getCurrentPosition(
             (position) => {
               console.log('Location available from previous grant')
-              loadCurrencyInfo(position.coords.latitude, position.coords.longitude)
+              loadCurrencyInfo(
+                position.coords.latitude,
+                position.coords.longitude,
+              )
             },
             () => {
               // User denied or permission unavailable, fallback to IP
               console.log('Location unavailable, using IP fallback')
               loadCurrencyInfo()
             },
-            { maximumAge: 300000 }
+            { maximumAge: 300000 },
           )
         }
         return false
