@@ -1,14 +1,21 @@
 import { useState } from 'react'
 import { useCurrency } from '../contexts/CurrencyContext'
+import { useAuth } from '../contexts/AuthContext'
 import Button from './Button'
 
 export default function LocationBanner() {
-  const { currencyInfo, requestLocationPermission } = useCurrency()
+  const { currencyInfo, requestLocationPermission, loading } = useCurrency()
+  const { session } = useAuth()
   const [requesting, setRequesting] = useState(false)
   const [showModal, setShowModal] = useState(true)
 
-  // Don't show if location already detected
-  if (currencyInfo?.locationDetected || !showModal) {
+  // CRITICAL: Don't show modal until session is ready
+  if (!session) {
+    return null
+  }
+
+  // Don't show if location already detected or still loading
+  if (currencyInfo?.locationDetected || !showModal || loading) {
     return null
   }
 

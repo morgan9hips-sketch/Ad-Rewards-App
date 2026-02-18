@@ -5,7 +5,7 @@ import {
   useEffect,
   ReactNode,
 } from 'react'
-// import { useAuth } from './AuthContext'  // Unused for now
+import { useAuth } from './AuthContext'
 import { API_BASE_URL } from '../config/api'
 import { supabase } from '../lib/supabase'
 
@@ -37,7 +37,7 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(
 )
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  // const { session } = useAuth()  // Unused for now
+  const { session } = useAuth()
   const [currencyInfo, setCurrencyInfo] = useState<CurrencyInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [locationError, setLocationError] = useState(false)
@@ -126,7 +126,17 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       } = await supabase.auth.getSession()
 
       if (!session?.access_token) {
-        console.log('No authentication session - waiting for login')
+        console.log('No authentication session - using fallback currency')
+        // Set fallback IMMEDIATELY - don't block UI
+        setCurrencyInfo({
+          displayCurrency: 'USD',
+          revenueCountry: null,
+          displayCountry: null,
+          exchangeRate: 1,
+          formatting: { symbol: '$', decimals: 2, position: 'before' },
+          locationDetected: false,
+          locationRequired: false,
+        })
         setLoading(false)
         return
       }
@@ -194,6 +204,14 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     // Also try to get precise location
     requestLocationPermission()
   }, [])
+
+  // Reload currency info when session becomes available
+  useEffect(() => {
+    if (session?.access_token && !currencyInfo?.locationDetected) {
+      console.log('Session available - reloading currency info')
+      loadCurrencyInfo()
+    }
+  }, [session?.access_token])
 
   const formatAmount = (
     amountUsd: number,
