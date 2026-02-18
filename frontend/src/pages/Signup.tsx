@@ -97,10 +97,20 @@ export default function Signup() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: undefined, // CRITICAL: Don't redirect for email signup
+        },
       })
 
       if (error) {
         setError(error.message)
+        return
+      }
+
+      if (!data.session) {
+        // Email confirmation required - show message
+        setError('Please check your email to confirm your account before signing in.')
+        setTimeout(() => navigate('/login'), 3000)
         return
       }
 

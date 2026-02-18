@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { auth } from '../lib/supabase'
 import {
   isHybridEnvironment,
@@ -11,6 +11,7 @@ import Card from '../components/Card'
 type LoginMode = 'oauth' | 'email'
 
 export default function Login() {
+  const navigate = useNavigate()
   const [mode, setMode] = useState<LoginMode>('oauth')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -94,8 +95,18 @@ export default function Login() {
     setLoading(true)
     setError('')
     try {
-      const { error } = await auth.signInWithPassword({ email, password })
+      const { data, error } = await auth.signInWithPassword({ email, password })
       if (error) throw error
+      
+      // If no session, email might need confirmation
+      if (!data.session) {
+        setError('Please confirm your email address before signing in.')
+        setLoading(false)
+        return
+      }
+      
+      // Success - navigate to dashboard
+      navigate('/dashboard')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Login failed')
       setLoading(false)
