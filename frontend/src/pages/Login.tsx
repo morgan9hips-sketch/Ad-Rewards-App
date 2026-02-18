@@ -97,14 +97,14 @@ export default function Login() {
     try {
       const { data, error } = await auth.signInWithPassword({ email, password })
       if (error) throw error
-      
+
       // If no session, email might need confirmation
       if (!data.session) {
         setError('Please confirm your email address before signing in.')
         setLoading(false)
         return
       }
-      
+
       // Success - navigate to dashboard
       navigate('/dashboard')
     } catch (err: unknown) {
@@ -146,7 +146,7 @@ export default function Login() {
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <h1 className="text-3xl font-bold text-white mb-6">Sign In</h1>
-        
+
         {error && (
           <div className="bg-red-500/10 border border-red-500 text-red-500 p-3 rounded mb-4">
             {error}
@@ -184,7 +184,11 @@ export default function Login() {
             {mode === 'oauth' ? (
               /* OAuth Login */
               <div className="space-y-3">
-                <Button fullWidth onClick={handleGoogleLogin} disabled={loading}>
+                <Button
+                  fullWidth
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
+                >
                   🔍 Continue with Google
                 </Button>
                 <Button
@@ -252,8 +256,8 @@ export default function Login() {
                 </form>
 
                 <p className="text-xs text-gray-500 text-center">
-                  Magic links let you sign in without a password. Just click
-                  the link in your email!
+                  Magic links let you sign in without a password. Just click the
+                  link in your email!
                 </p>
               </div>
             )}

@@ -84,7 +84,7 @@ async function initializeExchangeRates() {
 // Middleware
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: process.env.FRONTEND_URL || 'https://adify.adrevtechnologies.com',
     credentials: true,
   }),
 )
@@ -157,7 +157,7 @@ app.use(
 // Only start server if not in Vercel (Vercel handles this automatically)
 if (process.env.VERCEL !== '1') {
   app.listen(Number(PORT), async () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`)
+    console.log(`🚀 Server running on port ${PORT}`)
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
 
     // Initialize exchange rates on startup
