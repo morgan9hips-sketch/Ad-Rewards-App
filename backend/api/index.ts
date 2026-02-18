@@ -19,6 +19,7 @@ import coinValuationRoutes from '../src/routes/coinValuation.js'
 import platformRoutes from '../src/routes/platform.js'
 import legalRoutes from '../src/routes/legal.js'
 import geoRoutes from '../src/routes/geo.js'
+import migrateRoutes from '../src/routes/migrate.js'
 
 // Create Express app for Vercel
 const app = express()
@@ -59,6 +60,7 @@ app.use('/api/coin-valuation', authenticate, coinValuationRoutes)
 app.use('/api/platform', platformRoutes) // Public
 app.use('/api/legal', legalRoutes) // Public
 app.use('/api/geo-resolve', geoRoutes) // Public
+app.use('/api/migrate', migrateRoutes) // One-time migration endpoint
 
 // Error handling middleware
 app.use((err: any, req: any, res: any, next: any) => {
