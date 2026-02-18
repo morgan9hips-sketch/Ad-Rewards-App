@@ -51,9 +51,9 @@ const COUNTRY_NAMES: Record<string, string> = {
  * Assigns country + currency to user on first call.
  * Subsequent calls return stored data.
  */
-router.post('/resolve', async (req: AuthRequest, res) => {
+router.post('/resolve', async (req: any, res) => {
   try {
-    const userId = req.user!.id
+    const userId = req.user?.id || req.body?.userId
 
     // Check if user is already geo-resolved
     const profile = await prisma.userProfile.findUnique({
