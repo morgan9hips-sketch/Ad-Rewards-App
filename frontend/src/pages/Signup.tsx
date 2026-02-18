@@ -17,15 +17,20 @@ export default function Signup() {
   const [error, setError] = useState('')
   const [referralCode, setReferralCode] = useState<string | null>(null)
   const [referrerName, setReferrerName] = useState<string | null>(null)
+  const [clearingSession, setClearingSession] = useState(false)
 
   useEffect(() => {
-    // Sign out any existing session before showing signup
-    if (session) {
-      supabase.auth.signOut().then(() => {
-        // Now show signup form
-      })
-      return
+    const clearOldSession = async () => {
+      // CRITICAL: Fully sign out any existing session before showing signup
+      if (session) {
+        setClearingSession(true)
+        await supabase.auth.signOut()
+        // Wait for session to fully clear
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        setClearingSession(false)
+      }
     }
+    clearOldSession()
 
     // Detect referral code in URL
     const params = new URLSearchParams(window.location.search)
@@ -39,7 +44,7 @@ export default function Signup() {
       // Optionally fetch referrer info
       fetchReferrerInfo(refCode)
     }
-  }, [session, navigate])
+  }, [session])
 
   const fetchReferrerInfo = async (code: string) => {
     try {
@@ -59,7 +64,7 @@ export default function Signup() {
       await fetch(`${API_BASE_URL}/api/referrals/track`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ referralCode: refCode }),
@@ -109,7 +114,9 @@ export default function Signup() {
 
       if (!data.session) {
         // Email confirmation required - show message
-        setError('Please check your email to confirm your account before signing in.')
+        setError(
+          'Please check your email to confirm your account before signing in.',
+        )
         setTimeout(() => navigate('/login'), 3000)
         return
       }
@@ -128,6 +135,18 @@ export default function Signup() {
     }
   }
 
+  // Show loading while clearing old session
+  if (clearingSession) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+        <div className="text-center">
+          <LoadingSpinner size="large" />
+          <p className="text-gray-400 mt-4">Preparing signup...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
       <div className="max-w-md w-full">
@@ -136,9 +155,7 @@ export default function Signup() {
             <h1 className="text-3xl font-bold text-white mb-2">
               Create Account
             </h1>
-            <p className="text-gray-400">
-              Join Adify and start earning today!
-            </p>
+            <p className="text-gray-400">Join Adify and start earning today!</p>
           </div>
 
           {referralCode && (
@@ -211,11 +228,7 @@ export default function Signup() {
               </a>
             </div>
 
-            <Button
-              type="submit"
-              fullWidth
-              disabled={loading}
-            >
+            <Button type="submit" fullWidth disabled={loading}>
               {loading ? <LoadingSpinner size="small" /> : 'Create Account'}
             </Button>
           </form>
@@ -236,4 +249,3 @@ export default function Signup() {
     </div>
   )
 }
-
