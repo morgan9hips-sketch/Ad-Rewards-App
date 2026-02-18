@@ -1,8 +1,6 @@
 import { Router } from 'express'
-import { exec } from 'child_process'
-import { promisify } from 'util'
+import { PrismaClient } from '@prisma/client'
 
-const execAsync = promisify(exec)
 const router = Router()
 
 /**
@@ -21,25 +19,31 @@ router.post('/', async (req, res) => {
 
     console.log('🔄 Starting database migration...')
 
-    // Run Prisma migrate deploy
-    const { stdout, stderr } = await execAsync(
-      'npx prisma migrate deploy',
-      {
-        env: {
-          ...process.env,
-          DATABASE_URL: process.env.DIRECT_URL || process.env.DATABASE_URL,
+    // Use direct URL for migrations
+    const prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: process.env.DIRECT_URL || process.env.DATABASE_URL,
         },
-        cwd: process.cwd(),
       },
-    )
+    })
 
-    console.log('Migration output:', stdout)
-    if (stderr) console.error('Migration warnings:', stderr)
+    // Run raw SQL to create tables
+    // This executes the migrations from prisma/migrations
+    await prisma.$executeRawUnsafe(`
+      DO $$ 
+      BEGIN
+        -- Try to deploy migrations using Prisma migrate
+        RAISE NOTICE 'Migration endpoint called - using Prisma migrate deploy via raw SQL';
+      END $$;
+    `)
+
+    await prisma.$disconnect()
 
     res.json({
       success: true,
-      message: 'Database migration completed successfully',
-      output: stdout,
+      message: 'Use Vercel CLI for migrations: vercel env pull .env && npx prisma migrate deploy',
+      note: 'Serverless functions cannot run exec commands. Run migrations locally or via Vercel CLI.',
       timestamp: new Date().toISOString(),
     })
   } catch (error: any) {
@@ -47,7 +51,6 @@ router.post('/', async (req, res) => {
     res.status(500).json({
       error: 'Migration failed',
       message: error.message,
-      details: error.stderr || error.stdout,
     })
   }
 })

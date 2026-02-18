@@ -15,14 +15,15 @@ router.get('/stats/24h', async (req: AuthRequest, res) => {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-    // Get user's currency preference
-    const userId = req.user!.id
-    const profile = await prisma.userProfile.findUnique({
-      where: { userId },
-      select: { preferredCurrency: true },
-    })
-
-    const currency = profile?.preferredCurrency || 'USD'
+    // Get user's currency preference if authenticated, otherwise default to USD
+    let currency = 'USD'
+    if (req.user?.id) {
+      const profile = await prisma.userProfile.findUnique({
+        where: { userId: req.user.id },
+        select: { preferredCurrency: true },
+      })
+      currency = profile?.preferredCurrency || 'USD'
+    }
 
     // Get withdrawals from last 24 hours
     const withdrawals = await prisma.withdrawal.findMany({

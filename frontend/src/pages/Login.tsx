@@ -12,7 +12,7 @@ type LoginMode = 'oauth' | 'email'
 
 export default function Login() {
   const navigate = useNavigate()
-  const [mode, setMode] = useState<LoginMode>('oauth')
+  const [mode, setMode] = useState<LoginMode>('email') // Default to email instead of oauth
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
@@ -163,8 +163,9 @@ export default function Login() {
           </div>
         ) : (
           <>
+            {/* TEMPORARILY HIDE OAuth - using email only until OAuth is configured */}
             {/* Mode toggle */}
-            <div className="flex gap-2 mb-6">
+            {/* <div className="flex gap-2 mb-6">
               <Button
                 fullWidth
                 variant={mode === 'oauth' ? 'primary' : 'secondary'}
@@ -179,11 +180,11 @@ export default function Login() {
               >
                 Email Login
               </Button>
-            </div>
+            </div> */}
 
-            {mode === 'oauth' ? (
-              /* OAuth Login */
-              <div className="space-y-3">
+            {/* {mode === 'oauth' ? ( */}
+            {/* OAuth Login - TEMPORARILY DISABLED */}
+            {/* <div className="space-y-3">
                 <Button
                   fullWidth
                   onClick={handleGoogleLogin}
@@ -200,67 +201,67 @@ export default function Login() {
                   📘 Continue with Facebook
                 </Button>
               </div>
-            ) : (
-              /* Email/Password Login */
-              <div className="space-y-4">
-                <form onSubmit={handleEmailPasswordLogin} className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      disabled={loading}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      disabled={loading}
-                    />
-                  </div>
-                  <Button type="submit" fullWidth disabled={loading}>
-                    {loading ? 'Signing in...' : 'Sign in with Password'}
-                  </Button>
-                </form>
-
-                <div className="relative my-4">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-700"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-gray-900 text-gray-400">or</span>
-                  </div>
+            ) : ( */}
+            {/* Email/Password Login */}
+            <div className="space-y-4">
+              <form onSubmit={handleEmailPasswordLogin} className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    disabled={loading}
+                  />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    disabled={loading}
+                  />
+                </div>
+                <Button type="submit" fullWidth disabled={loading}>
+                  {loading ? 'Signing in...' : 'Sign in with Password'}
+                </Button>
+              </form>
 
-                <form onSubmit={handleMagicLinkLogin}>
-                  <Button
-                    type="submit"
-                    fullWidth
-                    variant="secondary"
-                    disabled={loading || !email}
-                  >
-                    ✨ Send Magic Link
-                  </Button>
-                </form>
-
-                <p className="text-xs text-gray-500 text-center">
-                  Magic links let you sign in without a password. Just click the
-                  link in your email!
-                </p>
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-700"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-gray-900 text-gray-400">or</span>
+                </div>
               </div>
-            )}
+
+              <form onSubmit={handleMagicLinkLogin}>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="secondary"
+                  disabled={loading || !email}
+                >
+                  ✨ Send Magic Link
+                </Button>
+              </form>
+
+              <p className="text-xs text-gray-500 text-center">
+                Magic links let you sign in without a password. Just click the
+                link in your email!
+              </p>
+            </div>
+            {/* )} */}
           </>
         )}
 
