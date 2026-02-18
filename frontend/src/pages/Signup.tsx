@@ -19,12 +19,30 @@ export default function Signup() {
   const [referrerName, setReferrerName] = useState<string | null>(null)
   const [clearingSession, setClearingSession] = useState(false)
 
+  const clearSupabaseStorage = () => {
+    try {
+      const url = import.meta.env.VITE_SUPABASE_URL || ''
+      const ref = url.replace(/^https?:\/\//, '').split('.')[0]
+      if (ref) {
+        localStorage.removeItem(`sb-${ref}-auth-token`)
+        localStorage.removeItem(`sb-${ref}-auth-token-code-verifier`)
+      }
+    } catch (error) {
+      console.warn('Failed to clear Supabase storage:', error)
+    }
+  }
+
   useEffect(() => {
     const clearOldSession = async () => {
       // CRITICAL: Fully sign out any existing session before showing signup
       if (session) {
         setClearingSession(true)
-        await supabase.auth.signOut()
+        try {
+          await supabase.auth.signOut({ scope: 'local' })
+        } catch (error) {
+          console.warn('Supabase signOut failed:', error)
+        }
+        clearSupabaseStorage()
         // Wait for session to fully clear
         await new Promise((resolve) => setTimeout(resolve, 500))
         setClearingSession(false)
