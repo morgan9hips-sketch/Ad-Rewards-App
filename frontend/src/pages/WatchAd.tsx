@@ -1,207 +1,285 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Card from '../components/Card'
-import Button from '../components/Button'
-import LoadingSpinner from '../components/LoadingSpinner'
-import MonetTagAd from '../components/MonetTagAd'
+import { useState, useEffect, useCallback } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { API_BASE_URL } from '../config/api'
+import Card from '../components/Card'
+
+declare global {
+  interface Window {
+    monetag?: {
+      push: (config: Record<string, unknown>) => void
+    }
+  }
+}
 
 export default function WatchAd() {
+  const { id } = useParams()
   const navigate = useNavigate()
-  const { session } = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [optedIn, setOptedIn] = useState(false)
-  const [watching, setWatching] = useState(false)
-  const [completed, setCompleted] = useState(false)
+  const { user } = useAuth()
+  const [stage, setStage] = useState<'opt-in' | 'loading' | 'complete'>(
+    'opt-in',
+  )
+  const [adCompleted, setAdCompleted] = useState(false)
   const [coinsEarned, setCoinsEarned] = useState(0)
-  const [totalCoins, setTotalCoins] = useState(0)
+  const [error, setError] = useState('')
 
-  const MONETAG_ZONES = {
-    vignette: '10618701',
-    onclick: '10618699',
-  }
+  const handleAdComplete = useCallback(async () => {
+    if (adCompleted) return // Prevent double completion
 
-  const handleOptIn = () => {
-    setOptedIn(true)
-    startWatching()
-  }
+    setAdCompleted(true)
 
-  const startWatching = () => {
-    setWatching(true)
-  }
-
-  const handleAdComplete = async () => {
     try {
-      const token = session?.access_token
-      if (!token) return
-
-      setLoading(true)
-
-      const res = await fetch(`${API_BASE_URL}/api/ads/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+      const token = localStorage.getItem('token')
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/ads/complete/${id}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         },
-        body: JSON.stringify({
-          adUnitId: 'monetag-vignette',
-          watchedSeconds: 30,
-          admobImpressionId: `monetag-${Date.now()}`,
-        }),
-      })
+      )
 
-      if (res.ok) {
-        const data = await res.json()
-        setCoinsEarned(data.coinsEarned)
-        setTotalCoins(parseInt(data.totalCoins))
-        setCompleted(true)
+      if (response.ok) {
+        const data = await response.json()
+        setCoinsEarned(data.coinsEarned || 100)
+        setStage('complete')
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to process ad completion')
+        setStage('complete')
       }
-    } catch (error) {
-      console.error('Error completing ad:', error)
-    } finally {
-      setLoading(false)
-      setWatching(false)
+    } catch (err) {
+      console.error('Error completing ad:', err)
+      setError('Network error. Please try again.')
+      setStage('complete')
+    }
+  }, [adCompleted, id])
+
+  useEffect(() => {
+    // Auto-complete after 35 seconds if ad doesn't trigger completion
+    let timeout: number
+    if (stage === 'loading') {
+      timeout = window.setTimeout(() => {
+        if (!adCompleted) {
+          handleAdComplete()
+        }
+      }, 35000) // 35 seconds
+    }
+    return () => {
+      if (timeout) window.clearTimeout(timeout)
+    }
+  }, [stage, adCompleted, handleAdComplete])
+
+  const handleOptIn = async () => {
+    setStage('loading')
+
+    // Trigger MonetTag Vignette Ad
+    if (window.monetag) {
+      try {
+        window.monetag.push({
+          vignette: {
+            key: 'YOUR_VIGNETTE_KEY_HERE',
+            onComplete: () => {
+              console.log('MonetTag ad completed')
+              handleAdComplete()
+            },
+            onSkip: () => {
+              console.log('MonetTag ad skipped')
+              handleAdComplete()
+            },
+            onError: (err: Error) => {
+              console.error('MonetTag ad error:', err)
+              handleAdComplete()
+            },
+          },
+        })
+      } catch (err) {
+        console.error('Error triggering MonetTag:', err)
+        window.setTimeout(() => handleAdComplete(), 5000)
+      }
+    } else {
+      window.setTimeout(() => handleAdComplete(), 5000)
     }
   }
 
-  const claimReward = () => {
-    navigate('/dashboard')
+  const handleMaybeLater = () => {
+    navigate('/ads')
   }
 
-  if (loading) {
+  const handleBackToAds = () => {
+    navigate('/ads')
+  }
+
+  // OPT-IN STAGE
+  if (stage === 'opt-in') {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <LoadingSpinner size="large" />
+      <div className="container mx-auto px-4 py-6 pb-24">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-6">
+            <div className="text-6xl mb-4">🇧🇪</div>
+            <h1 className="text-4xl font-bold text-white mb-3">
+              Earn 100 AdCoins!
+            </h1>
+            <p className="text-gray-300 text-lg">
+              Watch a short ad and earn instant rewards
+            </p>
+          </div>
+
+          <Card className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-2 border-purple-500/50">
+            <div className="text-center py-8">
+              <div className="bg-purple-900/50 rounded-lg p-6 mb-6 max-w-md mx-auto">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <div className="relative">
+                    <img
+                      src="/images/branding/Adcoin-large-512x512.png"
+                      alt="AdCoin"
+                      className="w-20 h-20 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-3xl">▶️</span>
+                    </div>
+                  </div>
+                  <span className="text-5xl font-bold text-yellow-400">
+                    100
+                  </span>
+                </div>
+                <p className="text-lg font-semibold text-purple-200">
+                  AdCoins Reward
+                </p>
+              </div>
+
+              <div className="space-y-3 text-left max-w-md mx-auto mb-8">
+                <div className="flex items-center gap-3 text-gray-300">
+                  <span className="text-green-400">✓</span>
+                  <span>Ad duration: ~30 seconds</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-300">
+                  <span className="text-green-400">✓</span>
+                  <span>Instant coin reward</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-300">
+                  <span className="text-green-400">✓</span>
+                  <span>Converts to real cash monthly</span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <button
+                  onClick={handleOptIn}
+                  className="w-full max-w-md px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xl font-bold rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg hover:shadow-purple-500/50"
+                >
+                  Yes, Show Me the Ad!
+                </button>
+                <button
+                  onClick={handleMaybeLater}
+                  className="w-full max-w-md px-8 py-3 bg-gray-700 text-gray-300 text-lg font-semibold rounded-lg hover:bg-gray-600 transition-all"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     )
   }
 
+  // LOADING STAGE
+  if (stage === 'loading') {
+    return (
+      <div className="container mx-auto px-4 py-6 pb-24">
+        <div className="max-w-2xl mx-auto">
+          <Card className="bg-gradient-to-br from-blue-900/40 to-purple-900/40 border-2 border-blue-500/50">
+            <div className="text-center py-16">
+              <div className="text-6xl mb-6">📺</div>
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Ad is loading...
+              </h2>
+              <p className="text-gray-300 mb-8">
+                This may open in a new window
+              </p>
+              <div className="flex justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+              </div>
+              <p className="text-gray-400 text-sm mt-6">
+                If the ad doesn't load, you'll be redirected automatically
+              </p>
+            </div>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  // COMPLETE STAGE
+  const currentBalance = (user as { coinsBalance?: number })?.coinsBalance || 0
+
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
-      <h1 className="text-3xl font-bold text-white mb-6">Watch Ads 📺</h1>
-
-      {!optedIn && !completed && (
-        <Card>
-          <div className="text-center p-8">
-            <div className="text-6xl mb-6">🎁</div>
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Earn 100 AdCoins!
-            </h2>
-            <p className="text-gray-400 mb-6 text-lg">
-              Watch a short ad and earn instant rewards
-            </p>
-
-            <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-lg p-6 mb-6">
-              <div className="flex items-center justify-center gap-3 mb-3">
-                <img
-                  src="/images/branding/Adcoin large 512x512.png"
-                  alt="100 AdCoins"
-                  className="w-16 h-16"
-                />
-                <p className="text-5xl font-bold text-yellow-500">100</p>
-              </div>
-              <p className="text-white font-semibold">AdCoins Reward</p>
+      <div className="max-w-2xl mx-auto">
+        {error ? (
+          <Card className="bg-gradient-to-br from-red-900/40 to-orange-900/40 border-2 border-red-500/50">
+            <div className="text-center py-12">
+              <div className="text-6xl mb-6">⚠️</div>
+              <h2 className="text-3xl font-bold text-red-400 mb-4">
+                Oops! Something went wrong
+              </h2>
+              <p className="text-gray-300 mb-8">{error}</p>
+              <button
+                onClick={handleBackToAds}
+                className="px-8 py-3 bg-blue-600 text-white text-lg font-bold rounded-lg hover:bg-blue-500 transition-all"
+              >
+                Back to Ads
+              </button>
             </div>
+          </Card>
+        ) : (
+          <Card className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 border-2 border-green-500/50">
+            <div className="text-center py-12">
+              <div className="text-6xl mb-6">🎉</div>
+              <h2 className="text-4xl font-bold text-green-400 mb-4">
+                Congratulations!
+              </h2>
+              <p className="text-gray-300 text-lg mb-8">
+                You've earned{' '}
+                <span className="text-yellow-400 font-bold text-2xl">
+                  {coinsEarned}
+                </span>{' '}
+                AdCoins!
+              </p>
 
-            <div className="space-y-3 text-left mb-8 max-w-sm mx-auto">
-              <div className="flex items-start gap-3">
-                <span className="text-green-500 text-xl">✓</span>
-                <p className="text-gray-300">Ad duration: ~30 seconds</p>
+              <div className="bg-green-900/30 rounded-lg p-6 mb-8 max-w-md mx-auto">
+                <div className="flex items-center justify-center gap-3">
+                  <img
+                    src="/images/branding/Adcoin-large-512x512.png"
+                    alt="AdCoin"
+                    className="w-16 h-16 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)] animate-bounce"
+                  />
+                  <span className="text-5xl font-bold text-yellow-400">
+                    +{coinsEarned}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-start gap-3">
-                <span className="text-green-500 text-xl">✓</span>
-                <p className="text-gray-300">Instant coin reward</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="text-green-500 text-xl">✓</span>
-                <p className="text-gray-300">Converts to real cash monthly</p>
-              </div>
+
+              <p className="text-gray-400 mb-8">
+                Your new balance:{' '}
+                <span className="text-white font-semibold">
+                  {currentBalance + coinsEarned}
+                </span>{' '}
+                AdCoins
+              </p>
+
+              <button
+                onClick={handleBackToAds}
+                className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-lg font-bold rounded-lg hover:from-green-500 hover:to-emerald-500 transition-all shadow-lg"
+              >
+                Watch Another Ad
+              </button>
             </div>
-
-            <Button
-              onClick={handleOptIn}
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-xl py-4 mb-3"
-            >
-              Yes, Show Me the Ad!
-            </Button>
-            <Button
-              onClick={() => navigate('/dashboard')}
-              variant="secondary"
-              className="w-full"
-            >
-              Maybe Later
-            </Button>
-          </div>
-        </Card>
-      )}
-
-      {watching && !completed && (
-        <Card className="mb-6">
-          <div className="aspect-video bg-gray-900 rounded-lg mb-4">
-            <MonetTagAd
-              zoneId={MONETAG_ZONES.vignette}
-              onAdComplete={handleAdComplete}
-            />
-          </div>
-          <p className="text-gray-400 text-center text-sm mb-4">
-            Please wait while the ad loads... This may open in a new window.
-          </p>
-          <Button
-            onClick={handleAdComplete}
-            variant="secondary"
-            className="w-full"
-          >
-            I watched the ad - Claim Reward
-          </Button>
-        </Card>
-      )}
-
-      {completed && (
-        <Card>
-          <div className="text-center p-8">
-            <div className="text-6xl mb-4">🎉</div>
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Congratulations!
-            </h2>
-
-            <div className="flex items-center justify-center gap-3 mb-2">
-              <h3 className="text-2xl font-bold text-white">You earned</h3>
-              <img
-                src="/images/branding/Adcoin large 512x512.png"
-                alt={`${coinsEarned} AdCoins earned`}
-                className="w-20 h-20"
-              />
-              <h3 className="text-2xl font-bold text-yellow-500">
-                {coinsEarned}!
-              </h3>
-            </div>
-
-            <div className="bg-gray-800 p-6 rounded-lg my-6">
-              <p className="text-gray-400 text-sm mb-2">Total Balance:</p>
-              <div className="flex items-center justify-center gap-3">
-                <p className="text-5xl font-bold text-yellow-500">
-                  {totalCoins.toLocaleString()}
-                </p>
-                <img
-                  src="/images/branding/Adcoin medium 256x256.png"
-                  alt="Total AdCoins balance"
-                  className="w-14 h-14"
-                />
-              </div>
-            </div>
-
-            <p className="text-gray-400 text-sm mb-6">
-              💡 Your coins will convert to cash when we receive ad revenue
-              (monthly)
-            </p>
-
-            <Button onClick={claimReward} className="w-full text-lg py-4">
-              Continue to Dashboard
-            </Button>
-          </div>
-        </Card>
-      )}
+          </Card>
+        )}
+      </div>
     </div>
   )
 }
