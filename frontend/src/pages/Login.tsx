@@ -8,11 +8,8 @@ import {
 import Button from '../components/Button'
 import Card from '../components/Card'
 
-type LoginMode = 'oauth' | 'email'
-
 export default function Login() {
   const navigate = useNavigate()
-  const [mode, setMode] = useState<LoginMode>('oauth') // Default to oauth - show Google/Facebook first
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
@@ -163,44 +160,34 @@ export default function Login() {
           </div>
         ) : (
           <>
-            {/* Mode toggle */}
-            <div className="flex gap-2 mb-6">
-              <Button
-                fullWidth
-                variant={mode === 'oauth' ? 'primary' : 'secondary'}
-                onClick={() => setMode('oauth')}
-              >
-                Social Login
+            {/* OAuth Options - Always Visible */}
+            <div className="space-y-3 mb-6">
+              <Button fullWidth onClick={handleGoogleLogin} disabled={loading}>
+                🔍 Continue with Google
               </Button>
               <Button
                 fullWidth
-                variant={mode === 'email' ? 'primary' : 'secondary'}
-                onClick={() => setMode('email')}
+                variant="secondary"
+                onClick={handleFacebookLogin}
+                disabled={loading}
               >
-                Email Login
+                📘 Continue with Facebook
               </Button>
             </div>
 
-            {mode === 'oauth' ? (
-              <div className="space-y-3">
-                <Button
-                  fullWidth
-                  onClick={handleGoogleLogin}
-                  disabled={loading}
-                >
-                  🔍 Continue with Google
-                </Button>
-                <Button
-                  fullWidth
-                  variant="secondary"
-                  onClick={handleFacebookLogin}
-                  disabled={loading}
-                >
-                  📘 Continue with Facebook
-                </Button>
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-700"></div>
               </div>
-            ) : (
-              {/* Email/Password Login */}
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-gray-900 text-gray-400">
+                  or sign in with email
+                </span>
+              </div>
+            </div>
+
+            {/* Email/Password Form - Always Visible */}
             <div className="space-y-4">
               <form onSubmit={handleEmailPasswordLogin} className="space-y-3">
                 <div>
@@ -259,7 +246,6 @@ export default function Login() {
                 link in your email!
               </p>
             </div>
-            )}
           </>
         )}
 

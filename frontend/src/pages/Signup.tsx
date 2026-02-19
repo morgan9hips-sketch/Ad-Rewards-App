@@ -11,12 +11,9 @@ import {
   requestAuthFromNative,
 } from '../utils/hybridBridge'
 
-type SignupMode = 'oauth' | 'email'
-
 export default function Signup() {
   const navigate = useNavigate()
   const { session } = useAuth()
-  const [mode, setMode] = useState<SignupMode>('oauth')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -241,97 +238,91 @@ export default function Signup() {
             </div>
           )}
 
-          {/* Mode toggle */}
-          <div className="flex gap-2 mb-6">
-            <Button
-              fullWidth
-              variant={mode === 'oauth' ? 'primary' : 'secondary'}
-              onClick={() => setMode('oauth')}
-            >
-              Social Signup
+          {/* OAuth Options - Always Visible */}
+          <div className="space-y-3 mb-6">
+            <Button fullWidth onClick={handleGoogleSignup} disabled={loading}>
+              🔍 Sign up with Google
             </Button>
             <Button
               fullWidth
-              variant={mode === 'email' ? 'primary' : 'secondary'}
-              onClick={() => setMode('email')}
+              variant="secondary"
+              onClick={handleFacebookSignup}
+              disabled={loading}
             >
-              Email Signup
+              📘 Sign up with Facebook
             </Button>
           </div>
 
-          {mode === 'oauth' ? (
-            <div className="space-y-3">
-              <Button fullWidth onClick={handleGoogleSignup} disabled={loading}>
-                🔍 Sign up with Google
-              </Button>
-              <Button
-                fullWidth
-                variant="secondary"
-                onClick={handleFacebookSignup}
-                disabled={loading}
-              >
-                📘 Sign up with Facebook
-              </Button>
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-700"></div>
             </div>
-          ) : (
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-                  placeholder="your@email.com"
-                  required
-                />
-              </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-gray-800 text-gray-400">
+                or sign up with email
+              </span>
+            </div>
+          </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Password
-                </label>
-                <PasswordInput
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Must be at least 8 characters
-                </p>
-              </div>
+          {/* Email Form - Always Visible */}
+          <form onSubmit={handleSignup} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                placeholder="your@email.com"
+                required
+              />
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Confirm Password
-                </label>
-                <PasswordInput
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Password
+              </label>
+              <PasswordInput
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Must be at least 8 characters
+              </p>
+            </div>
 
-              <div className="text-xs text-gray-400 text-center">
-                By signing up, you agree to our{' '}
-                <a href="/terms" className="text-blue-400 hover:underline">
-                  Terms of Service
-                </a>{' '}
-                and{' '}
-                <a href="/privacy" className="text-blue-400 hover:underline">
-                  Privacy Policy
-                </a>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Confirm Password
+              </label>
+              <PasswordInput
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+            </div>
 
-              <Button type="submit" fullWidth disabled={loading}>
-                {loading ? <LoadingSpinner size="small" /> : 'Create Account'}
-              </Button>
-            </form>
-          )}
+            <div className="text-xs text-gray-400 text-center">
+              By signing up, you agree to our{' '}
+              <a href="/terms" className="text-blue-400 hover:underline">
+                Terms of Service
+              </a>{' '}
+              and{' '}
+              <a href="/privacy" className="text-blue-400 hover:underline">
+                Privacy Policy
+              </a>
+            </div>
+
+            <Button type="submit" fullWidth disabled={loading}>
+              {loading ? <LoadingSpinner size="small" /> : 'Create Account'}
+            </Button>
+          </form>
 
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
