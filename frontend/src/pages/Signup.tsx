@@ -16,7 +16,7 @@ type SignupMode = 'oauth' | 'email'
 export default function Signup() {
   const navigate = useNavigate()
   const { session } = useAuth()
-  const [mode, setMode] = useState<SignupMode>('email')
+  const [mode, setMode] = useState<SignupMode>('oauth')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
