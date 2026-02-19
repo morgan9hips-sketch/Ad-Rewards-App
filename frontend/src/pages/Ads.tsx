@@ -103,7 +103,16 @@ export default function Ads() {
 
             <div className="bg-purple-900/50 rounded-lg p-6 mb-6 max-w-md mx-auto">
               <div className="flex items-center justify-center gap-3 mb-4">
-                <span className="text-5xl">▶️</span>
+                <div className="relative">
+                  <img
+                    src="/images/branding/Adcoin-large-512x512.png"
+                    alt="AdCoin"
+                    className="w-20 h-20 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-3xl">▶️</span>
+                  </div>
+                </div>
                 <span className="text-5xl font-bold text-yellow-400">100</span>
               </div>
               <p className="text-lg font-semibold text-purple-200">
