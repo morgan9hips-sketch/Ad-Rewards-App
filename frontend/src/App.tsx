@@ -6,6 +6,7 @@ import {
 } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { CurrencyProvider } from './contexts/CurrencyContext'
+import { useInterstitialAd } from './hooks/useInterstitialAd'
 import CookieConsent from './components/CookieConsent'
 import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
@@ -108,6 +109,9 @@ function ProtectedRoute({
 
 function AppContent() {
   const { isAuthenticated } = useAuth()
+
+  // Track clicks for interstitial ads (every 8 clicks)
+  useInterstitialAd()
 
   return (
     <div className="min-h-screen bg-black">
