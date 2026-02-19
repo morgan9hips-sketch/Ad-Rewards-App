@@ -12,6 +12,7 @@ import BottomNavigation from './components/BottomNavigation'
 import BetaBanner from './components/BetaBanner'
 import LocationPermissionModal from './components/LocationPermissionModal'
 import LoadingSpinner from './components/LoadingSpinner'
+import DevelopmentBanner from './components/DevelopmentBanner'
 
 // Pages
 import Home from './pages/Home'
@@ -54,7 +55,8 @@ function ProtectedRoute({
   children: React.ReactNode
   requireAdmin?: boolean
 }) {
-  const { isAuthenticated, loading, user, geoResolved, geoResolving } = useAuth()
+  const { isAuthenticated, loading, user, geoResolved, geoResolving } =
+    useAuth()
 
   if (loading || geoResolving) {
     return (
@@ -113,6 +115,7 @@ function AppContent() {
       <BetaBanner />
       <TopHeader />
       <CookieConsent />
+      <DevelopmentBanner />
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -265,7 +268,7 @@ function AppContent() {
         </>
       )}
       <Footer />
-      <CookieConsent />
+      <CookieConsent />
     </div>
   )
 }
@@ -283,5 +286,3 @@ function App() {
 }
 
 export default App
-
-
