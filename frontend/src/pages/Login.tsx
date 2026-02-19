@@ -12,7 +12,7 @@ type LoginMode = 'oauth' | 'email'
 
 export default function Login() {
   const navigate = useNavigate()
-  const [mode, setMode] = useState<LoginMode>('email') // Default to email instead of oauth
+  const [mode, setMode] = useState<LoginMode>('oauth') // Default to oauth - show Google/Facebook first
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
