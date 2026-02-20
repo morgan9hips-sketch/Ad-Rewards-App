@@ -101,26 +101,35 @@ router.post('/:id/watch', async (req: AuthRequest, res) => {
   }
 })
 
-// Complete ad view - NEW endpoint for coin-based system with VPN-proof location tracking
+// Complete ad view - NEW endpoint for coin-based system with regional revenue pools
 router.post('/complete', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
     const {
       adUnitId,
       watchedSeconds,
-      admobImpressionId,
-      countryCode,  // From AdMob SDK (VPN-proof!)
-      estimatedEarnings,  // AdMob's CPM estimate
-      currency  // AdMob currency
+      impressionId,  // From Monetag SDK
     } = req.body
 
-    // Validate required fields
-    if (!countryCode) {
-      return res.status(400).json({
+    // Get user profile to access regional country/currency set at signup
+    const profile = await prisma.userProfile.findUnique({
+      where: { userId: userId },
+      select: {
+        signupCountry: true,
+        countryCode: true,
+        preferredCurrency: true,
+      },
+    })
+
+    if (!profile) {
+      return res.status(404).json({
         success: false,
-        error: 'Country code from AdMob is required'
+        error: 'User profile not found'
       })
     }
+
+    const countryCode = profile.countryCode || profile.signupCountry || 'US'
+    const currency = profile.preferredCurrency || 'USD'
 
     // Get client IP for fraud detection
     const ipAddress = getClientIP(req)
@@ -147,8 +156,8 @@ router.post('/complete', async (req: AuthRequest, res) => {
     }
 
     // 3. Check for duplicate impression
-    if (admobImpressionId) {
-      const duplicateCheck = await checkDuplicateImpression(admobImpressionId)
+    if (impressionId) {
+      const duplicateCheck = await checkDuplicateImpression(impressionId)
       if (duplicateCheck.duplicate) {
         return res.status(409).json({
           success: false,
@@ -157,14 +166,7 @@ router.post('/complete', async (req: AuthRequest, res) => {
       }
     }
 
-    // 4. Detect VPN usage (IP location vs AdMob location)
-    const vpnCheck = await detectVPNMismatch(userId, ipAddress, countryCode)
-    if (vpnCheck.vpnSuspected) {
-      console.log(`🚨 VPN detected: User ${userId}, IP=${vpnCheck.ipCountry}, AdMob=${vpnCheck.admobCountry}`)
-      // We still allow the ad, but log the mismatch for monitoring
-    }
-
-    // 5. Create ad view record with AdMob location data (SOURCE OF TRUTH)
+    // 4. Create ad view record with user's regional data (from signup IP)
     const adView = await prisma.adView.create({
       data: {
         userId,
@@ -174,13 +176,13 @@ router.post('/complete', async (req: AuthRequest, res) => {
         rewardCents: 0, // Legacy field, not used in coin system
         coinsEarned: COINS_PER_AD,
         
-        // AdMob data (TRUSTED - VPN-proof)
-        admobImpressionId: admobImpressionId || undefined,
-        countryCode: countryCode,  // SOURCE OF TRUTH for revenue pool
-        estimatedEarningsUsd: estimatedEarnings ? parseFloat(estimatedEarnings) : undefined,
+        // User's regional data (SOURCE OF TRUTH from signup IP geolocation)
+        admobImpressionId: impressionId || undefined,
+        countryCode: countryCode,  // User's signup regional pool
+        estimatedEarningsUsd: undefined,  // Monetag doesn't provide CPM estimate
         admobCurrency: currency || 'USD',
         
-        // Audit trail (for fraud detection, NOT for location)
+        // Audit trail
         ipAddress,
         ipCountry: ipCountry || undefined,
         userAgent,
