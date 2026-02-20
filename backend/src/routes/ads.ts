@@ -28,8 +28,8 @@ router.get('/', async (req: AuthRequest, res) => {
 
     res.json(ads)
   } catch (error) {
-    console.error('Error fetching ads:', error)
-    res.status(500).json({ error: 'Failed to fetch ads' })
+    console.error('❌ Error fetching ads:', error instanceof Error ? error.message : error)
+    res.status(500).json({ error: 'Failed to fetch ads', details: error instanceof Error ? error.message : 'Unknown error' })
   }
 })
 

@@ -9,7 +9,10 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY!
 )
 
-const prisma = new PrismaClient()
+// FIX: Prevent Prisma connection pooling issues in serverless
+const globalForPrisma = global as unknown as { prisma: PrismaClient }
+const prisma = globalForPrisma.prisma || new PrismaClient()
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 export interface AuthRequest extends Request {
   user?: { id: string; email: string; role?: UserRole }
@@ -117,8 +120,9 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
 
     next()
   } catch (error) {
-    console.error('Authentication error:', error)
-    res.status(500).json({ error: 'Internal server error' })
+    console.error('❌ Authentication error:', error instanceof Error ? error.message : error)
+    console.error('Stack:', error instanceof Error ? error.stack : null)
+    res.status(500).json({ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' })
   }
 }
 
