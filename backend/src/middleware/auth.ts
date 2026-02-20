@@ -86,7 +86,7 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
       let attempts = 0
       while (attempts < 10) {
         const existing = await prisma.userProfile.findUnique({
-          where: { walletId }
+          where: { walletId: walletId }
         })
         if (!existing) break
         walletId = generateWalletId()
