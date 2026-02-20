@@ -106,7 +106,7 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
           signupCountry: countryCode,
           country: countryCode,
           preferredCurrency: currency,
-          walletId,
+          walletId: walletId,
           isBetaUser: shouldBeBetaUser(),
         },
       })
