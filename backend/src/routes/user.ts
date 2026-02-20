@@ -184,7 +184,6 @@ router.put('/profile', async (req: AuthRequest, res) => {
         const existingUser = await prisma.userProfile.findUnique({
           where: { displayName: displayName },
         })
-        })
         if (existingUser && existingUser.userId !== userId) {
           return res
             .status(400)
@@ -221,7 +220,7 @@ router.get('/balance', async (req: AuthRequest, res) => {
     const ipAddress = getClientIP(req)
 
     const profile = await prisma.userProfile.findUnique({
-      where: { userId },
+      where: { userId: userId },
       select: {
         coinsBalance: true,
         cashBalanceUsd: true,
