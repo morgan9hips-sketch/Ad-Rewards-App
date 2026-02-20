@@ -226,7 +226,6 @@ router.post('/complete', async (req: AuthRequest, res) => {
       totalCoins: userProfile?.coinsBalance.toString() || '0',
       message: `You earned ${COINS_PER_AD} coins!`,
       remaining: dailyLimit.remaining - 1,
-      vpnDetected: vpnCheck.vpnSuspected,
     })
   } catch (error) {
     console.error('Error completing ad view:', error)
