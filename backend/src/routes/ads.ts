@@ -131,6 +131,15 @@ router.post('/complete', async (req: AuthRequest, res) => {
     const countryCode = profile.countryCode || profile.signupCountry || 'US'
     const currency = profile.preferredCurrency || 'USD'
 
+    // Validate minimum watch time (fraud prevention)
+    const MIN_WATCH_SECONDS = 15  // Monetag ads must be watched for at least 15 seconds
+    if (!watchedSeconds || watchedSeconds < MIN_WATCH_SECONDS) {
+      return res.status(400).json({
+        success: false,
+        error: `Ad must be watched for at least ${MIN_WATCH_SECONDS} seconds`
+      })
+    }
+
     // Get client IP for fraud detection
     const ipAddress = getClientIP(req)
     const userAgent = req.headers['user-agent'] || ''
