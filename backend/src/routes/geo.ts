@@ -66,8 +66,17 @@ router.post('/resolve', async (req: any, res) => {
       },
     })
 
+    // If profile doesn't exist, can't geo-resolve
+    if (!profile) {
+      return res.status(404).json({
+        success: false,
+        error: 'User profile not found. Please sign in first.',
+        resolved: false,
+      })
+    }
+
     // If already resolved, return stored data immediately (idempotent)
-    if (profile?.geoResolved) {
+    if (profile.geoResolved) {
       return res.json({
         country: profile.countryCode,
         countryName: profile.countryName,
@@ -107,9 +116,11 @@ router.post('/resolve', async (req: any, res) => {
       resolved: true,
     })
   } catch (error) {
-    console.error('Error resolving geo:', error)
+    console.error('❌ Error resolving geo:', error instanceof Error ? error.message : error)
+    if (error instanceof Error) console.error('Stack:', error.stack)
     res.status(500).json({ 
       error: 'Failed to resolve geo location',
+      details: error instanceof Error ? error.message : 'Unknown error',
       resolved: false,
     })
   }
