@@ -57,7 +57,7 @@ router.post('/resolve', async (req: any, res) => {
 
     // Check if user is already geo-resolved
     const profile = await prisma.userProfile.findUnique({
-      where: { userId },
+      where: { userId: userId },
       select: {
         geoResolved: true,
         countryCode: true,
@@ -87,7 +87,7 @@ router.post('/resolve', async (req: any, res) => {
 
     // Persist to database (first resolution only)
     await prisma.userProfile.update({
-      where: { userId },
+      where: { userId: userId },
       data: {
         countryCode,
         countryName,
