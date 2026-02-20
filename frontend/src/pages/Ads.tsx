@@ -41,6 +41,11 @@ export default function WatchAd() {
       console.log('🔍 DEBUG - Token:', token)
       console.log('🔍 DEBUG - User:', user)
 
+      console.log('🔍 SENDING REQUEST WITH HEADERS:', {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      })
+
       if (!token) {
         setError('Not authenticated')
         setStage('complete')
@@ -63,12 +68,16 @@ export default function WatchAd() {
         },
       )
 
+      console.log('🔍 RESPONSE STATUS:', response.status)
+      console.log('🔍 RESPONSE:', response)
+
       if (response.ok) {
         const data = await response.json()
         setCoinsEarned(data.coinsEarned || 100)
         setStage('complete')
       } else {
         const errorData = await response.json()
+        console.log('🔍 ERROR DATA:', errorData)
         setError(errorData.error || 'Failed to process ad completion')
         setStage('complete')
       }
