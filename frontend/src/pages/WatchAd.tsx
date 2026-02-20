@@ -14,7 +14,7 @@ declare global {
 export default function WatchAd() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, session } = useAuth()
   const [stage, setStage] = useState<'opt-in' | 'loading' | 'complete'>(
     'opt-in',
   )
@@ -23,12 +23,18 @@ export default function WatchAd() {
   const [error, setError] = useState('')
 
   const handleAdComplete = useCallback(async () => {
-    if (adCompleted) return // Prevent double completion
+    if (adCompleted) return
 
     setAdCompleted(true)
 
     try {
-      const token = localStorage.getItem('token')
+      const token = session?.access_token
+      if (!token) {
+        setError('Not authenticated')
+        setStage('complete')
+        return
+      }
+
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/ads/complete`,
         {
@@ -59,17 +65,16 @@ export default function WatchAd() {
       setError('Network error. Please try again.')
       setStage('complete')
     }
-  }, [adCompleted, id])
+  }, [adCompleted, id, session])
 
   useEffect(() => {
-    // Auto-complete after 35 seconds if ad doesn't trigger completion
     let timeout: number
     if (stage === 'loading') {
       timeout = window.setTimeout(() => {
         if (!adCompleted) {
           handleAdComplete()
         }
-      }, 35000) // 35 seconds
+      }, 35000)
     }
     return () => {
       if (timeout) window.clearTimeout(timeout)
@@ -79,7 +84,6 @@ export default function WatchAd() {
   const handleOptIn = async () => {
     setStage('loading')
 
-    // Trigger MonetTag Vignette Ad
     if (window.monetag) {
       try {
         window.monetag.push({
@@ -116,13 +120,14 @@ export default function WatchAd() {
     navigate('/ads')
   }
 
-  // OPT-IN STAGE
+  const currentBalance = (user as { coinsBalance?: number })?.coinsBalance || 0
+
   if (stage === 'opt-in') {
     return (
       <div className="container mx-auto px-4 py-6 pb-24">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-6">
-            <div className="text-6xl mb-4">🇧🇪</div>
+            <div className="text-6xl mb-4">🎬</div>
             <h1 className="text-4xl font-bold text-white mb-3">
               Earn 100 AdCoins!
             </h1>
@@ -190,7 +195,6 @@ export default function WatchAd() {
     )
   }
 
-  // LOADING STAGE
   if (stage === 'loading') {
     return (
       <div className="container mx-auto px-4 py-6 pb-24">
@@ -216,9 +220,6 @@ export default function WatchAd() {
       </div>
     )
   }
-
-  // COMPLETE STAGE
-  const currentBalance = (user as { coinsBalance?: number })?.coinsBalance || 0
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">

@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import Card from '../components/Card'
 
 export default function Ads() {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const navigate = useNavigate()
   const [dailyLimit, setDailyLimit] = useState({
     watched: 0,
@@ -15,11 +15,16 @@ export default function Ads() {
 
   useEffect(() => {
     fetchDailyLimit()
-  }, [])
+  }, [session])
 
   const fetchDailyLimit = async () => {
     try {
-      const token = localStorage.getItem('token')
+      const token = session?.access_token
+      if (!token) {
+        setLoading(false)
+        return
+      }
+
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/ads/daily-limit`,
         {
@@ -61,7 +66,6 @@ export default function Ads() {
     <div className="container mx-auto px-4 py-6 pb-24">
       <h1 className="text-3xl font-bold text-white mb-6">Watch Ads 📺</h1>
 
-      {/* Daily Limit Card */}
       <Card className="mb-6 bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-purple-500/30">
         <div className="flex items-center justify-between">
           <div>
@@ -86,7 +90,6 @@ export default function Ads() {
         </div>
       </Card>
 
-      {/* Opt-In Ad Card */}
       {dailyLimit.remaining > 0 ? (
         <Card
           className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-2 border-purple-500/50 hover:border-purple-400/70 transition-all cursor-pointer"
