@@ -21,7 +21,7 @@ router.get('/my-code', async (req: AuthRequest, res) => {
     const userId = req.user!.id
 
     let profile = await prisma.userProfile.findUnique({
-      where: { userId },
+      where: { userId: userId },
       select: { referralCode: true, email: true },
     })
 
@@ -29,7 +29,7 @@ router.get('/my-code', async (req: AuthRequest, res) => {
     if (!profile?.referralCode) {
       const referralCode = nanoid(10).toUpperCase()
       profile = await prisma.userProfile.update({
-        where: { userId },
+        where: { userId: userId },
         data: { referralCode },
         select: { referralCode: true, email: true },
       })
@@ -125,7 +125,7 @@ router.post('/track', async (req: AuthRequest, res) => {
 
     // Find referrer by code
     const referrer = await prisma.userProfile.findUnique({
-      where: { referralCode },
+      where: { referralCode: referralCode },
     })
 
     if (!referrer) {
@@ -167,7 +167,7 @@ router.post('/track', async (req: AuthRequest, res) => {
 
     // Update user's referredBy field
     await prisma.userProfile.update({
-      where: { userId },
+      where: { userId: userId },
       data: { referredBy: referralCode },
     })
 
@@ -288,7 +288,7 @@ export async function checkReferralQualification(userId: string): Promise<void> 
 
     // Get user's cash balance
     const user = await prisma.userProfile.findUnique({
-      where: { userId },
+      where: { userId: userId },
       select: { cashBalanceUsd: true },
     })
 
