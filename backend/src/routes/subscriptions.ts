@@ -42,7 +42,7 @@ router.post('/create', async (req: AuthRequest, res) => {
 
     // Store pending subscription in database
     await prisma.userProfile.update({
-      where: { userId },
+      where: { userId: userId },
       data: {
         subscriptionId,
         subscriptionStatus: 'PENDING',
@@ -131,7 +131,7 @@ router.post('/cancel', async (req: AuthRequest, res) => {
     const { reason } = req.body
 
     const profile = await prisma.userProfile.findUnique({
-      where: { userId },
+      where: { userId: userId },
       select: { subscriptionId: true },
     })
 
@@ -147,7 +147,7 @@ router.post('/cancel', async (req: AuthRequest, res) => {
 
     // Update database
     await prisma.userProfile.update({
-      where: { userId },
+      where: { userId: userId },
       data: {
         subscriptionStatus: 'CANCELLED',
         tier: 'Free',
@@ -252,7 +252,7 @@ async function handleSubscriptionActivated(resource: any) {
 
   // Update user profile
   await prisma.userProfile.updateMany({
-    where: { subscriptionId },
+    where: { subscriptionId: subscriptionId },
     data: {
       tier,
       subscriptionStatus: 'ACTIVE',
@@ -267,7 +267,7 @@ async function handleSubscriptionCancelled(resource: any) {
   const subscriptionId = resource.id
 
   await prisma.userProfile.updateMany({
-    where: { subscriptionId },
+    where: { subscriptionId: subscriptionId },
     data: {
       tier: 'Free',
       subscriptionStatus: 'CANCELLED',
@@ -296,7 +296,7 @@ async function handlePaymentFailed(resource: any) {
 
   // Mark subscription as suspended with grace period
   await prisma.userProfile.updateMany({
-    where: { subscriptionId },
+    where: { subscriptionId: subscriptionId },
     data: {
       subscriptionStatus: 'SUSPENDED',
     },

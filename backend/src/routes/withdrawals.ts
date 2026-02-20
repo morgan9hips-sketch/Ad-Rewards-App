@@ -18,7 +18,7 @@ router.post('/request', async (req: AuthRequest, res) => {
 
     // Get user profile
     const profile = await prisma.userProfile.findUnique({
-      where: { userId },
+      where: { userId: userId },
       select: {
         coinsBalance: true,
         cashBalanceUsd: true,
@@ -125,12 +125,12 @@ router.get('/history', async (req: AuthRequest, res) => {
 
     const [withdrawals, total] = await Promise.all([
       prisma.withdrawal.findMany({
-        where: { userId },
+        where: { userId: userId },
         orderBy: { requestedAt: 'desc' },
         take: perPage,
         skip,
       }),
-      prisma.withdrawal.count({ where: { userId } }),
+      prisma.withdrawal.count({ where: { userId: userId } }),
     ])
 
     res.json({

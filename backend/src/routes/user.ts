@@ -48,7 +48,7 @@ router.post('/setup-profile', async (req: AuthRequest, res) => {
 
       // Check if display name is already taken
       const existingUser = await prisma.userProfile.findUnique({
-        where: { displayName },
+        where: { displayName: displayName },
       })
       if (existingUser && existingUser.userId !== userId) {
         return res.status(400).json({ error: 'Display name is already taken' })
@@ -57,7 +57,7 @@ router.post('/setup-profile', async (req: AuthRequest, res) => {
 
     // Update profile
     const profile = await prisma.userProfile.update({
-      where: { userId },
+      where: { userId: userId },
       data: {
         displayName: displayName || undefined,
         avatarEmoji: avatarEmoji || undefined,
@@ -83,7 +83,7 @@ router.get('/profile', async (req: AuthRequest, res) => {
     const userId = req.user!.id
 
     let profile = await prisma.userProfile.findUnique({
-      where: { userId },
+      where: { userId: userId },
     })
 
     // Create profile if it doesn't exist
@@ -106,7 +106,7 @@ router.get('/profile', async (req: AuthRequest, res) => {
     } else {
       // Update lastLogin
       await prisma.userProfile.update({
-        where: { userId },
+        where: { userId: userId },
         data: { lastLogin: new Date() },
       })
     }
@@ -182,7 +182,8 @@ router.put('/profile', async (req: AuthRequest, res) => {
       // Check if display name is already taken
       if (displayName) {
         const existingUser = await prisma.userProfile.findUnique({
-          where: { displayName },
+          where: { displayName: displayName },
+        })
         })
         if (existingUser && existingUser.userId !== userId) {
           return res
@@ -202,7 +203,7 @@ router.put('/profile', async (req: AuthRequest, res) => {
       updateData.showOnLeaderboard = showOnLeaderboard
 
     const profile = await prisma.userProfile.update({
-      where: { userId },
+      where: { userId: userId },
       data: updateData,
     })
 
@@ -365,7 +366,7 @@ router.get('/signup-bonus', async (req: AuthRequest, res) => {
 
     // Check if user has a signup bonus
     const signupBonus = await prisma.signupBonus.findUnique({
-      where: { userId },
+      where: { userId: userId },
     })
 
     if (!signupBonus) {
@@ -376,7 +377,7 @@ router.get('/signup-bonus', async (req: AuthRequest, res) => {
 
     // Get user profile for country info
     const profile = await prisma.userProfile.findUnique({
-      where: { userId },
+      where: { userId: userId },
       select: { country: true },
     })
 
@@ -401,7 +402,7 @@ router.post('/accept-terms', async (req: AuthRequest, res) => {
 
     // Update user profile with terms acceptance timestamp
     const profile = await prisma.userProfile.update({
-      where: { userId },
+      where: { userId: userId },
       data: {
         acceptedTermsAt: new Date(),
       },
@@ -425,10 +426,10 @@ router.delete('/account', async (req: AuthRequest, res) => {
     // Delete all user data in transaction for data consistency
     await prisma.$transaction(async (tx) => {
       // Delete related records first (foreign key constraints)
-      await tx.adView.deleteMany({ where: { userId } })
-      await tx.gameSession.deleteMany({ where: { userId } })
-      await tx.transaction.deleteMany({ where: { userId } })
-      await tx.withdrawal.deleteMany({ where: { userId } })
+      await tx.adView.deleteMany({ where: { userId: userId } })
+      await tx.gameSession.deleteMany({ where: { userId: userId } })
+      await tx.transaction.deleteMany({ where: { userId: userId } })
+      await tx.withdrawal.deleteMany({ where: { userId: userId } })
       await tx.referral.deleteMany({ 
         where: { 
           OR: [
@@ -437,11 +438,11 @@ router.delete('/account', async (req: AuthRequest, res) => {
           ]
         } 
       })
-      await tx.signupBonus.deleteMany({ where: { userId } })
-      await tx.userBadge.deleteMany({ where: { userId } })
+      await tx.signupBonus.deleteMany({ where: { userId: userId } })
+      await tx.userBadge.deleteMany({ where: { userId: userId } })
       
       // Finally delete the user profile
-      await tx.userProfile.delete({ where: { userId } })
+      await tx.userProfile.delete({ where: { userId: userId } })
     })
 
     res.json({ 
