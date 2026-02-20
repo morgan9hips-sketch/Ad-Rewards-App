@@ -177,10 +177,10 @@ router.post('/complete', async (req: AuthRequest, res) => {
         coinsEarned: COINS_PER_AD,
         
         // User's regional data (SOURCE OF TRUTH from signup IP geolocation)
-        admobImpressionId: impressionId || undefined,
+        admobImpressionId: impressionId || undefined,  // Monetag impression ID
         countryCode: countryCode,  // User's signup regional pool
-        estimatedEarningsUsd: undefined,  // Monetag doesn't provide CPM estimate
-        admobCurrency: currency || 'USD',
+        estimatedEarningsUsd: undefined,  // Monetag revenue data not available
+        admobCurrency: currency || 'USD',  // User's signup currency
         
         // Audit trail
         ipAddress,
