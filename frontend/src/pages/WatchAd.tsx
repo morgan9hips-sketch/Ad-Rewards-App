@@ -30,13 +30,18 @@ export default function WatchAd() {
     try {
       const token = localStorage.getItem('token')
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/ads/complete/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/ads/complete`,
         {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({
+            adUnitId: `monetag-vignette-${id}`,
+            watchedSeconds: 30,
+            admobImpressionId: `monetag-${Date.now()}`,
+          }),
         },
       )
 
