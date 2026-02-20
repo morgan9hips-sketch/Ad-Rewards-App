@@ -6,7 +6,7 @@ import { getCurrencyForCountry } from '../services/currencyService.js'
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
+  process.env.SUPABASE_ANON_KEY!
 )
 
 const prisma = new PrismaClient()
@@ -61,6 +61,7 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
     const { data: { user }, error } = await supabase.auth.getUser(token)
 
     if (error || !user) {
+      console.error('❌ Auth error:', error)
       return res.status(401).json({ error: 'Invalid token' })
     }
 
@@ -100,25 +101,47 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
           email: user.email!,
           signupIp: ip,
           signupCountry: countryCode,
-          revenueCountry: countryCode, // Locked - determines revenue pool
-          walletId: walletId,
-          currency: currency,
+          country: countryCode,
+          preferredCurrency: currency,
+          walletId,
           isBetaUser: shouldBeBetaUser(),
-          betaMultiplier: shouldBeBetaUser() ? 1.5 : 1.0,
         },
       })
-      
-      console.log(`✅ Auto-created profile for user ${user.id} with wallet ${walletId}`)
     }
 
-    req.user = { 
-      id: user.id, 
+    req.user = {
+      id: user.id,
       email: user.email!,
-      role: userProfile?.role || UserRole.USER
+      role: userProfile.role,
     }
+
     next()
   } catch (error) {
     console.error('Authentication error:', error)
-    res.status(401).json({ error: 'Authentication failed' })
+    res.status(500).json({ error: 'Internal server error' })
   }
+}
+
+export async function requireAdmin(req: AuthRequest, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (req.user.role !== 'ADMIN' && req.user.role !== 'SUPER_ADMIN') {
+    return res.status(403).json({ error: 'Forbidden: Admin access required' })
+  }
+
+  next()
+}
+
+export async function requireSuperAdmin(req: AuthRequest, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (req.user.role !== 'SUPER_ADMIN') {
+    return res.status(403).json({ error: 'Forbidden: Super Admin access required' })
+  }
+
+  next()
 }
