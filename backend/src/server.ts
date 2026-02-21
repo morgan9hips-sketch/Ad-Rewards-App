@@ -22,6 +22,7 @@ import coinValuationRoutes from './routes/coinValuation.js'
 import platformRoutes from './routes/platform.js'
 import legalRoutes from './routes/legal.js'
 import geoRoutes from './routes/geo.js'
+import minigameRoutes from './routes/minigame.js'
 
 dotenv.config()
 
@@ -138,6 +139,8 @@ app.use('/platform', authenticate, platformRoutes)
 app.use('/api/platform', authenticate, platformRoutes)
 app.use('/geo', authenticate, geoRoutes)
 app.use('/api/geo', authenticate, geoRoutes)
+app.use('/minigame', authenticate, minigameRoutes)
+app.use('/api/minigame', authenticate, minigameRoutes)
 
 // Error handler
 app.use(
