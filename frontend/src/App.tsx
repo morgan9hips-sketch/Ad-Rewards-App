@@ -37,6 +37,7 @@ import AdminExpiryIncome from './pages/AdminExpiryIncome'
 import Transactions from './pages/Transactions'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
+import MiniGames from './pages/MiniGames'
 
 // Legal Pages
 import Terms from './pages/legal/Terms'
@@ -220,6 +221,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Referrals />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/minigames"
+          element={
+            <ProtectedRoute>
+              <MiniGames />
             </ProtectedRoute>
           }
         />
