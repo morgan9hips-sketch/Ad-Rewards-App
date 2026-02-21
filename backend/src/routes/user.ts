@@ -329,16 +329,42 @@ router.get('/currency-info', async (req: AuthRequest, res) => {
 router.get('/transactions', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
-    const page = parseInt(req.query.page as string) || 1
-    const perPage = parseInt(req.query.perPage as string) || 20
+
+    // Validate and sanitize pagination params
+    const rawPage = parseInt(req.query.page as string)
+    const rawPerPage = parseInt(req.query.perPage as string)
+    const page = isNaN(rawPage) || rawPage < 1 ? 1 : rawPage
+    const perPage = isNaN(rawPerPage) || rawPerPage < 1 ? 20 : Math.min(rawPerPage, 100)
     const type = req.query.type as string | undefined
+
+    // Verify user exists before fetching transactions
+    const userExists = await prisma.userProfile.findUnique({
+      where: { userId },
+      select: { userId: true },
+    })
+
+    if (!userExists) {
+      return res.status(404).json({
+        error: 'User not found',
+        message: 'Your profile could not be found. Please sign in again.',
+        code: 'USER_NOT_FOUND',
+      })
+    }
 
     const result = await getUserTransactions(userId, page, perPage, type)
 
-    res.json(result)
+    res.json({
+      ...result,
+      page,
+      perPage,
+    })
   } catch (error) {
-    console.error('Error fetching transactions:', error)
-    res.status(500).json({ error: 'Failed to fetch transactions' })
+    console.error('Error fetching transactions:', error instanceof Error ? error.message : error)
+    res.status(500).json({
+      error: 'Failed to load transactions',
+      message: 'Please try again in a moment. If this persists, contact support.',
+      code: 'TRANSACTION_LOAD_ERROR',
+    })
   }
 })
 

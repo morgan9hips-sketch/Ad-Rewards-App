@@ -4,6 +4,7 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom'
+import { useState, useCallback } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { CurrencyProvider } from './contexts/CurrencyContext'
 import { useInterstitialAd } from './hooks/useInterstitialAd'
@@ -13,6 +14,8 @@ import BottomNavigation from './components/BottomNavigation'
 import BetaBanner from './components/BetaBanner'
 import LoadingSpinner from './components/LoadingSpinner'
 import DevelopmentBanner from './components/DevelopmentBanner'
+import SplashScreen from './components/SplashScreen'
+import ErrorBoundary from './components/ErrorBoundary'
 
 // Pages
 import Home from './pages/Home'
@@ -111,8 +114,22 @@ function ProtectedRoute({
 function AppContent() {
   const { isAuthenticated } = useAuth()
 
+  // Show splash screen only on first load of the session
+  const [splashDone, setSplashDone] = useState<boolean>(() => {
+    return sessionStorage.getItem('splash-shown') === 'true'
+  })
+
+  const handleSplashComplete = useCallback(() => {
+    sessionStorage.setItem('splash-shown', 'true')
+    setSplashDone(true)
+  }, [])
+
   // Track clicks for interstitial ads (every 8 clicks)
   useInterstitialAd()
+
+  if (!splashDone) {
+    return <SplashScreen onComplete={handleSplashComplete} />
+  }
 
   return (
     <div className="min-h-screen bg-black">
@@ -287,13 +304,15 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <CurrencyProvider>
-          <AppContent />
-        </CurrencyProvider>
-      </AuthProvider>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <CurrencyProvider>
+            <AppContent />
+          </CurrencyProvider>
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   )
 }
 

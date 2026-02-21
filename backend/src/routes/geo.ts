@@ -7,6 +7,11 @@ import geoip from 'geoip-lite'
 const router = Router()
 const prisma = new PrismaClient()
 
+// Default fallback values when geo detection fails
+const DEFAULT_COUNTRY_CODE = 'US'
+const DEFAULT_COUNTRY_NAME = 'United States'
+const DEFAULT_CURRENCY = 'USD'
+
 // Static country to currency mapping (as specified in requirements)
 const COUNTRY_TO_CURRENCY: Record<string, string> = {
   US: 'USD',
@@ -55,23 +60,50 @@ router.post('/resolve', async (req: any, res) => {
   try {
     const userId = req.user?.id || req.body?.userId
 
-    // Check if user is already geo-resolved
-    const profile = await prisma.userProfile.findUnique({
-      where: { userId: userId },
-      select: {
-        geoResolved: true,
-        countryCode: true,
-        countryName: true,
-        currencyCode: true,
-      },
-    })
-
-    // If profile doesn't exist, can't geo-resolve
-    if (!profile) {
-      return res.status(404).json({
+    if (!userId) {
+      return res.status(400).json({
         success: false,
-        error: 'User profile not found. Please sign in first.',
+        error: 'User ID is required.',
         resolved: false,
+      })
+    }
+
+    // Check if user is already geo-resolved
+    let profile = null
+    try {
+      profile = await prisma.userProfile.findUnique({
+        where: { userId: userId },
+        select: {
+          geoResolved: true,
+          countryCode: true,
+          countryName: true,
+          currencyCode: true,
+        },
+      })
+    } catch (dbError) {
+      console.error('❌ DB error during geo-resolve lookup:', dbError instanceof Error ? dbError.message : dbError)
+      // Fall through to IP-based detection as fallback
+    }
+
+    // If profile doesn't exist, can't geo-resolve against DB — return IP-based fallback
+    if (!profile) {
+      const clientIP = getClientIP(req)
+      let geo = null
+      try {
+        geo = geoip.lookup(clientIP)
+      } catch (geoError) {
+        console.error('❌ Geo lookup error:', geoError instanceof Error ? geoError.message : geoError)
+      }
+      const countryCode = geo?.country || DEFAULT_COUNTRY_CODE
+      const currency = COUNTRY_TO_CURRENCY[countryCode] || DEFAULT_CURRENCY
+      const countryName = COUNTRY_NAMES[countryCode] || DEFAULT_COUNTRY_NAME
+
+      return res.json({
+        country: countryCode,
+        countryName,
+        currency,
+        resolved: true,
+        source: 'ip-fallback',
       })
     }
 
@@ -89,24 +121,35 @@ router.post('/resolve', async (req: any, res) => {
     const clientIP = getClientIP(req)
 
     // Perform geo lookup using geoip-lite (IP-based, no browser APIs)
-    const geo = geoip.lookup(clientIP)
-    const countryCode = geo?.country || 'US' // Default to US if detection fails
-    const currency = COUNTRY_TO_CURRENCY[countryCode] || 'USD'
-    const countryName = COUNTRY_NAMES[countryCode] || 'United States'
+    let geo = null
+    try {
+      geo = geoip.lookup(clientIP)
+    } catch (geoError) {
+      console.error('❌ Geo lookup failed, using defaults:', geoError instanceof Error ? geoError.message : geoError)
+    }
+
+    const countryCode = geo?.country || DEFAULT_COUNTRY_CODE // Default if detection fails
+    const currency = COUNTRY_TO_CURRENCY[countryCode] || DEFAULT_CURRENCY
+    const countryName = COUNTRY_NAMES[countryCode] || DEFAULT_COUNTRY_NAME
 
     // Persist to database (first resolution only)
-    await prisma.userProfile.update({
-      where: { userId: userId },
-      data: {
-        countryCode,
-        countryName,
-        currencyCode: currency,
-        ipAddress: clientIP,
-        geoResolved: true,
-        geoSource: 'geoip-lite',
-        geoResolvedAt: new Date(),
-      },
-    })
+    try {
+      await prisma.userProfile.update({
+        where: { userId: userId },
+        data: {
+          countryCode,
+          countryName,
+          currencyCode: currency,
+          ipAddress: clientIP,
+          geoResolved: true,
+          geoSource: 'geoip-lite',
+          geoResolvedAt: new Date(),
+        },
+      })
+    } catch (updateError) {
+      console.error('❌ Failed to persist geo data:', updateError instanceof Error ? updateError.message : updateError)
+      // Still return the resolved data even if persistence fails
+    }
 
     // Return resolution result
     res.json({
@@ -118,10 +161,13 @@ router.post('/resolve', async (req: any, res) => {
   } catch (error) {
     console.error('❌ Error resolving geo:', error instanceof Error ? error.message : error)
     if (error instanceof Error) console.error('Stack:', error.stack)
-    res.status(500).json({ 
-      error: 'Failed to resolve geo location',
-      details: error instanceof Error ? error.message : 'Unknown error',
-      resolved: false,
+    // Graceful fallback — return defaults rather than crashing
+    res.json({ 
+      country: DEFAULT_COUNTRY_CODE,
+      countryName: DEFAULT_COUNTRY_NAME,
+      currency: DEFAULT_CURRENCY,
+      resolved: true,
+      source: 'error-fallback',
     })
   }
 })

@@ -2,6 +2,10 @@ import express from 'express'
 import cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import { authenticate } from '../src/middleware/auth.js'
+import { errorLogger } from '../src/middleware/errorLogger.js'
+import { securityHeaders, xssSanitize } from '../src/middleware/xss.js'
+import { sanitizeBody } from '../src/middleware/validation.js'
+import { ipRateLimiter } from '../src/middleware/rateLimiter.js'
 
 // Import routes
 import userRoutes from '../src/routes/user.js'
@@ -34,10 +38,14 @@ app.use(
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-CSRF-Token'],
   }),
 )
-app.use(express.json())
+app.use(express.json({ limit: '1mb' }))
+app.use(securityHeaders)
+app.use(xssSanitize)
+app.use(sanitizeBody)
+app.use(ipRateLimiter)
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -62,14 +70,8 @@ app.use('/api/legal', legalRoutes) // Public
 app.use('/api/geo-resolve', geoRoutes) // Public
 app.use('/api/migrate', migrateRoutes) // One-time migration endpoint
 
-// Error handling middleware
-app.use((err: any, req: any, res: any, next: any) => {
-  console.error('API Error:', err)
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal Server Error',
-    path: req.originalUrl,
-  })
-})
+// Error handling middleware (must be last)
+app.use(errorLogger)
 
 // 404 handler (must be last)
 app.use('*', (req, res) => {

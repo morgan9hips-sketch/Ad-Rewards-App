@@ -82,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Do geo resolution in background (non-blocking)
+    setGeoResolving(true)
     try {
       const response = await fetch(`${API_BASE_URL}/api/geo-resolve/resolve`, {
         method: 'POST',
@@ -98,6 +99,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Background geo resolution failed:', error)
+    } finally {
+      setGeoResolving(false)
     }
     
     return true

@@ -17,7 +17,7 @@ export default function GameOverModal({
   sessionId,
   score,
   completed,
-  onRetryWithVideo, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onRetryWithVideo: _onRetryWithVideo, // reserved for future ad integration
   onRetryWithWait,
   onExit,
 }: GameOverModalProps) {
