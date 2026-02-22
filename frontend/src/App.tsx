@@ -72,18 +72,6 @@ function ProtectedRoute({
     return <Navigate to="/login" replace />
   }
 
-  // MANDATORY: Block access until geo is resolved
-  if (!geoResolved) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-black">
-        <div className="text-center">
-          <LoadingSpinner size="large" />
-          <p className="text-gray-400 mt-4">Detecting your location...</p>
-        </div>
-      </div>
-    )
-  }
-
   if (requireAdmin && user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN') {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-black p-8 text-center">
