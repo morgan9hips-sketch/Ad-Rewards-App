@@ -44,6 +44,14 @@ interface UserProfile {
   createdAt: string
 }
 
+interface GameStatus {
+  cooldownActive: boolean
+  cooldownEndsAt: string | null
+  sessionsToday: number
+  remainingSessions: number
+  waitSeconds: number
+}
+
 export default function Dashboard() {
   const { user, session } = useAuth()
   const navigate = useNavigate()
@@ -53,6 +61,8 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [showTermsModal, setShowTermsModal] = useState(false)
+  const [gameStatus, setGameStatus] = useState<GameStatus | null>(null)
+  const [cooldownRemaining, setCooldownRemaining] = useState(0)
 
   useEffect(() => {
     fetchDashboardData()
@@ -102,6 +112,16 @@ export default function Dashboard() {
         const txData = await txRes.json()
         setTransactions(txData.transactions || [])
       }
+
+      // Fetch game status (cooldown + daily cap)
+      const gameRes = await fetch(`${API_BASE_URL}/api/game/status`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (gameRes.ok) {
+        const gameData = await gameRes.json()
+        setGameStatus(gameData)
+        setCooldownRemaining(gameData.waitSeconds || 0)
+      }
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
     } finally {
@@ -146,6 +166,13 @@ export default function Dashboard() {
     // Refresh profile data
     fetchDashboardData()
   }
+
+  // Countdown timer for cooldown display
+  useEffect(() => {
+    if (cooldownRemaining <= 0) return
+    const t = setTimeout(() => setCooldownRemaining((r) => Math.max(0, r - 1)), 1000)
+    return () => clearTimeout(t)
+  }, [cooldownRemaining])
 
   const handleTermsAccept = async () => {
     try {
@@ -325,6 +352,31 @@ export default function Dashboard() {
           {/* Quick Actions */}
           <Card>
             <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
+
+            {/* Daily ad progress */}
+            {gameStatus && (
+              <div className="bg-gray-800 rounded-lg p-3 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs text-gray-300">📅 Daily Sessions</p>
+                  <p className="text-xs text-gray-400">
+                    {gameStatus.sessionsToday} / 20
+                  </p>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-purple-500 h-2 rounded-full transition-all"
+                    style={{ width: `${Math.min(100, (gameStatus.sessionsToday / 20) * 100)}%` }}
+                  />
+                </div>
+                {cooldownRemaining > 0 && (
+                  <p className="text-xs text-blue-400 mt-2">
+                    ⏰ Next ad in {Math.floor(cooldownRemaining / 60)}:
+                    {(cooldownRemaining % 60).toString().padStart(2, '0')}
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="grid sm:grid-cols-2 gap-3">
               <Button fullWidth onClick={() => navigate('/ads')}>
                 <span className="flex items-center justify-center gap-2">

@@ -70,9 +70,10 @@ model UserProfile {
   cashWalletActivatedAt DateTime? @map("cash_wallet_activated_at")
 
   // Revenue location tracking (from AdMob - VPN-proof)
-  revenueCountry   String?  @map("revenue_country") // Primary earning country (locked)
-  revenueCountries String[] @default([]) @map("revenue_countries") // All countries earned from
-  signupCountry    String?  @map("signup_country") @db.Char(2) // Country at signup
+  revenueCountry       String?  @map("revenue_country") // Primary earning country (locked)
+  revenueCountries     String[] @default([]) @map("revenue_countries") // All countries earned from
+  revenueCountryLocked Boolean  @default(false) @map("revenue_country_locked")
+  signupCountry        String?  @map("signup_country") @db.Char(2) // Country at signup
 
   // New Monetag fields
   signupIp       String? @map("signup_ip")
@@ -212,13 +213,17 @@ model AdView {
 
   // Ad type tracking for revenue split
   adType           AdType? @map("ad_type")
+  adNetwork        String  @default("ogads") @map("ad_network")
   userRevenueShare Decimal @default(0.8500) @map("user_revenue_share") @db.Decimal(5, 4)
   coinsAwarded     Int     @default(0) @map("coins_awarded")
 
   // Backend revenue tracking
-  revenueUsd        Decimal @default(0) @map("revenue_usd") @db.Decimal(10, 6)
-  userEarningsUsd   Decimal @default(0) @map("user_earnings_usd") @db.Decimal(10, 6)
-  companyRevenueUsd Decimal @default(0) @map("company_revenue_usd") @db.Decimal(10, 6)
+  revenueUsd        Decimal  @default(0) @map("revenue_usd") @db.Decimal(10, 6)
+  userEarningsUsd   Decimal  @default(0) @map("user_earnings_usd") @db.Decimal(10, 6)
+  companyRevenueUsd Decimal  @default(0) @map("company_revenue_usd") @db.Decimal(10, 6)
+  userShareUsd      Decimal? @map("user_share_usd") @db.Decimal(12, 4)
+  platformShareUsd  Decimal? @map("platform_share_usd") @db.Decimal(12, 4)
+  ogadsClickId      String?  @map("ogads_click_id")
 
   // Audit trail (NOT used for location - for comparison/fraud detection)
   ipAddress String? @map("ip_address")
@@ -248,6 +253,8 @@ model AdView {
   @@index([countryCode, createdAt])
   @@index([userId, converted])
   @@index([gameSessionId])
+  @@index([adType])
+  @@index([adNetwork])
   @@map("ad_views")
 }
 
@@ -491,10 +498,23 @@ model GameSession {
   completedAt      DateTime?   @map("completed_at")
   createdAt        DateTime    @default(now()) @map("created_at")
 
+  // New session-based fields
+  initialAdId     String?  @map("initial_ad_id")
+  status          String   @default("active") // 'active', 'completed', 'abandoned'
+  baseCoins       Int      @default(0) @map("base_coins")
+  gameBonus       Int      @default(0) @map("game_bonus")
+  totalCoins      Int      @default(0) @map("total_coins")
+  gamesPlayed     Int      @default(0) @map("games_played")
+  gamesCompleted  Int      @default(0) @map("games_completed")
+  retryAdsWatched Int      @default(0) @map("retry_ads_watched")
+  startedAt       DateTime @default(now()) @map("started_at")
+  lastGameAt      DateTime? @map("last_game_at")
+
   adViews AdView[]
 
   @@index([userId])
   @@index([createdAt])
+  @@index([status])
   @@map("game_sessions")
 }
 
