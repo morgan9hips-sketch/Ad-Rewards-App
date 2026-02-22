@@ -10,11 +10,7 @@ import { supabase } from '../lib/supabase'
 import { API_BASE_URL } from '../config/api'
 import {
   isHybridEnvironment,
-  getStoredSessionFromNative,
-  storeSessionToNative,
   clearSessionFromNative,
-  setupSessionInjectionListener,
-  type SessionData as NativeSessionData,
 } from '../utils/hybridBridge'
 
 // TypeScript declaration for Android bridge
@@ -127,207 +123,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  /**
-   * Store session to native hybrid bridge.
-   * Only called after native injects session (for userId update).
-   */
-  const storeSessionToHybridBridge = (session: Session) => {
-    if (!isHybridEnvironment()) {
-      return
-    }
-
-    try {
-      // Update stored session with full details (native stores basic token, we add userId)
-      const expiryTimestamp = session.expires_at
-        ? session.expires_at * 1000
-        : Date.now() + 3600000
-
-      storeSessionToNative(
-        session.access_token,
-        session.refresh_token || null,
-        session.user?.id || null,
-        expiryTimestamp,
-      )
-    } catch (error) {
-      console.error('⚠️ Failed to update session in native storage:', error)
-      // Don't throw - native already has the token, this is just an update
-    }
-  }
-
-  /**
-   * Restore session from native storage on boot.
-   * Returns true if session was restored, false otherwise.
-   */
-  const restoreSessionFromNative = async (): Promise<boolean> => {
-    if (!isHybridEnvironment()) {
-      return false
-    }
-
-    const nativeSession = getStoredSessionFromNative()
-    if (!nativeSession || !nativeSession.accessToken) {
-      return false
-    }
-
-    try {
-      // Set the session in Supabase
-      const { data, error } = await supabase.auth.setSession({
-        access_token: nativeSession.accessToken,
-        refresh_token: nativeSession.refreshToken || '',
-      })
-
-      if (error) {
-        console.error(
-          '❌ Failed to restore session from native storage:',
-          error,
-        )
-        // Clear invalid session
-        clearSessionFromNative()
-        return false
-      }
-
-      if (data.session && data.session.user) {
-        console.log('✅ Session restored from native storage')
-        setSession(data.session)
-
-        // Fetch user profile and resolve geo
-        const { role, geoResolved: isGeoResolved } = await fetchUserProfile(
-          data.session.access_token,
-        )
-        setUser({ ...data.session.user, role })
-        await resolveGeo(data.session.access_token, isGeoResolved)
-
-        return true
-      }
-
-      return false
-    } catch (error) {
-      console.error('❌ Error restoring session from native:', error)
-      clearSessionFromNative()
-      return false
-    }
-  }
-
   useEffect(() => {
-    // Setup session injection listener for hybrid environment
-    if (isHybridEnvironment()) {
-      setupSessionInjectionListener(
-        async (nativeSession: NativeSessionData) => {
-          if (!nativeSession.accessToken) {
-            return
-          }
+    let subscription: ReturnType<
+      typeof supabase.auth.onAuthStateChange
+    >['data']['subscription'] | null = null
 
-          try {
-            // Set the session in Supabase
-            const { data, error } = await supabase.auth.setSession({
-              access_token: nativeSession.accessToken,
-              refresh_token: nativeSession.refreshToken || '',
-            })
-
-            if (error) {
-              console.error('❌ Failed to inject session from native:', error)
-              return
-            }
-
-            if (data.session && data.session.user) {
-              console.log('✅ Session injected successfully')
-              setSession(data.session)
-
-              // Fetch user profile and resolve geo
-              const { role, geoResolved: isGeoResolved } =
-                await fetchUserProfile(data.session.access_token)
-              setUser({ ...data.session.user, role })
-              await resolveGeo(data.session.access_token, isGeoResolved)
-            }
-          } catch (error) {
-            console.error('❌ Error injecting session:', error)
-          }
-        },
-      )
-    }
-
-    // Initialize authentication
-    const initAuth = async () => {
-      // HYBRID MODE: Try to restore session from native storage first
+    const initialize = async () => {
+      // Always clear session on app open - no session persistence
+      await supabase.auth.signOut()
       if (isHybridEnvironment()) {
-        console.log('🔗 Hybrid environment - checking native storage...')
-        const restored = await restoreSessionFromNative()
-        if (restored) {
-          console.log('✅ Session restored from native storage')
-          setLoading(false)
-          return
-        }
-        console.log('ℹ️ No stored session - user will need to login')
+        clearSessionFromNative()
       }
-
-      // STANDARD MODE: Get session from Supabase
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      setSession(session)
-      if (session?.user) {
-        const { role, geoResolved: isGeoResolved } = await fetchUserProfile(
-          session.access_token,
-        )
-        setUser({ ...session.user, role })
-        await resolveGeo(session.access_token, isGeoResolved)
-
-        // Legacy bridge support (for backwards compatibility)
-        sendTokenToAndroid(session.access_token)
-      } else {
-        setUser(null)
-        setGeoResolved(false)
-      }
+      setUser(null)
+      setSession(null)
       setLoading(false)
+
+      // Handle auth events (SIGN_IN, SIGN_OUT) during current app runtime
+      const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+        setSession(session)
+        if (event === 'SIGNED_IN' && session?.user) {
+          const { role, geoResolved: isGeoResolved } = await fetchUserProfile(
+            session.access_token,
+          )
+          setUser({ ...session.user, role })
+          await resolveGeo(session.access_token, isGeoResolved)
+
+          // Legacy bridge support
+          sendTokenToAndroid(session.access_token)
+
+          // Heuristic to detect if this is a new sign-up vs. a regular sign-in.
+          const user = session.user
+          const creationTime = new Date(user.created_at).getTime()
+          const lastSignInTime = user.last_sign_in_at
+            ? new Date(user.last_sign_in_at).getTime()
+            : creationTime
+
+          // If account was created less than 10 seconds before this sign-in, treat as new user.
+          if (Math.abs(creationTime - lastSignInTime) < 10000) {
+            triggerAndroidSignUp()
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null)
+          setGeoResolved(false)
+
+          // Clear native storage on sign out
+          if (isHybridEnvironment()) {
+            clearSessionFromNative()
+          }
+        }
+      })
+      subscription = data.subscription
     }
 
-    initAuth()
+    initialize()
 
-    // This handles subsequent auth events (SIGN_IN, SIGN_OUT)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session)
-      if (event === 'SIGNED_IN' && session?.user) {
-        const { role, geoResolved: isGeoResolved } = await fetchUserProfile(
-          session.access_token,
-        )
-        setUser({ ...session.user, role })
-        await resolveGeo(session.access_token, isGeoResolved)
-
-        // Update native storage with full session details (userId)
-        if (isHybridEnvironment()) {
-          storeSessionToHybridBridge(session)
-        }
-
-        // Legacy bridge support
-        sendTokenToAndroid(session.access_token)
-
-        // --- 🚨 NEW LOGIC FOR SIGN-UP 🚨 ---
-        // Heuristic to detect if this is a new sign-up vs. a regular sign-in.
-        const user = session.user
-        const creationTime = new Date(user.created_at).getTime()
-        const lastSignInTime = user.last_sign_in_at
-          ? new Date(user.last_sign_in_at).getTime()
-          : creationTime
-
-        // If account was created less than 10 seconds before this sign-in, treat as new user.
-        if (Math.abs(creationTime - lastSignInTime) < 10000) {
-          triggerAndroidSignUp()
-        }
-        // --- END OF NEW LOGIC ---
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null)
-        setGeoResolved(false)
-
-        // Clear native storage on sign out
-        if (isHybridEnvironment()) {
-          clearSessionFromNative()
-        }
-      }
-      // We keep loading=false on initial load only to prevent UI flicker
-    })
-
-    return () => subscription.unsubscribe()
+    return () => subscription?.unsubscribe()
   }, [])
 
   const signOut = async () => {
