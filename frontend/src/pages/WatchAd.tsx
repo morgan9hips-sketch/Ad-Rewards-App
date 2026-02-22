@@ -68,7 +68,7 @@ export default function WatchAd() {
         })
       }
     } catch {
-      console.error('Error fetching status:', e)
+      console.error('Error fetching status')
     } finally {
       setStatusLoading(false)
     }
@@ -108,7 +108,7 @@ export default function WatchAd() {
         body: JSON.stringify({ sessionId, adType }),
       })
     } catch {
-      console.error('Error recording ad completion:', e)
+      console.error('Error recording ad completion')
     }
   }
 
@@ -184,7 +184,7 @@ export default function WatchAd() {
         )
       }
     } catch {
-      console.error('Error recording attempt:', e)
+      console.error('Error recording attempt')
     }
 
     setStage('game-over')
