@@ -201,7 +201,12 @@ export default function Signup() {
   // Show loading while clearing old session
   if (clearingSession) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+      <div
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{
+          background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%)',
+        }}
+      >
         <div className="text-center">
           <LoadingSpinner size="large" />
           <p className="text-gray-400 mt-4">Preparing signup...</p>
@@ -211,7 +216,12 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%)',
+      }}
+    >
       <div className="max-w-md w-full">
         <div className="bg-gray-800 rounded-lg shadow-2xl p-8">
           <div className="text-center mb-8">

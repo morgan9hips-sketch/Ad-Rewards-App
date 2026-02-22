@@ -140,7 +140,12 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%)',
+      }}
+    >
       <Card className="w-full max-w-md">
         <h1 className="text-3xl font-bold text-white mb-6">Sign In</h1>
 
