@@ -5,7 +5,7 @@ interface SplashScreenProps {
   minDisplayMs?: number
 }
 
-export default function SplashScreen({ onComplete, minDisplayMs = 2000 }: SplashScreenProps) {
+export default function SplashScreen({ onComplete, minDisplayMs = 5000 }: SplashScreenProps) {
   const [phase, setPhase] = useState<'in' | 'hold' | 'out'>('in')
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export default function SplashScreen({ onComplete, minDisplayMs = 2000 }: Splash
           <img
             src="/images/branding/Adcoin large 512x512.png"
             alt="Adify"
-            className="relative w-28 h-28 object-contain drop-shadow-2xl"
+            className="relative w-32 h-32 object-contain drop-shadow-2xl animate-spin-slow"
             onError={(e) => {
               // Fallback to text logo if image fails
               const target = e.currentTarget
@@ -80,6 +80,9 @@ export default function SplashScreen({ onComplete, minDisplayMs = 2000 }: Splash
           </h1>
           <p className="text-gray-400 text-sm mt-1 tracking-widest uppercase">
             Earn While You Watch
+          </p>
+          <p className="text-gray-400 text-sm mt-2 animate-pulse">
+            Loading...
           </p>
         </div>
 
