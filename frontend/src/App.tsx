@@ -17,6 +17,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import FirstVisitModal from './components/FirstVisitModal'
 
 // Pages
+import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import AuthCallback from './pages/AuthCallback'
@@ -72,6 +73,18 @@ function ProtectedRoute({
     return <Navigate to="/login" replace />
   }
 
+  // MANDATORY: Block access until geo is resolved
+  if (!geoResolved) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-black">
+        <div className="text-center">
+          <LoadingSpinner size="large" />
+          <p className="text-gray-400 mt-4">Detecting your location...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (requireAdmin && user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN') {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-black p-8 text-center">
@@ -124,7 +137,7 @@ function AppContent() {
       <CookieConsent />
 
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/auth/callback" element={<AuthCallback />} />

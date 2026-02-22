@@ -1,8 +1,5 @@
 import geoip from 'geoip-lite'
 import { getCurrencyForCountry } from './currencyService.js'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
 
 /**
  * Detect country from IP address
@@ -130,59 +127,4 @@ export function getClientIP(req: any): string {
   }
 
   return req.connection?.remoteAddress || req.socket?.remoteAddress || 'unknown'
-}
-
-/**
- * Lock the revenue country on first rewarded ad.
- * If already locked, tracks the new country for VPN detection.
- * Returns the effective revenue country.
- */
-export async function lockRevenueCountry(
-  userId: string,
-  detectedCountry: string
-): Promise<string> {
-  const profile = await prisma.userProfile.findUnique({
-    where: { userId },
-    select: { revenueCountry: true, revenueCountryLocked: true, revenueCountries: true, vpnSuspicionScore: true },
-  })
-
-  if (!profile) return detectedCountry
-
-  // Track all countries seen for VPN detection
-  const allCountries = profile.revenueCountries || []
-  if (!allCountries.includes(detectedCountry)) {
-    allCountries.push(detectedCountry)
-  }
-
-  // VPN detection: flag if earning from 3+ different countries
-  const newSuspicionScore = allCountries.length >= 3
-    ? Math.min(100, (profile.vpnSuspicionScore || 0) + 10)
-    : profile.vpnSuspicionScore || 0
-
-  if (!profile.revenueCountryLocked) {
-    // First rewarded ad — lock the revenue country
-    await prisma.userProfile.update({
-      where: { userId },
-      data: {
-        revenueCountry: detectedCountry,
-        revenueCountryLocked: true,
-        revenueCountries: allCountries,
-        vpnSuspicionScore: newSuspicionScore,
-      },
-    })
-    return detectedCountry
-  }
-
-  // Already locked — update tracking data only
-  await prisma.userProfile.update({
-    where: { userId },
-    data: {
-      revenueCountries: allCountries,
-      vpnSuspicionScore: newSuspicionScore,
-      suspiciousActivity: newSuspicionScore >= 30,
-    },
-  })
-
-  // Return the locked country (immutable)
-  return profile.revenueCountry || detectedCountry
 }
