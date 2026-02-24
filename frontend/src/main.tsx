@@ -1,11 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
+import App from './App'
 import './index.css'
 import { initializeGA4 } from './utils/analytics'
 
 // Initialize Google Analytics 4 before React renders
-// This ensures GA4 loads globally for all users (authenticated and unauthenticated)
 initializeGA4()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -14,35 +13,39 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>,
 )
 
-// Service worker control to prevent stale cached builds on web
+// --------------------------------------------------
+// Monetag Service Worker (Apollo 11 – FINAL VERSION)
+// --------------------------------------------------
+
 const enableMonetagSw = import.meta.env.VITE_ENABLE_MONETAG_SW === 'true'
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .getRegistrations()
-      .then((registrations) => {
-        if (!enableMonetagSw) {
-          registrations.forEach((registration) => registration.unregister())
-          if ('caches' in window) {
-            caches
-              .keys()
-              .then((keys) => keys.forEach((key) => caches.delete(key)))
-          }
-          return
-        }
+  window.addEventListener('load', async () => {
+    try {
+      // Only ever touch the Monetag SW
+      const existingRegistration =
+        await navigator.serviceWorker.getRegistration('/sw.js')
 
-        navigator.serviceWorker
-          .register('/sw.js')
-          .then((registration) => {
-            console.log('Monetag SW registered:', registration)
-          })
-          .catch((error) => {
-            console.log('Monetag SW registration failed:', error)
-          })
-      })
-      .catch((error) => {
-        console.log('Service worker registration check failed:', error)
-      })
+      // If disabled → unregister Monetag SW only
+      if (!enableMonetagSw) {
+        if (existingRegistration) {
+          await existingRegistration.unregister()
+          console.log('🧹 Monetag service worker unregistered')
+        }
+        return
+      }
+
+      // If already registered → do nothing
+      if (existingRegistration) {
+        console.log('✅ Monetag service worker already registered')
+        return
+      }
+
+      // Register Monetag service worker
+      const registration = await navigator.serviceWorker.register('/sw.js')
+      console.log('🚀 Monetag service worker registered:', registration.scope)
+    } catch (error) {
+      console.error('❌ Monetag service worker error:', error)
+    }
   })
 }
