@@ -1,61 +1,59 @@
 import {
   BrowserRouter as Router,
-  import {
-    BrowserRouter as Router,
-    Routes,
-    Route,
-    Navigate,
-  } from 'react-router-dom'
-  import { AuthProvider, useAuth } from './contexts/AuthContext'
-  import { CurrencyProvider } from './contexts/CurrencyContext'
-  import { useInterstitialAd } from './hooks/useInterstitialAd'
-  import CookieConsent from './components/CookieConsent'
-  import TopHeader from './components/TopHeader'
-  import BottomNavigation from './components/BottomNavigation'
-  import BetaBanner from './components/BetaBanner'
-  import LoadingSpinner from './components/LoadingSpinner'
-  import DevelopmentBanner from './components/DevelopmentBanner'
-  import Footer from './components/Footer'
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { CurrencyProvider } from './contexts/CurrencyContext'
+import { useInterstitialAd } from './hooks/useInterstitialAd'
+import CookieConsent from './components/CookieConsent'
+import TopHeader from './components/TopHeader'
+import BottomNavigation from './components/BottomNavigation'
+import BetaBanner from './components/BetaBanner'
+import LoadingSpinner from './components/LoadingSpinner'
+import DevelopmentBanner from './components/DevelopmentBanner'
+import Footer from './components/Footer'
 
-  // Pages
-  import Home from './pages/Home'
-  import Login from './pages/Login'
-  import Signup from './pages/Signup'
-  import AuthCallback from './pages/AuthCallback'
-  import Dashboard from './pages/Dashboard'
-  import WatchAd from './pages/WatchAd'
-  import Game from './pages/Game'
-  import Settings from './pages/Settings'
-  import Withdrawals from './pages/Withdrawals'
-  import Leaderboard from './pages/Leaderboard'
-  import Badges from './pages/Badges'
-  import Subscriptions from './pages/Subscriptions'
-  import Referrals from './pages/Referrals'
-  import AdminPanel from './pages/AdminPanel'
-  import AdminConversions from './pages/AdminConversions'
-  import AdminRevenue from './pages/AdminRevenue'
-  import AdminLogs from './pages/AdminLogs'
-  import AdminExpiryIncome from './pages/AdminExpiryIncome'
-  import Transactions from './pages/Transactions'
-  import TermsOfService from './pages/TermsOfService'
-  import PrivacyPolicy from './pages/PrivacyPolicy'
+// Pages
+import Home from './pages/Home'
+import Login from './pages/Login'
+import Signup from './pages/Signup'
+import AuthCallback from './pages/AuthCallback'
+import Dashboard from './pages/Dashboard'
+import WatchAd from './pages/WatchAd'
+import Game from './pages/Game'
+import Settings from './pages/Settings'
+import Withdrawals from './pages/Withdrawals'
+import Leaderboard from './pages/Leaderboard'
+import Badges from './pages/Badges'
+import Subscriptions from './pages/Subscriptions'
+import Referrals from './pages/Referrals'
+import AdminPanel from './pages/AdminPanel'
+import AdminConversions from './pages/AdminConversions'
+import AdminRevenue from './pages/AdminRevenue'
+import AdminLogs from './pages/AdminLogs'
+import AdminExpiryIncome from './pages/AdminExpiryIncome'
+import Transactions from './pages/Transactions'
+import TermsOfService from './pages/TermsOfService'
+import PrivacyPolicy from './pages/PrivacyPolicy'
 
-  // Legal Pages
-  import Terms from './pages/legal/Terms'
-  import Privacy from './pages/legal/Privacy'
-  import Cookies from './pages/legal/Cookies'
-  import AdMob from './pages/legal/AdMob'
-  import DeleteAccount from './pages/legal/DeleteAccount'
+// Legal Pages
+import Terms from './pages/legal/Terms'
+import Privacy from './pages/legal/Privacy'
+import Cookies from './pages/legal/Cookies'
+import AdMob from './pages/legal/AdMob'
+import DeleteAccount from './pages/legal/DeleteAccount'
 
-  function ProtectedRoute({
-    children,
-    requireAdmin = false,
-  }: {
-    children: React.ReactNode
-    requireAdmin?: boolean
-  }) {
-    const { isAuthenticated, loading, user, geoResolved, geoResolving } =
-      useAuth()
+function ProtectedRoute({
+  children,
+  requireAdmin = false,
+}: {
+  children: React.ReactNode
+  requireAdmin?: boolean
+}) {
+  const { isAuthenticated, loading, user, geoResolved, geoResolving } =
+    useAuth()
 
     if (loading || geoResolving) {
       return (
