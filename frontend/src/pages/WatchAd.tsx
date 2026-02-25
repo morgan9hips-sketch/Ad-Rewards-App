@@ -7,6 +7,8 @@ export default function WatchAd() {
   const navigate = useNavigate()
   const { user, session } = useAuth()
   const [error, setError] = useState('')
+  const [status, setStatus] = useState('')
+  const [isWaiting, setIsWaiting] = useState(false)
 
   const handleOptIn = async () => {
     const token = session?.access_token
@@ -16,11 +18,26 @@ export default function WatchAd() {
     }
 
     try {
+      setError('')
+      setStatus('Opening ad...')
+      setIsWaiting(true)
       const { watchAd } = await import('../utils/watchAds')
-      await watchAd(token)
+      const result = await watchAd(token)
+      if (result.success && result.rewardGranted) {
+        setStatus(`Reward granted: ${result.coinsEarned || 0} AdCoins`)
+        window.location.reload()
+        return
+      }
+      if (result.success) {
+        setStatus('Ad attempt recorded. Reward will be applied if eligible.')
+        return
+      }
+      setError(result.error || 'Failed to record ad event')
     } catch (err) {
       console.error('Error triggering ad:', err)
       setError('Failed to load ad. Please try again.')
+    } finally {
+      setIsWaiting(false)
     }
   }
 
@@ -36,10 +53,10 @@ export default function WatchAd() {
         <div className="text-center mb-6">
           <div className="text-6xl mb-4">🎬</div>
           <h1 className="text-4xl font-bold text-white mb-3">
-            Earn 100 AdCoins!
+            Earn up to 100 AdCoins
           </h1>
           <p className="text-gray-300 text-lg">
-            Watch a short ad and earn instant rewards
+            Watch a short ad. Rewards are applied after you return.
           </p>
         </div>
 
@@ -71,13 +88,19 @@ export default function WatchAd() {
               </div>
               <div className="flex items-center gap-3 text-gray-300">
                 <span className="text-green-400">✓</span>
-                <span>Instant coin reward</span>
+                <span>Reward eligibility applied after return</span>
               </div>
               <div className="flex items-center gap-3 text-gray-300">
                 <span className="text-green-400">✓</span>
                 <span>Converts to real cash monthly</span>
               </div>
             </div>
+
+            {status && (
+              <div className="mb-6 p-4 bg-purple-900/40 border border-purple-500 rounded-lg">
+                <p className="text-purple-100">{status}</p>
+              </div>
+            )}
 
             {error && (
               <div className="mb-6 p-4 bg-red-900/50 border border-red-500 rounded-lg">
@@ -88,9 +111,10 @@ export default function WatchAd() {
             <div className="space-y-3">
               <button
                 onClick={handleOptIn}
-                className="w-full max-w-md px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xl font-bold rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg hover:shadow-purple-500/50"
+                disabled={isWaiting}
+                className="w-full max-w-md px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xl font-bold rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg hover:shadow-purple-500/50 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Yes, Show Me the Ad!
+                {isWaiting ? 'Waiting for ad...' : 'Yes, Show Me the Ad!'}
               </button>
               <button
                 onClick={handleMaybeLater}

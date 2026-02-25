@@ -1,41 +1,73 @@
+type AdEventResponse = {
+  success: boolean
+  event?: 'ad_requested' | 'ad_returned'
+  rewardGranted?: boolean
+  coinsEarned?: number
+  error?: string
+  reason?: string
+}
+
+async function postAdEvent(
+  authToken: string,
+  event: 'ad_requested' | 'ad_returned'
+): Promise<AdEventResponse> {
+  const response = await fetch('/api/reward/ad-event', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ event, source: 'web' }),
+  })
+
+  const data = (await response.json()) as AdEventResponse
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to record ad event')
+  }
+
+  return data
+}
+
 export async function watchAd(authToken: string) {
-  // 1️⃣ Open a controlled popup (user gesture = required)
   const adWindow = window.open(
     '/ad-bridge.html',
     '_blank',
     'width=480,height=800'
   )
 
-  // 2️⃣ Fail-safe: popup blocked
   if (!adWindow) {
-    alert('Please allow popups to watch ads.')
-    return
+    return { success: false, error: 'Popup blocked. Please allow popups.' }
   }
 
-  // 3️⃣ Wait fixed time (Monetag video/interstitial duration)
-  setTimeout(async () => {
-    try {
-      const response = await fetch('/api/reward/watch-ad', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
-      })
+  await postAdEvent(authToken, 'ad_requested')
 
-      const data = await response.json()
+  return await new Promise<AdEventResponse>((resolve) => {
+    let resolved = false
 
-      if (response.ok) {
-        alert(`✅ You earned ${data.coinsEarned} coins!`)
-        window.location.reload() // Refresh to show new balance
-      } else {
-        alert(`❌ ${data.error || 'Failed to claim reward'}`)
+    const finalize = async () => {
+      if (resolved) return
+      resolved = true
+
+      try {
+        const result = await postAdEvent(authToken, 'ad_returned')
+        resolve(result)
+      } catch (error) {
+        resolve({
+          success: false,
+          error: error instanceof Error ? error.message : 'Ad event failed',
+        })
+      } finally {
+        adWindow.close()
       }
-    } catch (error) {
-      console.error('Reward claim failed:', error)
-      alert('❌ Network error. Please try again.')
-    } finally {
-      adWindow.close()
     }
-  }, 35000) // 35 seconds = 30s ad + 5s buffer
+
+    window.addEventListener('focus', finalize, { once: true })
+
+    const pollClosed = window.setInterval(() => {
+      if (adWindow.closed) {
+        window.clearInterval(pollClosed)
+        finalize()
+      }
+    }, 500)
+  })
 }

@@ -11,8 +11,4 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   // Allow fetch to proceed normally
-  // Monetag ads will be handled by their service worker
 })
-
-// Monetag service worker integration
-importScripts('https://5gvci.com/act/files/service-worker.min.js?r=sw')

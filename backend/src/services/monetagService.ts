@@ -8,15 +8,9 @@ const USER_REVENUE_SHARE = 0.85 // 85% of revenue goes to users
 
 /**
  * Monetag Ad Zone Configuration
- * 
- * Passive Ads (100% Platform Revenue):
- * - Zone 10618702: Push Notifications
- * - Zone 211854: Banner Multitag
- * - Zone 10618701: Vignette Banner
- * - Zone 10618700: In-Page Push
- * 
+ *
  * Rewarded Ads (85% User / 15% Platform):
- * - Zone 10618699: OnClick Popunder
+ * - Zone 10646214: Web OnClick/Interstitial Flow
  */
 
 interface AdZoneConfig {
@@ -27,11 +21,7 @@ interface AdZoneConfig {
 }
 
 export const AD_ZONES: Record<string, AdZoneConfig> = {
-  '10618702': { type: 'push', userShare: 0, platformShare: 100, coins: 0 },
-  '211854': { type: 'banner', userShare: 0, platformShare: 100, coins: 0 },
-  '10618701': { type: 'vignette', userShare: 0, platformShare: 100, coins: 0 },
-  '10618700': { type: 'inpage', userShare: 0, platformShare: 100, coins: 0 },
-  '10618699': { type: 'rewarded', userShare: 85, platformShare: 15, coins: 100 },
+  '10646214': { type: 'rewarded', userShare: 85, platformShare: 15, coins: 100 },
 }
 
 /**
