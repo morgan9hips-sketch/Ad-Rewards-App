@@ -1,4 +1,4 @@
-export async function watchAd() {
+export async function watchAd(authToken: string) {
   // 1️⃣ Open a controlled popup (user gesture = required)
   const adWindow = window.open(
     '/ad-bridge.html',
@@ -17,8 +17,8 @@ export async function watchAd() {
     try {
       const response = await fetch('/api/reward/watch-ad', {
         method: 'POST',
-        credentials: 'include',
         headers: {
+          'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'
         }
       })
@@ -26,8 +26,8 @@ export async function watchAd() {
       const data = await response.json()
 
       if (response.ok) {
-        alert('✅ You earned 100 coins!')
-        // TODO: Refresh user balance in UI
+        alert(`✅ You earned ${data.coinsEarned} coins!`)
+        window.location.reload() // Refresh to show new balance
       } else {
         alert(`❌ ${data.error || 'Failed to claim reward'}`)
       }
@@ -37,5 +37,5 @@ export async function watchAd() {
     } finally {
       adWindow.close()
     }
-  }, 35000) // 30s ad + 5s buffer
+  }, 35000) // 35 seconds = 30s ad + 5s buffer
 }
