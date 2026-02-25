@@ -1,33 +1,24 @@
-import React from 'react'
-
-declare global {
-  interface Window {
-    show_213853?: () => void
-  }
-}
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
+import WatchAd from './pages/WatchAd'
+import Layout from './components/Layout'
 
 export default function App() {
-  const playAd = () => {
-    if (window.show_213853) {
-      window.show_213853()
-    } else {
-      alert('Ad not loaded yet. Refresh and try again.')
-    }
-  }
-
   return (
-    <div style={{ padding: 40 }}>
-      <h1>Rewarded Video Test</h1>
-      <button
-        onClick={playAd}
-        style={{
-          padding: '12px 24px',
-          fontSize: '18px',
-          cursor: 'pointer',
-        }}
-      >
-        Watch Video Ad
-      </button>
-    </div>
+    <Router>
+      <AuthProvider>
+        <Layout>
+          <Routes>
+            <Route path="/watch-ad" element={<WatchAd />} />
+            <Route path="/" element={<Navigate to="/watch-ad" replace />} />
+          </Routes>
+        </Layout>
+      </AuthProvider>
+    </Router>
   )
 }

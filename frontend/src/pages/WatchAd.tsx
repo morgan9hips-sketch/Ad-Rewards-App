@@ -57,9 +57,7 @@ export default function WatchAd() {
                     <span className="text-3xl">▶️</span>
                   </div>
                 </div>
-                <span className="text-5xl font-bold text-yellow-400">
-                  100
-                </span>
+                <span className="text-5xl font-bold text-yellow-400">100</span>
               </div>
               <p className="text-lg font-semibold text-purple-200">
                 AdCoins Reward
