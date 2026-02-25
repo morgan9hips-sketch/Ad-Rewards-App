@@ -10,9 +10,8 @@ import { useInterstitialAd } from './hooks/useInterstitialAd'
 import CookieConsent from './components/CookieConsent'
 import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
-import BetaBanner from './components/BetaBanner'
 import LoadingSpinner from './components/LoadingSpinner'
-import DevelopmentBanner from './components/DevelopmentBanner'
+import FirstVisitModal from './components/FirstVisitModal'
 import Footer from './components/Footer'
 
 // Pages
@@ -111,10 +110,9 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-black">
-      <BetaBanner />
+      <FirstVisitModal />
       <TopHeader />
       <CookieConsent />
-      <DevelopmentBanner />
 
       <Routes>
         <Route path="/" element={<Home />} />
