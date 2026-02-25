@@ -10,9 +10,9 @@ import { useInterstitialAd } from './hooks/useInterstitialAd'
 import CookieConsent from './components/CookieConsent'
 import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
+import BetaBanner from './components/BetaBanner'
 import LoadingSpinner from './components/LoadingSpinner'
-import FirstVisitModal from './components/FirstVisitModal'
-import Footer from './components/Footer'
+import DevelopmentBanner from './components/DevelopmentBanner'
 
 // Pages
 import Home from './pages/Home'
@@ -20,9 +20,9 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import AuthCallback from './pages/AuthCallback'
 import Dashboard from './pages/Dashboard'
+import Ads from './pages/Ads'
 import WatchAd from './pages/WatchAd'
 import Game from './pages/Game'
-import MiniGames from './pages/MiniGames'
 import Settings from './pages/Settings'
 import Withdrawals from './pages/Withdrawals'
 import Leaderboard from './pages/Leaderboard'
@@ -37,6 +37,7 @@ import AdminExpiryIncome from './pages/AdminExpiryIncome'
 import Transactions from './pages/Transactions'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
+import MiniGames from './pages/MiniGames'
 
 // Legal Pages
 import Terms from './pages/legal/Terms'
@@ -44,6 +45,9 @@ import Privacy from './pages/legal/Privacy'
 import Cookies from './pages/legal/Cookies'
 import AdMob from './pages/legal/AdMob'
 import DeleteAccount from './pages/legal/DeleteAccount'
+
+// Components
+import Footer from './components/Footer'
 
 function ProtectedRoute({
   children,
@@ -67,6 +71,7 @@ function ProtectedRoute({
     return <Navigate to="/login" replace />
   }
 
+  // MANDATORY: Block access until geo is resolved
   if (!geoResolved) {
     return (
       <div className="flex justify-center items-center h-screen bg-black">
@@ -83,7 +88,7 @@ function ProtectedRoute({
       <div className="flex flex-col items-center justify-center h-screen bg-black p-8 text-center">
         <div className="max-w-md">
           <h1 className="text-3xl font-bold text-red-600 mb-4">
-            Access Denied
+            ⛔ Access Denied
           </h1>
           <p className="text-gray-300 mb-6">
             You do not have permission to access this page. Admin privileges are
@@ -93,7 +98,7 @@ function ProtectedRoute({
             onClick={() => window.history.back()}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Go Back
+            ← Go Back
           </button>
         </div>
       </div>
@@ -106,13 +111,15 @@ function ProtectedRoute({
 function AppContent() {
   const { isAuthenticated } = useAuth()
 
+  // Track clicks for interstitial ads (every 8 clicks)
   useInterstitialAd()
 
   return (
     <div className="min-h-screen bg-black">
-      <FirstVisitModal />
+      <BetaBanner />
       <TopHeader />
       <CookieConsent />
+      <DevelopmentBanner />
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -122,6 +129,7 @@ function AppContent() {
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
 
+        {/* New Legal Pages */}
         <Route path="/legal/terms" element={<Terms />} />
         <Route path="/legal/privacy" element={<Privacy />} />
         <Route path="/legal/cookies" element={<Cookies />} />
@@ -140,7 +148,7 @@ function AppContent() {
           path="/ads"
           element={
             <ProtectedRoute>
-              <WatchAd />
+              <Ads />
             </ProtectedRoute>
           }
         />
@@ -153,26 +161,10 @@ function AppContent() {
           }
         />
         <Route
-          path="/watch-ad"
-          element={
-            <ProtectedRoute>
-              <WatchAd />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/game"
           element={
             <ProtectedRoute>
               <Game />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/mini-games"
-          element={
-            <ProtectedRoute>
-              <MiniGames />
             </ProtectedRoute>
           }
         />
@@ -233,6 +225,14 @@ function AppContent() {
           }
         />
         <Route
+          path="/minigames"
+          element={
+            <ProtectedRoute>
+              <MiniGames />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admin"
           element={
             <ProtectedRoute requireAdmin>
@@ -274,13 +274,18 @@ function AppContent() {
         />
       </Routes>
 
-      {isAuthenticated && <BottomNavigation />}
+      {isAuthenticated && (
+        <>
+          <BottomNavigation />
+        </>
+      )}
       <Footer />
+      <CookieConsent />
     </div>
   )
 }
 
-export default function App() {
+function App() {
   return (
     <Router>
       <AuthProvider>
@@ -291,3 +296,5 @@ export default function App() {
     </Router>
   )
 }
+
+export default App
