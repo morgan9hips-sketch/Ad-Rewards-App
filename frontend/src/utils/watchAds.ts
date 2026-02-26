@@ -1,3 +1,5 @@
+import { API_BASE_URL } from '../config/api'
+
 type AdEventResponse = {
   success: boolean
   event?: 'ad_requested' | 'ad_returned'
@@ -11,7 +13,7 @@ async function postAdEvent(
   authToken: string,
   event: 'ad_requested' | 'ad_returned'
 ): Promise<AdEventResponse> {
-  const response = await fetch('/api/reward/ad-event', {
+  const response = await fetch(`${API_BASE_URL}/api/reward/ad-event`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${authToken}`,
