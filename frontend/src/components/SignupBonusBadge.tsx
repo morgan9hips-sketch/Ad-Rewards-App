@@ -102,7 +102,7 @@ export default function SignupBonusBadge() {
 
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mb-6">
           <p className="text-blue-300 text-sm text-center">
-            💡 This bonus unlocks when you reach the minimum withdrawal threshold (15,000 coins)
+            💡 This bonus unlocks when you reach the minimum withdrawal threshold (20,000 coins)
           </p>
         </div>
 

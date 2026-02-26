@@ -30,9 +30,9 @@ router.post('/request', async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Profile not found' })
     }
 
-    // Check minimum coins (15,000)
+    // Check minimum coins (20,000)
     const coinsBalance = Number(profile.coinsBalance)
-    const MIN_COINS = 15000
+    const MIN_COINS = 20000
 
     if (coinsBalance < MIN_COINS) {
       return res.status(400).json({

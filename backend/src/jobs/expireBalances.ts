@@ -6,7 +6,6 @@ const prisma = new PrismaClient()
 // Expiry configuration constants
 const COIN_EXPIRY_DAYS = 30
 const CASH_EXPIRY_DAYS = 90
-const COINS_TO_ZAR_RATE = 1000 // 1000 coins = R1 ZAR
 
 /**
  * Expire coin balances after 30 days of inactivity
@@ -38,8 +37,8 @@ async function expireCoins() {
 
     for (const user of inactiveUsers) {
       const coins = Number(user.coinsBalance)
-      // Using configured coins to ZAR conversion rate
-      const cashValue = coins / COINS_TO_ZAR_RATE
+      // Coins that expire before conversion have no cash value (not yet converted)
+      const cashValue = 0
 
       // Log expiry
       await prisma.expiredBalance.create({
@@ -62,12 +61,12 @@ async function expireCoins() {
       totalValue += cashValue
 
       console.log(
-        `Expired ${coins} coins (R${cashValue.toFixed(2)}) from user ${user.email}`,
+        `Expired ${coins} coins (unconverted) from user ${user.email}`,
       )
     }
 
     console.log(
-      `✅ Coin expiry complete: ${inactiveUsers.length} users, ${totalExpired} coins (R${totalValue.toFixed(2)})`,
+      `✅ Coin expiry complete: ${inactiveUsers.length} users, ${totalExpired} coins expired (unconverted)`,
     )
 
     return {

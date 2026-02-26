@@ -44,7 +44,7 @@ export default function TermsAcceptanceModal({
                 </li>
                 <li>
                   <strong className="text-white">Withdrawal:</strong> Minimum
-                  15,000 coins required, PayPal only, 7-14 days processing
+                  20,000 coins required, PayPal only, 7-14 days processing
                 </li>
                 <li>
                   <strong className="text-white">Balance Expiry:</strong> Coins

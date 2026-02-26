@@ -261,9 +261,9 @@ export default function TermsOfService() {
             4.3 Withdrawals and Payments
           </h3>
           <p className="text-gray-300 mb-4">
-            <strong>Minimum Withdrawal:</strong> The minimum withdrawal amount
-            is $10.00 USD equivalent. You may only request a withdrawal once
-            your cash balance reaches this threshold.
+            <strong>Minimum Withdrawal:</strong> The minimum withdrawal threshold
+            is 20,000 AdCoins. You may only request a withdrawal once your coin balance
+            reaches this threshold and coins are converted to cash based on advertising revenue.
           </p>
           <p className="text-gray-300 mb-4">
             <strong>Payment Method:</strong> Payments are processed exclusively
@@ -314,8 +314,8 @@ export default function TermsOfService() {
             (currently 20,000 coins minimum). Below this threshold, balances
             remain as coins only and are subject to coin expiry rules (30 days).
             Once the threshold is reached, coins automatically convert to cash
-            at the prevailing conversion rate which varies based on advertising revenue.
-            Cash balances are subject to the 90-day expiry rule.
+            at the prevailing conversion rate which varies based on advertising
+            revenue. Cash balances are subject to the 90-day expiry rule.
           </p>
 
           <p className="text-gray-300 mb-4">
