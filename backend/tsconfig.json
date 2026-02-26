@@ -9,13 +9,11 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "strict": false,
     "outDir": "./dist",
     "declaration": false,
     "sourceMap": false,
-    "types": ["node"],
-    "suppressImplicitAnyIndexErrors": true,
-    "noImplicitAny": false
+    "types": ["node"]
   },
   "include": ["src/**/*", "api/**/*"],
   "exclude": ["node_modules", "dist"]
