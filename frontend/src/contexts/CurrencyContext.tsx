@@ -44,76 +44,14 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   const requestLocationPermission = async (): Promise<boolean> => {
     try {
-      // Check if we've already prompted the user
-      const hasPrompted = localStorage.getItem('location_prompted')
-      if (hasPrompted === 'true') {
-        console.log('Location already prompted, skipping repeat prompt...')
-        // Don't prompt again, but still try to get location if user granted it
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              console.log('Location available from previous grant')
-              loadCurrencyInfo(
-                position.coords.latitude,
-                position.coords.longitude,
-              )
-            },
-            () => {
-              // User denied or permission unavailable, fallback to IP
-              console.log('Location unavailable, using IP fallback')
-              loadCurrencyInfo()
-            },
-            { maximumAge: 300000 },
-          )
-        }
-        return false
-      }
-
-      // Check if geolocation is available
-      if (!navigator.geolocation) {
-        console.error('Geolocation not supported')
-        setLocationError(true)
-        localStorage.setItem('location_prompted', 'true')
-        return false
-      }
-
-      // Request location permission
-      return new Promise((resolve) => {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            console.log(
-              'Location detected:',
-              position.coords.latitude,
-              position.coords.longitude,
-            )
-            setLocationError(false)
-            localStorage.setItem('location_prompted', 'true')
-            loadCurrencyInfo(
-              position.coords.latitude,
-              position.coords.longitude,
-            )
-            resolve(true)
-          },
-          (error) => {
-            console.error('Location error:', error.message)
-            setLocationError(true)
-            localStorage.setItem('location_prompted', 'true')
-            // Fallback to IP if location is denied
-            loadCurrencyInfo()
-            resolve(false)
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 300000, // Cache for 5 minutes
-          },
-        )
-      })
-    } catch (error) {
-      console.error('Error requesting location:', error)
-      setLocationError(true)
+      // DISABLE geolocation prompts - use IP-based detection only
+      console.log('Using IP-based location detection (no browser prompt)')
       localStorage.setItem('location_prompted', 'true')
-      // Fallback to IP on error
+      loadCurrencyInfo()
+      return false
+    } catch (error) {
+      console.error('Error loading location:', error)
+      setLocationError(true)
       loadCurrencyInfo()
       return false
     }

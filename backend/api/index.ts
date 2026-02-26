@@ -68,7 +68,7 @@ app.use('/api/referrals', referralsRoutes) // Has public routes, uses middleware
 app.use('/api/coin-valuation', authenticate, coinValuationRoutes)
 app.use('/api/platform', platformRoutes) // Public
 app.use('/api/legal', legalRoutes) // Public
-app.use('/api/geo-resolve', geoRoutes) // Public
+app.use('/api/geo-resolve', authenticate, geoRoutes) // Requires auth for user context
 app.use('/api/migrate', migrateRoutes) // One-time migration endpoint
 app.use('/api/reward', authenticate, rewardRoutes)
 
