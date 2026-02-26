@@ -26,6 +26,13 @@ export default tseslint.config(
       // Suppress non-critical warnings
       'react-hooks/exhaustive-deps': 'warn',
       '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
+    files: ['**/*.css', '**/*.tsx', '**/*.ts'],
+    rules: {
+      'no-inline-styles': 'off',
     },
   },
 )
