@@ -9,7 +9,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { path: '/dashboard', icon: '🏠', label: 'Home' },
   { path: '/ads', icon: '📺', label: 'Ads' },
-  { path: '/minigames', icon: '🎮', label: 'Games' },
+  { path: '/mini-games', icon: '🎮', label: 'Games' },
   { path: '/leaderboard', icon: '🏆', label: 'Leaderboard' },
   { path: '/settings', icon: '⚙️', label: 'Settings' },
 ]
@@ -29,7 +29,9 @@ export default function BottomNavigation() {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 className={`flex flex-col items-center py-3 px-4 transition-colors ${
-                  isActive ? 'text-blue-500' : 'text-gray-400 hover:text-gray-300'
+                  isActive
+                    ? 'text-blue-500'
+                    : 'text-gray-400 hover:text-gray-300'
                 }`}
               >
                 <span className="text-2xl mb-1">{item.icon}</span>

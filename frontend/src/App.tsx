@@ -177,6 +177,10 @@ function AppContent() {
           }
         />
         <Route
+          path="/minigames"
+          element={<Navigate to="/mini-games" replace />}
+        />
+        <Route
           path="/transactions"
           element={
             <ProtectedRoute>

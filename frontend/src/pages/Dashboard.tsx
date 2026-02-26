@@ -12,7 +12,6 @@ import RecentWithdrawals from '../components/RecentWithdrawals'
 import PlatformStats from '../components/PlatformStats'
 import SignupBonusBadge from '../components/SignupBonusBadge'
 import TermsAcceptanceModal from '../components/TermsAcceptanceModal'
-import LocationBanner from '../components/LocationBanner'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
 
@@ -209,9 +208,6 @@ export default function Dashboard() {
           <p className="text-gray-400 mt-2">{getSubGreeting()}</p>
         )}
       </div>
-
-      {/* Location Banner (non-blocking) */}
-      <LocationBanner />
 
       {/* Expiry Warnings */}
       <ExpiryWarning />
