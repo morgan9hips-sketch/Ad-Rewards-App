@@ -311,11 +311,11 @@ export default function TermsOfService() {
           <p className="text-gray-300 mb-4">
             <strong>Conversion Threshold:</strong> Coins are NOT automatically
             converted to cash until you reach the minimum withdrawal threshold
-            (currently R20 ZAR / 20,000 coins). Below this threshold, balances
+            (currently 20,000 coins minimum). Below this threshold, balances
             remain as coins only and are subject to coin expiry rules (30 days).
             Once the threshold is reached, coins automatically convert to cash
-            at the prevailing conversion rate (1,000 coins = R1 ZAR). Cash
-            balances are subject to the 90-day expiry rule.
+            at the prevailing conversion rate which varies based on advertising revenue.
+            Cash balances are subject to the 90-day expiry rule.
           </p>
 
           <p className="text-gray-300 mb-4">
