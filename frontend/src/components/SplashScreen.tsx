@@ -5,7 +5,10 @@ interface SplashScreenProps {
   minDisplayMs?: number
 }
 
-export default function SplashScreen({ onComplete, minDisplayMs = 5000 }: SplashScreenProps) {
+export default function SplashScreen({
+  onComplete,
+  minDisplayMs = 5000,
+}: SplashScreenProps) {
   const [phase, setPhase] = useState<'in' | 'hold' | 'out'>('in')
 
   useEffect(() => {
@@ -37,17 +40,18 @@ export default function SplashScreen({ onComplete, minDisplayMs = 5000 }: Splash
         phase === 'out' ? 'opacity-0' : 'opacity-100'
       }`}
       style={{
-        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%)',
+        background:
+          'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%)',
       }}
       aria-label="Loading Adify"
       role="status"
     >
       {/* Background Logo - Top Half */}
-      <div className="absolute top-0 left-0 right-0 h-1/2 flex items-center justify-center overflow-hidden opacity-20">
+      <div className="absolute top-0 left-0 right-0 h-1/2 flex items-center justify-center overflow-hidden opacity-30">
         <img
-          src="/images/branding/Adcoin-large-512x512.png"
+          src="/images/branding/logo-full.png"
           alt=""
-          className="w-96 h-96 object-contain drop-shadow-2xl"
+          className="w-full h-full object-cover"
         />
       </div>
 
@@ -61,7 +65,9 @@ export default function SplashScreen({ onComplete, minDisplayMs = 5000 }: Splash
         <div className={`relative ${phase === 'hold' ? 'animate-pulse' : ''}`}>
           <div
             className="absolute inset-0 rounded-full blur-2xl opacity-40"
-            style={{ background: 'radial-gradient(circle, #3b82f6, transparent 70%)' }}
+            style={{
+              background: 'radial-gradient(circle, #3b82f6, transparent 70%)',
+            }}
           />
           <img
             src="/images/branding/Adcoin large 512x512.png"
@@ -74,7 +80,8 @@ export default function SplashScreen({ onComplete, minDisplayMs = 5000 }: Splash
               const parent = target.parentElement
               if (parent) {
                 const fallback = document.createElement('div')
-                fallback.className = 'w-28 h-28 rounded-full bg-blue-600 flex items-center justify-center text-white text-4xl font-bold'
+                fallback.className =
+                  'w-28 h-28 rounded-full bg-blue-600 flex items-center justify-center text-white text-4xl font-bold'
                 fallback.textContent = 'A'
                 parent.appendChild(fallback)
               }
@@ -90,9 +97,7 @@ export default function SplashScreen({ onComplete, minDisplayMs = 5000 }: Splash
           <p className="text-gray-400 text-sm mt-1 tracking-widest uppercase">
             Earn While You Watch
           </p>
-          <p className="text-gray-400 text-sm mt-2 animate-pulse">
-            Loading...
-          </p>
+          <p className="text-gray-400 text-sm mt-2 animate-pulse">Loading...</p>
         </div>
 
         {/* Progress indicator */}
@@ -101,7 +106,10 @@ export default function SplashScreen({ onComplete, minDisplayMs = 5000 }: Splash
             className="h-full bg-blue-500 rounded-full transition-all"
             style={{
               width: phase === 'in' ? '20%' : phase === 'hold' ? '80%' : '100%',
-              transition: phase === 'in' ? 'width 0.8s ease-out' : 'width 1.2s ease-in-out',
+              transition:
+                phase === 'in'
+                  ? 'width 0.8s ease-out'
+                  : 'width 1.2s ease-in-out',
             }}
           />
         </div>

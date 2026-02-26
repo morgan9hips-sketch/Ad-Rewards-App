@@ -66,7 +66,7 @@ export default function WatchAd() {
               <div className="flex items-center justify-center gap-3 mb-4">
                 <div className="relative">
                   <img
-                    src="/images/branding/Adcoin-large-512x512.png"
+                    src="/images/branding/Adcoin large 512x512.png"
                     alt="AdCoin"
                     className="w-20 h-20 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]"
                   />

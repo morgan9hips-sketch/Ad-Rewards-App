@@ -78,7 +78,7 @@ export default function Leaderboard() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <LoadingSpinner size="large" />
+        <LoadingSpinner size="large" withLogo={true} text="Loading Leaderboard..." />
       </div>
     )
   }

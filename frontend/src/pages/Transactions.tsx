@@ -81,7 +81,7 @@ export default function Transactions() {
   if (loading && page === 1) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <LoadingSpinner size="large" />
+        <LoadingSpinner size="large" withLogo={true} text="Loading Transactions..." />
       </div>
     )
   }

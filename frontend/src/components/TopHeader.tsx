@@ -1,11 +1,31 @@
 import { useAuth } from '../contexts/AuthContext'
 import Logo from './Logo'
 import Button from './Button'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 export default function TopHeader() {
   const { user, isAuthenticated, signOut } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const getPageName = () => {
+    const path = location.pathname
+    const pageNames: { [key: string]: string } = {
+      '/dashboard': 'Dashboard',
+      '/ads': 'Watch Ads',
+      '/ads/watch': 'Watch Ad',
+      '/games': 'Games',
+      '/mini-games': 'Games',
+      '/leaderboard': 'Leaderboard',
+      '/profile': 'Profile',
+      '/settings': 'Settings',
+      '/referrals': 'Referrals',
+      '/rewards': 'Rewards',
+      '/login': 'Sign In',
+      '/signup': 'Sign Up',
+    }
+    return pageNames[path] || 'Adify'
+  }
 
   const handleSignOut = async () => {
     await signOut()
@@ -28,8 +48,8 @@ export default function TopHeader() {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Responsive logo display: Full logo for desktop (≥640px), Icon for mobile (<640px) */}
         {/* Using separate instances for cleaner code than internal media queries */}
-        <div 
-          className="hidden sm:block cursor-pointer" 
+        <div
+          className="hidden sm:block cursor-pointer"
           onClick={handleLogoClick}
           onKeyDown={handleLogoKeyDown}
           role="button"
@@ -38,8 +58,8 @@ export default function TopHeader() {
         >
           <Logo size="md" variant="full" />
         </div>
-        <div 
-          className="block sm:hidden cursor-pointer" 
+        <div
+          className="block sm:hidden cursor-pointer"
           onClick={handleLogoClick}
           onKeyDown={handleLogoKeyDown}
           role="button"
@@ -48,7 +68,14 @@ export default function TopHeader() {
         >
           <Logo size="sm" variant="icon" />
         </div>
-        
+
+        {/* Page name in center */}
+        <div className="hidden md:flex flex-1 justify-center">
+          <h2 className="text-lg font-semibold text-gray-200">
+            {getPageName()}
+          </h2>
+        </div>
+
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <>

@@ -103,7 +103,7 @@ export default function Referrals() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <LoadingSpinner />
+        <LoadingSpinner size="large" withLogo={true} text="Loading Referrals..." />
       </div>
     )
   }

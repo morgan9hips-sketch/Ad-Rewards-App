@@ -104,7 +104,7 @@ export default function Game() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-900">
-        <LoadingSpinner size="large" />
+        <LoadingSpinner size="large" withLogo={true} text="Loading Game..." />
       </div>
     )
   }

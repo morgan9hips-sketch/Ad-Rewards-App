@@ -209,7 +209,7 @@ export default function Withdrawals() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <LoadingSpinner size="large" />
+        <LoadingSpinner size="large" withLogo={true} text="Loading Withdrawals..." />
       </div>
     )
   }
