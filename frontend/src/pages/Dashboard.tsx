@@ -16,7 +16,7 @@ import { API_BASE_URL } from '../config/api'
 
 // UI configuration constants
 const NEW_USER_THRESHOLD_HOURS = 24
-const CONVERSION_THRESHOLD_COINS = 150000
+const CONVERSION_THRESHOLD_COINS = 20000
 
 interface UserBalance {
   coins: string
@@ -334,10 +334,10 @@ export default function Dashboard() {
               <Button
                 fullWidth
                 variant="secondary"
-                onClick={() => navigate('/game')}
+                onClick={() => navigate('/mini-games')}
               >
                 <span className="flex items-center justify-center gap-2">
-                  <span>🎮 Play Game</span>
+                  <span>🎮 Play Games</span>
                   <span className="flex items-center gap-1">
                     <img
                       src="/images/branding/Adcoin tiny 64x64.png"

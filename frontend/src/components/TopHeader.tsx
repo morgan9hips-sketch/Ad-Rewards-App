@@ -70,8 +70,8 @@ export default function TopHeader() {
         </div>
 
         {/* Page name in center */}
-        <div className="hidden md:flex flex-1 justify-center">
-          <h2 className="text-lg font-semibold text-gray-200">
+        <div className="flex flex-1 justify-center">
+          <h2 className="text-sm sm:text-lg font-semibold text-gray-200">
             {getPageName()}
           </h2>
         </div>

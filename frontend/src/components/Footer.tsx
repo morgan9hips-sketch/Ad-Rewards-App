@@ -11,7 +11,8 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-bold mb-4">Adify</h3>
             <p className="text-gray-400 text-sm mb-4">
-              Earn real money by watching ads and playing games. Fair, transparent, and rewarding.
+              Earn real money by watching ads and playing games. Fair,
+              transparent, and rewarding.
             </p>
             <p className="text-gray-500 text-xs">
               © {currentYear} AdRev Technologies (Pty) Ltd
@@ -81,12 +82,12 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://policies.google.com/technologies/ads"
+                  href="https://monetag.com/publishers"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Google AdMob Policy
+                  Monetag Publisher Policy
                 </a>
               </li>
             </ul>
@@ -111,12 +112,13 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-8 pt-6 text-center text-xs text-gray-500">
-          <p>
-            AdRev Technologies (Pty) Ltd • Registered in South Africa
-          </p>
+          <p>AdRev Technologies (Pty) Ltd • Registered in South Africa</p>
           <p className="mt-2">
             This site uses Google AdMob to serve advertisements. See our{' '}
-            <Link to="/legal/admob" className="text-blue-400 hover:text-blue-300 underline">
+            <Link
+              to="/legal/admob"
+              className="text-blue-400 hover:text-blue-300 underline"
+            >
               AdMob Disclosure
             </Link>
             .
