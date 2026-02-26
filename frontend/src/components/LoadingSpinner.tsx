@@ -30,9 +30,9 @@ export default function LoadingSpinner({
   const spinner = withLogo ? (
     <div className="flex flex-col justify-center items-center gap-4">
       <img
-        src="/images/branding/logo-icon.png"
+        src="/images/branding/Adcoin-large-512x512.png"
         alt="Loading..."
-        className={`loading-logo ${logoSizeClasses[spinnerSize]}`}
+        className={`loading-logo ${logoSizeClasses[spinnerSize]} animate-spin-slow`}
       />
       <p className="text-gray-400 text-sm">{text || 'Loading...'}</p>
       {progress !== undefined && (

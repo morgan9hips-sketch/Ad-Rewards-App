@@ -42,6 +42,7 @@ import Terms from './pages/legal/Terms'
 import Privacy from './pages/legal/Privacy'
 import Cookies from './pages/legal/Cookies'
 import AdMob from './pages/legal/AdMob'
+import Monetag from './pages/legal/Monetag'
 import DeleteAccount from './pages/legal/DeleteAccount'
 
 function ProtectedRoute({
@@ -56,7 +57,7 @@ function ProtectedRoute({
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-black">
-        <LoadingSpinner size="large" />
+        <LoadingSpinner size="large" withLogo={true} text="Loading..." />
       </div>
     )
   }
@@ -112,6 +113,7 @@ function AppContent() {
         <Route path="/legal/privacy" element={<Privacy />} />
         <Route path="/legal/cookies" element={<Cookies />} />
         <Route path="/legal/admob" element={<AdMob />} />
+        <Route path="/legal/monetag" element={<Monetag />} />
         <Route path="/legal/delete-account" element={<DeleteAccount />} />
 
         <Route

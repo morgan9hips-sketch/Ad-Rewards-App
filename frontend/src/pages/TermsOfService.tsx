@@ -163,7 +163,7 @@ export default function TermsOfService() {
 
           <h3 className="text-lg font-semibold text-white mt-6 mb-3">5.3 Service Interruptions</h3>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
-            <li>We are not liable for service interruptions, downtime, technical issues, or third-party service failures (including Google AdMob or PayPal).</li>
+            <li>We are not liable for service interruptions, downtime, technical issues, or third-party service failures (including Monetag or PayPal).</li>
             <li>We may suspend or discontinue the service at any time without prior notice.</li>
           </ul>
 
@@ -190,7 +190,7 @@ export default function TermsOfService() {
             <li>Fraudulent activity or suspicious behavior</li>
             <li>Use of bots, automation, or other prohibited tools</li>
             <li>Creation of multiple accounts</li>
-            <li>Violation of Google AdMob policies</li>
+            <li>Violation of Monetag policies or ad network terms</li>
             <li>Providing false or inaccurate information</li>
             <li>Abuse of the service or other users</li>
             <li>Any reason we deem necessary to protect the integrity of the service</li>

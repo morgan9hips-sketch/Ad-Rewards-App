@@ -33,7 +33,7 @@ export default function SplashScreen({ onComplete, minDisplayMs = 5000 }: Splash
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center transition-opacity duration-500 ${
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center transition-opacity duration-500 overflow-hidden ${
         phase === 'out' ? 'opacity-0' : 'opacity-100'
       }`}
       style={{
@@ -42,9 +42,18 @@ export default function SplashScreen({ onComplete, minDisplayMs = 5000 }: Splash
       aria-label="Loading Adify"
       role="status"
     >
+      {/* Background Logo - Top Half */}
+      <div className="absolute top-0 left-0 right-0 h-1/2 flex items-center justify-center overflow-hidden opacity-20">
+        <img
+          src="/images/branding/Adcoin-large-512x512.png"
+          alt=""
+          className="w-96 h-96 object-contain drop-shadow-2xl"
+        />
+      </div>
+
       {/* Logo container */}
       <div
-        className={`flex flex-col items-center gap-6 transition-all duration-800 ${
+        className={`flex flex-col items-center gap-6 transition-all duration-800 relative z-10 ${
           phase === 'in' ? 'scale-75 opacity-0' : 'scale-100 opacity-100'
         }`}
       >
@@ -87,7 +96,7 @@ export default function SplashScreen({ onComplete, minDisplayMs = 5000 }: Splash
         </div>
 
         {/* Progress indicator */}
-        <div className="w-48 h-1 bg-gray-800 rounded-full overflow-hidden mt-4">
+        <div className="w-48 h-1 bg-gray-800 rounded-full overflow-hidden mt-4 relative z-10">
           <div
             className="h-full bg-blue-500 rounded-full transition-all"
             style={{
@@ -99,7 +108,7 @@ export default function SplashScreen({ onComplete, minDisplayMs = 5000 }: Splash
       </div>
 
       {/* Version */}
-      <p className="absolute bottom-8 text-gray-600 text-xs">
+      <p className="absolute bottom-8 text-gray-600 text-xs relative z-10">
         v1.0.0
       </p>
     </div>

@@ -52,7 +52,7 @@ export default function PrivacyPolicy() {
             Location is determined through:
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
-            <li><strong>Google AdMob SDK</strong> (primary method, cannot be easily spoofed)</li>
+            <li><strong>Monetag SDK</strong> (ad serving platform for measuring ad views)</li>
             <li><strong>IP address geolocation</strong> (secondary method, used for cross-verification and fraud detection)</li>
           </ul>
           <p className="text-gray-300 mb-4">
@@ -112,14 +112,14 @@ export default function PrivacyPolicy() {
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li><strong>Web Platform:</strong> Google AdSense for web-based advertising</li>
-            <li><strong>Mobile Platform:</strong> Unity Ads and/or Google AdMob for mobile app advertising</li>
+            <li><strong>Web Platform:</strong> Monetag for web-based advertising</li>
           </ul>
           <p className="text-gray-300 mb-4">
             Data handling and privacy practices may differ slightly between platforms based on the specific advertising technology used. Each advertising partner has its own privacy policy and data practices:
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li>Google AdSense Privacy Policy: <a href="https://policies.google.com/privacy" className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a></li>
-            <li>Google AdMob Privacy Policy: <a href="https://support.google.com/admob/answer/6128543" className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">AdMob Privacy Information</a></li>
+            <li>Monetag Privacy Policy: <a href="https://monetag.com/privacy" className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">Monetag Privacy Information</a></li>
             <li>Unity Ads Privacy Policy: <a href="https://unity.com/legal/privacy-policy" className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">unity.com/legal/privacy-policy</a></li>
           </ul>
           <p className="text-gray-300 mb-4">
@@ -149,7 +149,7 @@ export default function PrivacyPolicy() {
             We share data with trusted third-party service providers who assist us in operating the service:
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
-            <li><strong>Advertising Partners:</strong> We use Google AdSense (web) and Google AdMob/Unity Ads (mobile) to deliver advertisements. These partners collect device information, location data, and ad interaction data. See their respective privacy policies for details.</li>
+            <li><strong>Advertising Partners:</strong> We use Monetag to deliver advertisements on the web platform. Monetag collects device information, location data, and ad interaction data. See their privacy policy for details.</li>
             <li><strong>PayPal:</strong> Processes withdrawal payments. We share your PayPal email address and payment amount. See <a href="https://www.paypal.com/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">PayPal's Privacy Policy</a>.</li>
             <li><strong>Cloud Hosting Providers:</strong> Store and process data on secure servers.</li>
           </ul>
@@ -267,12 +267,12 @@ export default function PrivacyPolicy() {
             <strong>Opt-Out:</strong> You can decline analytics cookies through the Cookie Consent banner or your browser settings.
           </p>
 
-          <h3 className="text-lg font-semibold text-white mt-6 mb-3">7.3 Advertising Cookies (AdMob)</h3>
-          <p className="text-gray-300 mb-4">
-            <strong>Purpose:</strong> Google AdMob uses cookies to deliver relevant ads and track ad performance. This is essential for the service to generate revenue.
+          <h3 className="text-lg font-semibold text-white mt-6 mb-3">7.3 Advertising Cookies (Monetag)</h3>
+          <p className="text-gray-300 mb-2">
+            <strong>Purpose:</strong> Monetag uses cookies to deliver relevant ads and track ad performance. This is essential for the service to generate revenue.
           </p>
           <p className="text-gray-300 mb-4">
-            <strong>Opt-Out:</strong> Not possible. AdMob cookies are required to provide the rewards program. By using the service, you consent to AdMob's data collection as described in <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">Google's Privacy Policy</a>.
+            <strong>Opt-Out:</strong> Not possible. Monetag cookies are required to provide the rewards program. By using the service, you consent to Monetag's data collection as described in <a href="https://monetag.com/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">Monetag's Privacy Policy</a>.
           </p>
 
           <h2 className="text-xl font-bold text-white mt-8 mb-4">8. International Data Transfers</h2>
@@ -282,7 +282,7 @@ export default function PrivacyPolicy() {
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li><strong>Cloud hosting providers:</strong> Data is stored in secure data centers</li>
-            <li><strong>Google (AdMob):</strong> Processes data in the United States and European Union with adequate safeguards (Standard Contractual Clauses)</li>
+            <li><strong>Monetag:</strong> Processes data in the United States and European Union with adequate safeguards (Standard Contractual Clauses)</li>
             <li><strong>PayPal:</strong> Processes payments globally with appropriate data protection measures</li>
           </ul>
           <p className="text-gray-300 mb-4">
