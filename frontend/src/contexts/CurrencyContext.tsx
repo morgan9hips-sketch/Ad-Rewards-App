@@ -142,17 +142,10 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Always load currency info immediately when component mounts
     loadCurrencyInfo()
-    // Also try to get precise location
-    requestLocationPermission()
   }, [])
 
-  // Reload currency info when session becomes available
-  useEffect(() => {
-    if (session?.access_token && !currencyInfo?.locationDetected) {
-      console.log('Session available - reloading currency info')
-      loadCurrencyInfo()
-    }
-  }, [session?.access_token])
+  // Reload currency info ONCE when session becomes available (removed to prevent loop)
+  // Currency info is loaded on mount and will use the session if available
 
   const formatAmount = (
     amountUsd: number,
