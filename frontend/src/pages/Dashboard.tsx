@@ -10,7 +10,6 @@ import ExpiryWarning from '../components/ExpiryWarning'
 import CoinValuationTicker from '../components/CoinValuationTicker'
 import RecentWithdrawals from '../components/RecentWithdrawals'
 import PlatformStats from '../components/PlatformStats'
-import SignupBonusBadge from '../components/SignupBonusBadge'
 import TermsAcceptanceModal from '../components/TermsAcceptanceModal'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
@@ -198,9 +197,6 @@ export default function Dashboard() {
       {showProfileSetup && (
         <ProfileSetup onComplete={handleProfileSetupComplete} />
       )}
-
-      {/* Signup Bonus Badge */}
-      <SignupBonusBadge />
 
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-white">{getGreeting()}</h1>

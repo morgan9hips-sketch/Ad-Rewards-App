@@ -11,7 +11,6 @@ import CookieConsent from './components/CookieConsent'
 import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
 import LoadingSpinner from './components/LoadingSpinner'
-import FirstVisitModal from './components/FirstVisitModal'
 import Footer from './components/Footer'
 
 // Pages
@@ -52,10 +51,9 @@ function ProtectedRoute({
   children: React.ReactNode
   requireAdmin?: boolean
 }) {
-  const { isAuthenticated, loading, user, geoResolved, geoResolving } =
-    useAuth()
+  const { isAuthenticated, loading, user } = useAuth()
 
-  if (loading || geoResolving) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-black">
         <LoadingSpinner size="large" />
@@ -65,17 +63,6 @@ function ProtectedRoute({
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
-  }
-
-  if (!geoResolved) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-black">
-        <div className="text-center">
-          <LoadingSpinner size="large" />
-          <p className="text-gray-400 mt-4">Detecting your location...</p>
-        </div>
-      </div>
-    )
   }
 
   if (requireAdmin && user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN') {
@@ -110,7 +97,6 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-black">
-      <FirstVisitModal />
       <TopHeader />
       <CookieConsent />
 
