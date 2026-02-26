@@ -64,6 +64,23 @@ export default function TermsOfService() {
           </ul>
 
           <h2 className="text-xl font-bold text-white mt-8 mb-4">
+            1.5 Monetag Ad Network Compliance
+          </h2>
+          <p className="text-gray-300 mb-4">
+            Our advertisements are served through Monetag, a certified ad network. By using our service, you agree to comply with all Monetag policies and requirements:
+          </p>
+          <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
+            <li><strong>Traffic Quality Requirements:</strong> All ad impressions must come from real, legitimate users. Invalid traffic (bot-generated, proxy-based, or auto-refreshed impressions) is strictly prohibited.</li>
+            <li><strong>Fraud Prevention:</strong> Monetag employs advanced fraud detection. Any attempt to manipulate ad metrics, use automated tools, or generate artificial impressions will result in account suspension and earnings forfeiture.</li>
+            <li><strong>Ad Interaction Authenticity:</strong> Users must not force-click ads, mechanically generate interactions, or use tools to bypass ad blockers or safety mechanisms.</li>
+            <li><strong>Geographic Compliance:</strong> Users must not use VPNs, proxies, or location spoofing to appear in geographic regions other than their actual location, as this violates Monetag's traffic quality standards.</li>
+            <li><strong>Refund Policy:</strong> Any earnings generated from invalid traffic may be withheld or refunded to advertisers, and your account may be suspended for investigating or contesting Monetag's fraud detection results.</li>
+          </ul>
+          <p className="text-gray-300 mb-4">
+            See <a href="https://monetag.com/publishers" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">Monetag's Publisher Policies</a> for complete requirements.
+          </p>
+
+          <h2 className="text-xl font-bold text-white mt-8 mb-4">
             2. Eligibility and Account Requirements
           </h2>
 
@@ -379,15 +396,13 @@ export default function TermsOfService() {
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li>Violation of these Terms of Service</li>
             <li>Fraudulent activity or suspicious behavior</li>
-            <li>Use of bots, automation, or other prohibited tools</li>
+            <li>Use of bots, automation, VPNs, proxies, or other prohibited tools</li>
             <li>Creation of multiple accounts</li>
-            <li>Violation of Monetag policies or ad network terms</li>
+            <li>Violation of Monetag publisher policies or ad network terms of service</li>
+            <li>Generation of invalid traffic (bot impressions, auto-refreshed ads, forced clicks)</li>
             <li>Providing false or inaccurate information</li>
             <li>Abuse of the service or other users</li>
-            <li>
-              Any reason we deem necessary to protect the integrity of the
-              service
-            </li>
+            <li>Any reason we deem necessary to protect the integrity of the service and our advertising partners</li>
           </ul>
 
           <h3 className="text-lg font-semibold text-white mt-6 mb-3">

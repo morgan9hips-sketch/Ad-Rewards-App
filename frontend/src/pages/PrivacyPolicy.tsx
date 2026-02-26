@@ -106,8 +106,8 @@ export default function PrivacyPolicy() {
           <p className="text-gray-300 mb-4">Location is determined through:</p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li>
-              <strong>Monetag SDK</strong> (ad serving platform for measuring ad
-              views)
+              <strong>Monetag SDK</strong> (ad network collecting clicks,
+              impressions, and device data)
             </li>
             <li>
               <strong>IP address geolocation</strong> (secondary method, used
@@ -327,10 +327,22 @@ export default function PrivacyPolicy() {
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li>
-              <strong>Advertising Partners:</strong> We use Monetag to deliver
-              advertisements on the web platform. Monetag collects device
-              information, location data, and ad interaction data. See their
-              privacy policy for details.
+              <strong>Advertising Partners:</strong> We use Monetag, a certified
+              ad network partner, to deliver advertisements. Monetag is
+              compliant with Transparent Ads standards and collects: advertising
+              IDs, IP addresses, device information (OS, browser type),
+              click/impression data, and general geographic location. Monetag
+              maintains strict fraud detection policies to prevent bot traffic
+              and invalid traffic (IVT). See{' '}
+              <a
+                href="https://monetag.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 underline"
+              >
+                Monetag's Privacy Policy
+              </a>{' '}
+              for their complete data practices.
             </li>
             <li>
               <strong>PayPal:</strong> Processes withdrawal payments. We share

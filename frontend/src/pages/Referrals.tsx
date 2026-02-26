@@ -80,17 +80,14 @@ export default function Referrals() {
 
   const shareViaWhatsApp = () => {
     const message = `Join me on Adify and earn coins! ${referralLink}`
-    window.open(
-      `https://wa.me/?text=${encodeURIComponent(message)}`,
-      '_blank'
-    )
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank')
   }
 
   const shareViaTwitter = () => {
     const message = `Join me on Adify and earn coins! Use my referral code: ${referralCode}`
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}&url=${encodeURIComponent(referralLink)}`,
-      '_blank'
+      '_blank',
     )
   }
 
@@ -103,7 +100,11 @@ export default function Referrals() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <LoadingSpinner size="large" withLogo={true} text="Loading Referrals..." />
+        <LoadingSpinner
+          size="large"
+          withLogo={true}
+          text="Loading Referrals..."
+        />
       </div>
     )
   }
@@ -152,7 +153,9 @@ export default function Referrals() {
           </div>
           <div className="bg-gray-800 rounded-lg p-4 mb-4 break-all">
             <div className="text-sm text-gray-400 mb-2">Referral Link</div>
-            <div className="text-sm font-mono text-blue-400">{referralLink}</div>
+            <div className="text-sm font-mono text-blue-400">
+              {referralLink}
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button

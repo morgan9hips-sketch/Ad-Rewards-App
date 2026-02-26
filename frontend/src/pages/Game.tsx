@@ -32,7 +32,7 @@ export default function Game() {
       const res = await fetch(`${API_BASE_URL}/api/game/start`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       })
@@ -71,7 +71,7 @@ export default function Game() {
       await fetch(`${API_BASE_URL}/api/game/end`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

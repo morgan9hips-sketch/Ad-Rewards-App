@@ -59,7 +59,8 @@ export default function Withdrawals() {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([])
   const [paypalEmail, setPaypalEmail] = useState('')
   const [showForm, setShowForm] = useState(false)
-  const [withdrawalResult, setWithdrawalResult] = useState<WithdrawalResult | null>(null)
+  const [withdrawalResult, setWithdrawalResult] =
+    useState<WithdrawalResult | null>(null)
 
   useEffect(() => {
     fetchData()
@@ -140,7 +141,7 @@ export default function Withdrawals() {
 
     const coins = balance ? parseInt(balance.coins) : 0
     const estimate = calculateEstimate()
-    
+
     if (!estimate) {
       alert('Unable to calculate withdrawal estimate')
       return
@@ -209,7 +210,11 @@ export default function Withdrawals() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <LoadingSpinner size="large" withLogo={true} text="Loading Withdrawals..." />
+        <LoadingSpinner
+          size="large"
+          withLogo={true}
+          text="Loading Withdrawals..."
+        />
       </div>
     )
   }
@@ -239,8 +244,10 @@ export default function Withdrawals() {
 
       {/* Balance Card with Estimate */}
       <Card className="mb-6">
-        <h2 className="text-xl font-bold text-white mb-4">Ready to Withdraw?</h2>
-        
+        <h2 className="text-xl font-bold text-white mb-4">
+          Ready to Withdraw?
+        </h2>
+
         <div className="bg-gray-800 p-4 rounded-lg mb-4">
           <div className="text-center py-2">
             <div className="text-sm text-gray-400 mb-1">Your Balance</div>
@@ -256,7 +263,9 @@ export default function Withdrawals() {
                   Estimated Payout:
                 </div>
                 <div className="text-2xl font-bold text-green-500 mb-2">
-                  {estimate.symbol}{estimate.low} - {estimate.symbol}{estimate.high}
+                  {estimate.symbol}
+                  {estimate.low} - {estimate.symbol}
+                  {estimate.high}
                 </div>
                 <div className="text-xs text-gray-500">
                   Based on current regional ad performance
@@ -266,23 +275,25 @@ export default function Withdrawals() {
               <div className="border-t border-gray-700 pt-3 mt-3">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-400">Regional Performance:</span>
-                  <span className={`font-semibold ${
-                    estimate.multiplier > 1.0 ? 'text-green-500' : 
-                    estimate.multiplier < 1.0 ? 'text-yellow-500' : 
-                    'text-gray-400'
-                  }`}>
+                  <span
+                    className={`font-semibold ${
+                      estimate.multiplier > 1.0
+                        ? 'text-green-500'
+                        : estimate.multiplier < 1.0
+                          ? 'text-yellow-500'
+                          : 'text-gray-400'
+                    }`}
+                  >
                     {estimate.multiplier.toFixed(2)}x
                     {estimate.multiplier > 1.0 && ' 🔥'}
                     {estimate.multiplier < 1.0 && ' ⚠️'}
                   </span>
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
-                  {estimate.multiplier > 1.0 && 
-                    `${((estimate.multiplier - 1) * 100).toFixed(0)}% above average this month`
-                  }
-                  {estimate.multiplier < 1.0 && 
-                    `${((1 - estimate.multiplier) * 100).toFixed(0)}% below average this month`
-                  }
+                  {estimate.multiplier > 1.0 &&
+                    `${((estimate.multiplier - 1) * 100).toFixed(0)}% above average this month`}
+                  {estimate.multiplier < 1.0 &&
+                    `${((1 - estimate.multiplier) * 100).toFixed(0)}% below average this month`}
                   {estimate.multiplier === 1.0 && 'Stable'}
                 </div>
               </div>

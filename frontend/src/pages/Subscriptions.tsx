@@ -85,7 +85,8 @@ export default function Subscriptions() {
       const token = session?.access_token
       if (!token) return
 
-      const API_URL = import.meta.env.VITE_API_URL || 'https://api.adrevtechnologies.com'
+      const API_URL =
+        import.meta.env.VITE_API_URL || 'https://api.adrevtechnologies.com'
       const res = await fetch(`${API_URL}/api/subscriptions/cancel`, {
         method: 'POST',
         headers: {
@@ -111,7 +112,11 @@ export default function Subscriptions() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <LoadingSpinner size="large" withLogo={true} text="Loading Subscriptions..." />
+        <LoadingSpinner
+          size="large"
+          withLogo={true}
+          text="Loading Subscriptions..."
+        />
       </div>
     )
   }
