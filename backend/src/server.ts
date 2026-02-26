@@ -6,6 +6,11 @@ import { authenticate } from './middleware/auth.js'
 import { scheduleExpiryJob } from './jobs/expireBalances.js'
 import { scheduleCoinValuationJob } from './jobs/updateCoinValuations.js'
 
+// Fix BigInt JSON serialization
+;(BigInt.prototype as any).toJSON = function () {
+  return this.toString()
+}
+
 // Import routes
 import userRoutes from './routes/user.js'
 import adsRoutes from './routes/ads.js'

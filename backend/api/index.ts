@@ -7,6 +7,11 @@ import { securityHeaders, xssSanitize } from '../src/middleware/xss.js'
 import { sanitizeBody } from '../src/middleware/validation.js'
 import { ipRateLimiter } from '../src/middleware/rateLimiter.js'
 
+// Fix BigInt JSON serialization
+;(BigInt.prototype as any).toJSON = function () {
+  return this.toString()
+}
+
 // Import routes
 import userRoutes from '../src/routes/user.js'
 import adsRoutes from '../src/routes/ads.js'
