@@ -7,7 +7,9 @@ import { processWithdrawal } from '../services/transactionService.js'
 const router = Router()
 const prisma = new PrismaClient()
 
-const MINIMUM_WITHDRAWAL_USD = parseFloat(process.env.MINIMUM_WITHDRAWAL_USD || '10.00')
+const MINIMUM_WITHDRAWAL_USD = parseFloat(
+  process.env.MINIMUM_WITHDRAWAL_USD || '10.00',
+)
 const BASELINE_RATE_VALUE = 1.0 // R1 per 100 coins at 1.0x multiplier
 
 // Create withdrawal request
@@ -46,7 +48,7 @@ router.post('/request', async (req: AuthRequest, res) => {
 
     // Check minimum withdrawal
     if (cashBalanceUsd < MINIMUM_WITHDRAWAL_USD) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: `Minimum withdrawal is $${MINIMUM_WITHDRAWAL_USD.toFixed(2)} USD`,
         currentBalance: cashBalanceUsd.toFixed(2),
       })
@@ -108,9 +110,9 @@ router.post('/request', async (req: AuthRequest, res) => {
     })
   } catch (error) {
     console.error('Error creating withdrawal:', error)
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: 'Failed to create withdrawal request' 
+      error: 'Failed to create withdrawal request',
     })
   }
 })
@@ -180,23 +182,34 @@ router.get('/recent-public', async (req, res) => {
     const publicWithdrawals = withdrawals.map((w) => {
       // Anonymize user ID - show only last 4 chars
       const userId = `User${w.user.id.slice(-4)}`
-      
+
       // Calculate coins withdrawn (reverse engineer from amount)
-      const valuePer100Coins = coinValuation ? parseFloat(coinValuation.valuePer100Coins.toString()) : BASELINE_RATE_VALUE
+      const valuePer100Coins = coinValuation
+        ? parseFloat(coinValuation.valuePer100Coins.toString())
+        : BASELINE_RATE_VALUE
       const rateMultiplier = valuePer100Coins / BASELINE_RATE_VALUE
-      const estimatedCoins = Math.round((parseFloat(w.amountLocal.toString()) / valuePer100Coins) * 100)
+      const estimatedCoins = Math.round(
+        (parseFloat(w.amountLocal.toString()) / valuePer100Coins) * 100,
+      )
 
       return {
         userId,
         coins: estimatedCoins,
         amountLocal: parseFloat(w.amountLocal.toString()),
         currencyCode: w.currencyCode,
-        countryCode: w.currencyCode === 'ZAR' ? 'ZA' : 
-                     w.currencyCode === 'USD' ? 'US' :
-                     w.currencyCode === 'GBP' ? 'GB' :
-                     w.currencyCode === 'EUR' ? 'EU' : 'US',
+        countryCode:
+          w.currencyCode === 'ZAR'
+            ? 'ZA'
+            : w.currencyCode === 'USD'
+              ? 'US'
+              : w.currencyCode === 'GBP'
+                ? 'GB'
+                : w.currencyCode === 'EUR'
+                  ? 'EU'
+                  : 'US',
         rateMultiplier,
-        completedAt: w.completedAt?.toISOString() || w.requestedAt.toISOString(),
+        completedAt:
+          w.completedAt?.toISOString() || w.requestedAt.toISOString(),
       }
     })
 
@@ -214,7 +227,7 @@ router.get('/:id', async (req: AuthRequest, res) => {
     const withdrawalId = req.params.id
 
     const withdrawal = await prisma.withdrawal.findFirst({
-      where: { 
+      where: {
         id: withdrawalId,
         userId,
       },

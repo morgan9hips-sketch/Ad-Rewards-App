@@ -86,8 +86,15 @@ export default function SignupBonusBadge() {
 
         <div className="bg-black/30 rounded-lg p-4 mb-6 text-center">
           <p className="text-white text-lg mb-2">
-            You're user <span className="text-yellow-300 font-bold">#{bonusInfo.userNumber.toLocaleString()}</span> in{' '}
-            <span className="text-yellow-300 font-bold">{getCountryName(bonusInfo.countryCode)}</span>!
+            You're user{' '}
+            <span className="text-yellow-300 font-bold">
+              #{bonusInfo.userNumber.toLocaleString()}
+            </span>{' '}
+            in{' '}
+            <span className="text-yellow-300 font-bold">
+              {getCountryName(bonusInfo.countryCode)}
+            </span>
+            !
           </p>
           <p className="text-gray-300 text-sm mb-4">
             As an early supporter, you've received:
@@ -102,7 +109,8 @@ export default function SignupBonusBadge() {
 
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mb-6">
           <p className="text-blue-300 text-sm text-center">
-            💡 This bonus unlocks when you reach the minimum withdrawal threshold (20,000 coins)
+            💡 This bonus unlocks when you reach the minimum withdrawal
+            threshold (20,000 coins)
           </p>
         </div>
 

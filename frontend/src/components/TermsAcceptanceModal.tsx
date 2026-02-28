@@ -60,8 +60,7 @@ export default function TermsAcceptanceModal({
                 </li>
                 <li>
                   <strong className="text-white">Privacy:</strong> We collect
-                  your country (not exact location), usage data, and device
-                  info
+                  your country (not exact location), usage data, and device info
                 </li>
               </ul>
             </div>
