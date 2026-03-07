@@ -77,6 +77,40 @@ async function main() {
 
   console.log('')
   console.log('⚠️  IMPORTANT: Ensure admin users have strong passwords and access is properly secured!')
+
+  // ── V2 Reward Catalog seed ──────────────────────────────────────────────────
+  console.log('')
+  console.log('🎁 Seeding V2 reward catalog...')
+  try {
+    const v2Rewards = [
+      {
+        title: '$5 PayPal Cash',
+        description: 'Redeem your coins for $5 USD sent to your PayPal account.',
+        costCoins: 5000,
+        isActive: true,
+      },
+      {
+        title: '$10 Amazon Gift Card',
+        description: 'Redeem your coins for a $10 Amazon digital gift card.',
+        costCoins: 9500,
+        isActive: true,
+      },
+    ]
+
+    for (const reward of v2Rewards) {
+      const existing = await prisma.v2Reward.findFirst({
+        where: { title: reward.title },
+      })
+      if (!existing) {
+        await prisma.v2Reward.create({ data: reward })
+        console.log(`   ✅ Created V2 reward: ${reward.title}`)
+      } else {
+        console.log(`   ⏭️  V2 reward already exists: ${reward.title}`)
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error seeding V2 reward catalog:', error)
+  }
 }
 
 main()

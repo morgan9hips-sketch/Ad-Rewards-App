@@ -1,13 +1,19 @@
 import { Router, Request, Response } from 'express'
-import { creditLedger, getV2Balance } from '../../services/v2/ledger.js'
+import { creditLedger, getV2Balance, V2LedgerEntryType } from '../../services/v2/ledger.js'
 
 const router = Router()
+
+const VALID_CREDIT_TYPES = new Set<string>([
+  V2LedgerEntryType.ADMIN_CREDIT,
+  V2LedgerEntryType.EARN,
+  V2LedgerEntryType.ADJUSTMENT,
+])
 
 /**
  * GET /api/v2/ledger/balance/:userId
  *
  * Returns the computed V2 balance for a user.
- * Balance = SUM(credits) - SUM(debits) from v2_ledger_entries.
+ * Balance = SUM(amount_coins) from v2_ledger_entries (positive=credit, negative=debit).
  * There is no stored balance column; it is always derived.
  */
 router.get('/balance/:userId', async (req: Request, res: Response) => {
@@ -29,10 +35,12 @@ router.get('/balance/:userId', async (req: Request, res: Response) => {
  * Body:
  *   userId          string  – target user
  *   amountCoins     number  – coins to credit (positive integer)
+ *   type            string  – ADMIN_CREDIT | EARN | ADJUSTMENT
  *   idempotencyKey  string  – unique provider event id / admin action id
  *   referenceId?    string  – optional reference (e.g. ad impression id)
  *   referenceType?  string  – optional type label
  *   description?    string  – human-readable note
+ *   metadata?       object  – arbitrary key/value payload
  *
  * Idempotency: if `idempotencyKey` has already been used, the existing
  * entry is returned with HTTP 200 and `created: false`. No duplicate row
@@ -42,10 +50,12 @@ router.post('/credit', async (req: Request, res: Response) => {
   const {
     userId,
     amountCoins,
+    type,
     idempotencyKey,
     referenceId,
     referenceType,
     description,
+    metadata,
   } = req.body
 
   if (!userId || typeof userId !== 'string') {
@@ -57,15 +67,22 @@ router.post('/credit', async (req: Request, res: Response) => {
   if (!amountCoins || typeof amountCoins !== 'number' || amountCoins <= 0) {
     return res.status(400).json({ error: 'amountCoins must be a positive number' })
   }
+  if (!type || !VALID_CREDIT_TYPES.has(type)) {
+    return res.status(400).json({
+      error: `type must be one of: ${[...VALID_CREDIT_TYPES].join(', ')}`,
+    })
+  }
 
   try {
     const result = await creditLedger({
       userId,
       amountCoins: BigInt(amountCoins),
+      type: type as V2LedgerEntryType,
       idempotencyKey,
       referenceId,
       referenceType,
       description,
+      metadata,
     })
     const status = result.created ? 201 : 200
     res.status(status).json({
