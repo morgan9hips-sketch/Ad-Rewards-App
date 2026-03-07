@@ -4,9 +4,10 @@
  * Implements the V2 data-ownership rules:
  *
  * 1. LEDGER SOURCE OF TRUTH
- *    Balance is computed by aggregating v2_ledger_entries for a user
- *    (SUM of credits minus SUM of debits). This service never reads or
- *    writes balance columns on the V1 `user_profiles` table.
+ *    Balance is computed by summing all signed amount_coins values for a user
+ *    across v2_ledger_entries (positive = credit, negative = debit). This
+ *    service never reads or writes balance columns on the V1 `user_profiles`
+ *    table.
  *
  * 2. IDEMPOTENCY
  *    Every credit must supply an `idempotencyKey` (provider event id or
@@ -19,21 +20,27 @@
  *    `v2_claims`). It never touches V1 tables.
  */
 
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, V2LedgerEntryType } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+export { V2LedgerEntryType }
+
 export interface CreditParams {
   userId: string
+  /** Positive coin amount to add to the user's balance. */
   amountCoins: bigint
+  type: V2LedgerEntryType
   idempotencyKey: string
   referenceId?: string
   referenceType?: string
   description?: string
+  metadata?: Record<string, unknown>
 }
 
 export interface DebitParams {
   userId: string
+  /** Positive coin amount to deduct from the user's balance (stored negated). */
   amountCoins: bigint
   claimId?: number
   referenceId?: string
@@ -51,20 +58,22 @@ export async function creditLedger(params: CreditParams) {
   const {
     userId,
     amountCoins,
+    type,
     idempotencyKey,
     referenceId,
     referenceType,
     description,
+    metadata,
   } = params
 
   if (amountCoins <= 0n) {
     throw new Error('amountCoins must be positive for a credit')
   }
 
-  // Use upsert-style: attempt to create; on conflict return existing row.
-  // Prisma's createOrConnect is not available for unique fields on create,
-  // so we check existence first inside a serializable transaction to ensure
-  // atomicity without a race condition.
+  if (type === V2LedgerEntryType.REDEEM) {
+    throw new Error('Use debitLedger for REDEEM entries')
+  }
+
   return prisma.$transaction(async (tx) => {
     const existing = await tx.v2LedgerEntry.findUnique({
       where: { idempotencyKey },
@@ -76,12 +85,13 @@ export async function creditLedger(params: CreditParams) {
     const entry = await tx.v2LedgerEntry.create({
       data: {
         userId,
-        entryType: 'credit',
-        amountCoins,
+        type,
+        amountCoins,       // positive
         idempotencyKey,
         referenceId,
         referenceType,
         description,
+        metadata: metadata ? (metadata as object) : undefined,
       },
     })
     return { entry, created: true }
@@ -90,6 +100,9 @@ export async function creditLedger(params: CreditParams) {
 
 /**
  * Debit a user's V2 ledger (internal helper – called by claimService).
+ *
+ * Stores the amount as a negative value so that a single SUM over all
+ * `amount_coins` values yields the user's current balance.
  */
 export async function debitLedger(
   params: DebitParams,
@@ -112,8 +125,8 @@ export async function debitLedger(
   return client.v2LedgerEntry.create({
     data: {
       userId,
-      entryType: 'debit',
-      amountCoins,
+      type: V2LedgerEntryType.REDEEM,
+      amountCoins: -amountCoins,  // stored as negative
       claimId: claimId ?? null,
       referenceId: referenceId ?? null,
       referenceType: referenceType ?? null,
@@ -125,23 +138,15 @@ export async function debitLedger(
 /**
  * Compute a user's V2 balance from ledger entries.
  *
- * balance = SUM(credit amounts) - SUM(debit amounts)
+ * balance = SUM(amount_coins)  — credits are positive, debits are negative.
  *
  * This is always derived – there is no stored balance column in V2.
  */
 export async function getV2Balance(userId: string): Promise<bigint> {
-  const [credits, debits] = await Promise.all([
-    prisma.v2LedgerEntry.aggregate({
-      where: { userId, entryType: 'credit' },
-      _sum: { amountCoins: true },
-    }),
-    prisma.v2LedgerEntry.aggregate({
-      where: { userId, entryType: 'debit' },
-      _sum: { amountCoins: true },
-    }),
-  ])
+  const result = await prisma.v2LedgerEntry.aggregate({
+    where: { userId },
+    _sum: { amountCoins: true },
+  })
 
-  const totalCredits = credits._sum.amountCoins ?? 0n
-  const totalDebits = debits._sum.amountCoins ?? 0n
-  return totalCredits - totalDebits
+  return result._sum.amountCoins ?? 0n
 }

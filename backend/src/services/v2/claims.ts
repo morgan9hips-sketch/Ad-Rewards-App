@@ -4,25 +4,28 @@
  * Implements the V2 claim lifecycle:
  *
  * 3. CLAIM LIFECYCLE
- *    - A claim is created with status='pending'.
+ *    - A claim is created with status=PENDING.
  *    - Fulfillment atomically:
- *        a) creates a debit ledger entry for the claim amount, and
- *        b) transitions the claim to status='fulfilled'.
- *    - Attempting to fulfill an already-fulfilled (or rejected) claim
+ *        a) creates a REDEEM debit ledger entry for the claim amount, and
+ *        b) transitions the claim to status=FULFILLED.
+ *    - Attempting to fulfill an already-fulfilled (or rejected/canceled) claim
  *      returns an error without modifying any data.
  *
  * V1 SEPARATION
  *    This service only reads/writes V2 tables. It never touches V1 tables.
  */
 
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, V2ClaimStatus } from '@prisma/client'
 import { debitLedger } from './ledger.js'
 
 const prisma = new PrismaClient()
 
+export { V2ClaimStatus }
+
 export interface CreateClaimParams {
   userId: string
   amountCoins: bigint
+  rewardId?: number
   description?: string
   metadata?: Record<string, unknown>
 }
@@ -31,7 +34,7 @@ export interface CreateClaimParams {
  * Create a new pending claim.
  */
 export async function createClaim(params: CreateClaimParams) {
-  const { userId, amountCoins, description, metadata } = params
+  const { userId, amountCoins, rewardId, description, metadata } = params
 
   if (amountCoins <= 0n) {
     throw new Error('amountCoins must be positive')
@@ -40,8 +43,9 @@ export async function createClaim(params: CreateClaimParams) {
   return prisma.v2Claim.create({
     data: {
       userId,
-      status: 'pending',
+      status: V2ClaimStatus.PENDING,
       amountCoins,
+      rewardId: rewardId ?? null,
       description: description ?? null,
       metadata: metadata ? (metadata as object) : undefined,
     },
@@ -51,23 +55,23 @@ export async function createClaim(params: CreateClaimParams) {
 /**
  * Fulfill a pending claim.
  *
- * Atomically creates a debit ledger entry and marks the claim as
- * 'fulfilled'. Throws if the claim does not exist or is not pending.
+ * Atomically creates a REDEEM debit ledger entry and marks the claim as
+ * FULFILLED. Throws if the claim does not exist or is not in PENDING status.
  */
-export async function fulfillClaim(claimId: number) {
+export async function fulfillClaim(claimId: number, fulfillmentRef?: string, notes?: string) {
   return prisma.$transaction(async (tx) => {
     const claim = await tx.v2Claim.findUnique({ where: { id: claimId } })
 
     if (!claim) {
       throw new Error(`Claim ${claimId} not found`)
     }
-    if (claim.status !== 'pending') {
+    if (claim.status !== V2ClaimStatus.PENDING) {
       throw new Error(
         `Claim ${claimId} cannot be fulfilled (status: ${claim.status})`,
       )
     }
 
-    // Create the debit ledger entry linked to this claim.
+    // Create the REDEEM debit ledger entry linked to this claim.
     await debitLedger(
       {
         userId: claim.userId,
@@ -80,12 +84,14 @@ export async function fulfillClaim(claimId: number) {
       tx as unknown as Parameters<typeof debitLedger>[1],
     )
 
-    // Transition claim to fulfilled.
+    // Transition claim to FULFILLED.
     return tx.v2Claim.update({
       where: { id: claimId },
       data: {
-        status: 'fulfilled',
+        status: V2ClaimStatus.FULFILLED,
         fulfilledAt: new Date(),
+        fulfillmentRef: fulfillmentRef ?? null,
+        notes: notes ?? null,
       },
     })
   })
