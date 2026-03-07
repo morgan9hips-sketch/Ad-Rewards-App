@@ -602,3 +602,60 @@ model BetaDebt {
 
   @@map("beta_debts")
 }
+
+// ─── V2 Data Ownership: Ledger Source-of-Truth ────────────────────────────────
+// Rules:
+//   1. Balance is computed from v2_ledger_entries (SUM credits - SUM debits).
+//      No direct "set balance" writes are permitted in V2.
+//   2. Every credit entry MUST carry a unique idempotency_key (provider event id
+//      or admin action id). Duplicate keys are rejected by the DB unique index,
+//      preventing double-credits on replay.
+//   3. A V2Claim starts in status='pending'. Fulfillment creates a debit entry
+//      and transitions the claim to status='fulfilled'.
+//   4. These tables are strictly V2-only; V2 code NEVER writes to V1 tables
+//      (user_profiles, transactions, ad_views, withdrawals, etc.).
+// ──────────────────────────────────────────────────────────────────────────────
+
+model V2LedgerEntry {
+  id             Int      @id @default(autoincrement())
+  userId         String   @map("user_id")
+  /// 'credit' adds to the balance; 'debit' subtracts from it.
+  entryType      String   @map("entry_type")
+  /// Coin amount (always positive; direction is determined by entryType).
+  amountCoins    BigInt   @map("amount_coins")
+  description    String?
+  /// Required for credits. Uniqueness enforces idempotency: replaying the same
+  /// provider event id / admin action id is safely ignored by the caller.
+  idempotencyKey String?  @unique @map("idempotency_key")
+  /// e.g. admob impression id, admin_action id, v2_claim id
+  referenceId    String?  @map("reference_id")
+  /// e.g. 'ad_view', 'admin_adjustment', 'claim_fulfillment'
+  referenceType  String?  @map("reference_type")
+  claimId        Int?     @map("claim_id")
+  claim          V2Claim? @relation(fields: [claimId], references: [id])
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([referenceId])
+  @@index([claimId])
+  @@index([createdAt])
+  @@map("v2_ledger_entries")
+}
+
+model V2Claim {
+  id          Int      @id @default(autoincrement())
+  userId      String   @map("user_id")
+  /// 'pending' → 'fulfilled' | 'rejected'. Starts as 'pending'.
+  status      String   @default("pending")
+  amountCoins BigInt   @map("amount_coins")
+  description String?
+  metadata    Json?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  fulfilledAt DateTime? @map("fulfilled_at")
+
+  ledgerEntries V2LedgerEntry[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("v2_claims")
+}
