@@ -30,6 +30,7 @@ import legalRoutes from '../src/routes/legal.js'
 import geoRoutes from '../src/routes/geo.js'
 import migrateRoutes from '../src/routes/migrate.js'
 import rewardRoutes from '../src/routes/reward.js'
+import v2Routes from '../src/routes/v2/index.js'
 
 // Create Express app for Vercel
 const app = express()
@@ -76,6 +77,7 @@ app.use('/api/legal', legalRoutes) // Public
 app.use('/api/geo-resolve', authenticate, geoRoutes) // Requires auth for user context
 app.use('/api/migrate', migrateRoutes) // One-time migration endpoint
 app.use('/api/reward', authenticate, rewardRoutes)
+app.use('/api/v2', v2Routes) // V2 API namespace (feature-flagged)
 
 // Error handling middleware (must be last)
 app.use(errorLogger)
