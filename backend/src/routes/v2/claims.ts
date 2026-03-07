@@ -1,41 +1,50 @@
-import { Router, Request, Response } from 'express'
+import { Router, Response } from 'express'
+import { PrismaClient } from '@prisma/client'
+import { authenticate, AuthRequest } from '../../middleware/auth.js'
 import { createClaim, fulfillClaim, V2ClaimStatus } from '../../services/v2/claims.js'
 
 const router = Router()
+const prisma = new PrismaClient()
 
 /**
  * POST /api/v2/claims
  *
- * Creates a new V2 claim with status=PENDING.
+ * Creates a new V2 claim with status=PENDING for the authenticated user.
+ * The coin cost is derived from the referenced V2Reward's costCoins.
+ * No debit is made on claim creation; debit happens on fulfillment.
  *
  * Body:
- *   userId       string  – claimant user id
- *   amountCoins  number  – coin amount to claim (positive integer)
- *   rewardId?    number  – optional V2Reward id
- *   description? string  – human-readable note
- *   metadata?    object  – arbitrary key/value payload
+ *   rewardId  string | number  – id of the V2Reward to claim
  */
-router.post('/', async (req: Request, res: Response) => {
-  const { userId, amountCoins, rewardId, description, metadata } = req.body
+router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
+  const userId = req.user!.id
+  const { rewardId } = req.body
 
-  if (!userId || typeof userId !== 'string') {
-    return res.status(400).json({ error: 'userId is required' })
-  }
-  if (!amountCoins || typeof amountCoins !== 'number' || amountCoins <= 0) {
-    return res.status(400).json({ error: 'amountCoins must be a positive number' })
+  const parsedRewardId = typeof rewardId === 'string' ? parseInt(rewardId, 10) : rewardId
+  if (!parsedRewardId || typeof parsedRewardId !== 'number' || isNaN(parsedRewardId)) {
+    return res.status(400).json({ error: 'rewardId is required' })
   }
 
   try {
+    const reward = await prisma.v2Reward.findUnique({ where: { id: parsedRewardId } })
+    if (!reward) {
+      return res.status(404).json({ error: 'Reward not found' })
+    }
+    if (!reward.isActive) {
+      return res.status(400).json({ error: 'Reward is not active' })
+    }
+
     const claim = await createClaim({
       userId,
-      amountCoins: BigInt(amountCoins),
-      rewardId: typeof rewardId === 'number' ? rewardId : undefined,
-      description,
-      metadata,
+      amountCoins: BigInt(reward.costCoins),
+      rewardId: reward.id,
     })
     res.status(201).json({
-      ...claim,
-      amountCoins: claim.amountCoins.toString(),
+      ok: true,
+      claim: {
+        ...claim,
+        amountCoins: claim.amountCoins.toString(),
+      },
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
@@ -58,7 +67,7 @@ router.post('/', async (req: Request, res: Response) => {
  *
  * Returns 409 if the claim is not in PENDING status.
  */
-router.post('/:id/fulfill', async (req: Request, res: Response) => {
+router.post('/:id/fulfill', async (req: AuthRequest, res: Response) => {
   const claimId = parseInt(req.params.id, 10)
   if (isNaN(claimId)) {
     return res.status(400).json({ error: 'Invalid claim id' })
