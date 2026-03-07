@@ -28,6 +28,7 @@ import platformRoutes from './routes/platform.js'
 import legalRoutes from './routes/legal.js'
 import geoRoutes from './routes/geo.js'
 import minigameRoutes from './routes/minigame.js'
+import v2Routes from './routes/v2/index.js'
 
 dotenv.config()
 
@@ -147,6 +148,9 @@ app.use('/api/geo', authenticate, geoRoutes)
 app.use('/minigame', authenticate, minigameRoutes)
 app.use('/api/minigame', authenticate, minigameRoutes)
 
+// V2 API namespace (with feature flag)
+app.use('/api/v2', v2Routes)
+
 // Error handler
 app.use(
   (
@@ -175,7 +179,7 @@ if (process.env.VERCEL !== '1') {
     // NOTE: This will not run in Vercel's serverless environment
     // For Vercel, you'll need to create a separate Vercel Cron Job endpoint
     scheduleExpiryJob()
-    
+
     // Start coin valuation update job (every 6 hours)
     scheduleCoinValuationJob()
   })
@@ -183,7 +187,7 @@ if (process.env.VERCEL !== '1') {
   // Initialize exchange rates for serverless environments on first request
   // Note: This is called asynchronously on module load to avoid blocking
   // Exchange rate queries should handle the case where rates may not be available yet
-  initializeExchangeRates().catch(err => {
+  initializeExchangeRates().catch((err) => {
     console.error('Failed to initialize exchange rates:', err)
   })
 }
