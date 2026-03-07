@@ -3,6 +3,8 @@ import { v2FeatureFlag } from '../../middleware/v2-feature-flag.js'
 
 // Import V2 routes
 import healthRoutes from './health.js'
+import ledgerRoutes from './ledger.js'
+import claimsRoutes from './claims.js'
 
 const router = Router()
 
@@ -11,5 +13,7 @@ router.use(v2FeatureFlag)
 
 // V2 Routes
 router.use('/health', healthRoutes)
+router.use('/ledger', ledgerRoutes)
+router.use('/claims', claimsRoutes)
 
 export default router
