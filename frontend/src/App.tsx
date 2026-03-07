@@ -36,6 +36,8 @@ import AdminExpiryIncome from './pages/AdminExpiryIncome'
 import Transactions from './pages/Transactions'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
+import AdCity from './pages/AdCity'
+import WalletV2 from './pages/WalletV2'
 
 // Legal Pages
 import Terms from './pages/legal/Terms'
@@ -129,6 +131,22 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <WatchAd />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ad-city"
+          element={
+            <ProtectedRoute>
+              <AdCity />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/wallet"
+          element={
+            <ProtectedRoute>
+              <WalletV2 />
             </ProtectedRoute>
           }
         />
