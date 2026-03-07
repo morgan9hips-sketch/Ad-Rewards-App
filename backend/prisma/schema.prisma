@@ -698,3 +698,44 @@ model V2Claim {
   @@index([status])
   @@map("v2_claims")
 }
+
+model V2Task {
+  id            Int       @id @default(autoincrement())
+  title         String
+  description   String?
+  type          String    // "survey", "offer", "game", "affiliate"
+  provider      String    // "ayet", "wannads", "internal"
+  geoCountries  String[]  @map("geo_countries") // ["US", "ZA", "GB"]
+  baseRewardUSD Float     @map("base_reward_usd")
+  rewardCoins   Int       @map("reward_coins")
+  isActive      Boolean   @default(true) @map("is_active")
+  expiresAt     DateTime? @map("expires_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  completions   V2TaskCompletion[]
+
+  @@index([isActive])
+  @@index([provider])
+  @@map("v2_tasks")
+}
+
+model V2TaskCompletion {
+  id                String    @id @default(uuid())
+  userId            String    @map("user_id")
+  taskId            Int       @map("task_id")
+  task              V2Task    @relation(fields: [taskId], references: [id])
+  status            String    @default("pending") // "pending", "approved", "rejected"
+  providerReference String?   @map("provider_reference") // Provider's transaction ID
+  revenueEarnedUSD  Float?    @map("revenue_earned_usd")
+  coinsAwarded      Int       @default(0) @map("coins_awarded")
+  approvedAt        DateTime? @map("approved_at")
+  rejectedAt        DateTime? @map("rejected_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  @@unique([userId, taskId]) // Prevent duplicate completions
+  @@index([userId])
+  @@index([taskId])
+  @@index([status])
+  @@map("v2_task_completions")
+}

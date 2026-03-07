@@ -8,6 +8,8 @@ import rewardsRoutes from './rewards.js'
 import ledgerRoutes from './ledger.js'
 import claimsRoutes from './claims.js'
 import adminRoutes from './admin.js'
+import tasksRoutes from './tasks.js'
+import postbackRoutes from './postback.js'
 
 const router = Router()
 
@@ -21,5 +23,7 @@ router.use('/rewards', rewardsRoutes)
 router.use('/ledger', ledgerRoutes)
 router.use('/claims', claimsRoutes)
 router.use('/admin', adminRoutes)
+router.use('/tasks', tasksRoutes)
+router.use('/postback', postbackRoutes)
 
 export default router
