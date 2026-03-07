@@ -602,3 +602,70 @@ model BetaDebt {
 
   @@map("beta_debts")
 }
+
+// ============================================================
+// V2 Rewards System
+// ============================================================
+
+enum V2LedgerEntryType {
+  ADMIN_CREDIT
+  EARN
+  REDEEM
+  ADJUSTMENT
+}
+
+enum V2ClaimStatus {
+  PENDING
+  APPROVED
+  FULFILLED
+  REJECTED
+  CANCELED
+}
+
+/// Append-only ledger for V2 coin balances.
+/// Balance = SUM(amount_coins) for a given userId.
+model V2LedgerEntry {
+  id             String             @id @default(uuid())
+  userId         String             @map("user_id")
+  amountCoins    BigInt             @map("amount_coins") // positive = credit, negative = debit
+  entryType      V2LedgerEntryType  @map("entry_type")
+  idempotencyKey String?            @unique @map("idempotency_key")
+  note           String?
+  createdAt      DateTime           @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("v2_ledger_entries")
+}
+
+/// Reward catalog: items users can redeem with coins.
+model V2Reward {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  costCoins   Int      @map("cost_coins")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  claims V2Claim[]
+
+  @@index([isActive])
+  @@map("v2_rewards")
+}
+
+/// Claims represent a user's request to redeem a reward.
+model V2Claim {
+  id        String        @id @default(uuid())
+  userId    String        @map("user_id")
+  rewardId  String        @map("reward_id")
+  reward    V2Reward      @relation(fields: [rewardId], references: [id])
+  status    V2ClaimStatus @default(PENDING)
+  amountCoins BigInt      @map("amount_coins")
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@map("v2_claims")
+}
