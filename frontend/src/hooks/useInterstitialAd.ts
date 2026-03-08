@@ -11,7 +11,7 @@ declare global {
 const CLICK_THRESHOLD = 8 // Show ad every 8 clicks
 const STORAGE_KEY = 'interstitial_click_count'
 
-export function useInterstitialAd() {
+export function useInterstitialAd(pathname?: string) {
   const incrementClickCount = useCallback(() => {
     const currentCount = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
     const newCount = currentCount + 1
@@ -54,6 +54,10 @@ export function useInterstitialAd() {
   }
 
   useEffect(() => {
+    // Don't attach click listener on admin routes
+    const isAdminRoute = pathname?.startsWith('/admin')
+    if (isAdminRoute) return
+
     // Track clicks globally
     const handleClick = () => {
       incrementClickCount()
@@ -64,7 +68,7 @@ export function useInterstitialAd() {
     return () => {
       document.removeEventListener('click', handleClick)
     }
-  }, [incrementClickCount])
+  }, [incrementClickCount, pathname])
 
   return { incrementClickCount }
 }

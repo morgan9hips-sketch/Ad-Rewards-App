@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import Card from '../components/Card'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ProgressBar from '../components/ProgressBar'
+import { useAuth } from '../contexts/AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 interface Badge {
   id: string
@@ -16,62 +18,30 @@ interface Badge {
 export default function Badges() {
   const [loading, setLoading] = useState(true)
   const [badges, setBadges] = useState<Badge[]>([])
+  const { session } = useAuth()
 
   useEffect(() => {
-    setTimeout(() => {
-      setBadges([
-        {
-          id: '1',
-          name: 'First Steps',
-          description: 'Watch your first ad',
-          icon: '🎬',
-          earned: true,
-        },
-        {
-          id: '2',
-          name: 'Ad Enthusiast',
-          description: 'Watch 50 ads',
-          icon: '⭐',
-          earned: false,
-          progress: 23,
-          requirement: 50,
-        },
-        {
-          id: '3',
-          name: 'Century Club',
-          description: 'Watch 100 ads',
-          icon: '💯',
-          earned: false,
-          progress: 23,
-          requirement: 100,
-        },
-        {
-          id: '4',
-          name: 'Early Bird',
-          description: 'Watch an ad before 8 AM',
-          icon: '🌅',
-          earned: false,
-        },
-        {
-          id: '5',
-          name: 'Night Owl',
-          description: 'Watch an ad after midnight',
-          icon: '🦉',
-          earned: true,
-        },
-        {
-          id: '6',
-          name: 'Weekend Warrior',
-          description: 'Watch ads for 10 consecutive weekends',
-          icon: '⚔️',
-          earned: false,
-          progress: 3,
-          requirement: 10,
-        },
-      ])
-      setLoading(false)
-    }, 1000)
-  }, [])
+    const fetchBadges = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/user/badges`, {
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setBadges(Array.isArray(data.badges) ? data.badges : [])
+        } else {
+          setBadges([])
+        }
+      } catch (error) {
+        console.error('Failed to fetch badges:', error)
+        setBadges([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBadges()
+  }, [session])
 
   if (loading) {
     return (

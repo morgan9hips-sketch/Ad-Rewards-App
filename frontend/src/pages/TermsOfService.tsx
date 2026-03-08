@@ -12,7 +12,7 @@ export default function TermsOfService() {
             <strong>Effective Date:</strong> January 16, 2026
           </p>
           <p className="text-gray-300 mb-6">
-            Welcome to Ad Rewards ("we," "our," or "us"). By accessing or using
+            Welcome to Adify ("we," "our," or "us"). By accessing or using
             our service, you agree to be bound by these Terms of Service. Please
             read them carefully.
           </p>
@@ -21,7 +21,7 @@ export default function TermsOfService() {
             1. Service Description
           </h2>
           <p className="text-gray-300 mb-4">
-            Ad Rewards is a web-based rewards platform that allows users to earn
+            Adify is a web-based rewards platform that allows users to earn
             virtual currency (AdCoins) by participating in rewarded sessions.
             Users can convert earned AdCoins to cash and withdraw funds via
             PayPal.
@@ -346,7 +346,7 @@ export default function TermsOfService() {
             <li>
               This is a <strong>rewards program</strong>, not an employment
               relationship. You are not an employee, contractor, agent, or
-              partner of Ad Rewards.
+              partner of Adify.
             </li>
             <li>
               You are not entitled to any employment benefits, including but not
@@ -501,7 +501,7 @@ export default function TermsOfService() {
           <p className="text-gray-300 mb-4">
             <strong>Our Rights:</strong> All content, features, functionality,
             logos, trademarks, service marks, and trade names displayed on the
-            service are the exclusive property of Ad Rewards and are protected
+            service are the exclusive property of Adify and are protected
             by copyright, trademark, and other intellectual property laws.
           </p>
           <p className="text-gray-300 mb-4">
@@ -600,7 +600,7 @@ export default function TermsOfService() {
           </h3>
           <p className="text-gray-300 mb-4">
             These Terms, together with our Privacy Policy, constitute the entire
-            agreement between you and Ad Rewards regarding the service and
+            agreement between you and Adify regarding the service and
             supersede all prior agreements and understandings.
           </p>
 

@@ -10,8 +10,8 @@ const navItems: NavItem[] = [
   { path: '/dashboard', icon: '🏠', label: 'Home' },
   { path: '/ad-city', icon: '🏙️', label: 'Ad City' },
   { path: '/shop', icon: '🛒', label: 'Shop' },
+  { path: '/ad-store', icon: '🏪', label: 'Ad Store' },
   { path: '/mini-games', icon: '🎮', label: 'Games' },
-  { path: '/leaderboard', icon: '🏆', label: 'Leaderboard' },
   { path: '/settings', icon: '⚙️', label: 'Settings' },
 ]
 
