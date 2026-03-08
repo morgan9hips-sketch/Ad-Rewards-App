@@ -93,18 +93,19 @@ export default function AdCity() {
 
       {tasks.length === 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* Placeholder task cards */}
           {[
-            { type: 'Surveys', icon: '📋', color: 'blue' },
-            { type: 'Offers', icon: '🎁', color: 'purple' },
-            { type: 'Videos', icon: '📺', color: 'red' },
-            { type: 'App Installs', icon: '📱', color: 'green' },
-            { type: 'Shopping', icon: '🛒', color: 'yellow' },
-            { type: 'Games', icon: '🎮', color: 'pink' },
+            { type: 'Surveys', icon: '📋', desc: 'Share your opinions' },
+            { type: 'Offers', icon: '🎁', desc: 'Try new services' },
+            { type: 'Videos', icon: '📺', desc: 'Watch short videos' },
+            { type: 'App Installs', icon: '📱', desc: 'Download apps' },
+            { type: 'Shopping', icon: '🛒', desc: 'Earn while shopping' },
+            { type: 'Games', icon: '🎮', desc: 'Play casual games' },
           ].map((taskType) => (
-            <Card key={taskType.type} className="opacity-60">
+            <Card key={taskType.type} className="opacity-60 border-gray-700">
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className={`text-xs px-2 py-1 bg-${taskType.color}-900 text-${taskType.color}-300 rounded`}>
+                  <span className="text-xs px-2 py-1 bg-gray-800 text-gray-400 rounded">
                     {taskType.type.toUpperCase()}
                   </span>
                   <span className="text-sm text-gray-500">Partner Network</span>
@@ -114,7 +115,7 @@ export default function AdCity() {
                   {taskType.type}
                 </h3>
                 <p className="text-sm text-gray-400">
-                  Complete {taskType.type.toLowerCase()} from our partner networks to earn coins
+                  {taskType.desc}
                 </p>
               </div>
               <div className="flex items-center justify-between">
@@ -122,7 +123,7 @@ export default function AdCity() {
                   Coming Soon
                 </div>
                 <div className="px-4 py-2 bg-gray-800 text-gray-500 rounded text-sm cursor-not-allowed">
-                  Launching Soon
+                  Integrating...
                 </div>
               </div>
             </Card>
