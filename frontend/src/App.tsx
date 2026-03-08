@@ -37,6 +37,7 @@ import Transactions from './pages/Transactions'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import AdCity from './pages/AdCity'
+import Shop from './pages/Shop'
 import WalletV2 from './pages/WalletV2'
 
 // Legal Pages
@@ -139,6 +140,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <AdCity />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/shop"
+          element={
+            <ProtectedRoute>
+              <Shop />
             </ProtectedRoute>
           }
         />
