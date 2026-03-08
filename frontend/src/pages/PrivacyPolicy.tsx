@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
             <strong>Effective Date:</strong> January 16, 2026
           </p>
           <p className="text-gray-300 mb-6">
-            At Ad Rewards ("we," "our," or "us"), we respect your privacy and
+            At Adify ("we," "our," or "us"), we respect your privacy and
             are committed to protecting your personal data. This Privacy Policy
             explains how we collect, use, share, and protect your information in
             compliance with the Protection of Personal Information Act (POPIA)

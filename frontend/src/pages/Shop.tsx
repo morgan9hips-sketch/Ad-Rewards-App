@@ -1,6 +1,6 @@
 import Card from '../components/Card'
 
-export default function Shop() {
+export default function AdStore() {
   const affiliateCategories = [
     { name: 'Electronics', icon: '💻', count: 0 },
     { name: 'Fashion', icon: '👕', count: 0 },
@@ -15,7 +15,7 @@ export default function Shop() {
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-2">🛒 Shop & Earn</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">🏪 Ad Store</h1>
         <p className="text-gray-400">
           Earn extra coins when you shop through our affiliate partners
         </p>
@@ -25,7 +25,7 @@ export default function Shop() {
         <div className="text-center py-8">
           <div className="text-6xl mb-4">🚀</div>
           <h2 className="text-2xl font-bold text-white mb-2">
-            Shopping Rewards Coming Soon!
+            Ad Store Coming Soon!
           </h2>
           <p className="text-gray-300 mb-4 max-w-2xl mx-auto">
             We're partnering with top retailers to bring you cashback and bonus coins on your purchases.

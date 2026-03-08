@@ -3,6 +3,8 @@ import {
   Routes,
   Route,
   Navigate,
+  useNavigate,
+  useLocation,
 } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { CurrencyProvider } from './contexts/CurrencyContext'
@@ -10,6 +12,7 @@ import { useInterstitialAd } from './hooks/useInterstitialAd'
 import CookieConsent from './components/CookieConsent'
 import TopHeader from './components/TopHeader'
 import BottomNavigation from './components/BottomNavigation'
+import FloatingHUD from './components/FloatingHUD'
 import LoadingSpinner from './components/LoadingSpinner'
 import Footer from './components/Footer'
 
@@ -37,7 +40,8 @@ import Transactions from './pages/Transactions'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import AdCity from './pages/AdCity'
-import Shop from './pages/Shop'
+import AdStore from './pages/Shop'
+import ShopNew from './pages/ShopNew'
 import WalletV2 from './pages/WalletV2'
 
 // Legal Pages
@@ -47,6 +51,25 @@ import Cookies from './pages/legal/Cookies'
 import AdMob from './pages/legal/AdMob'
 import Monetag from './pages/legal/Monetag'
 import DeleteAccount from './pages/legal/DeleteAccount'
+
+function NotFound() {
+  const navigate = useNavigate()
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white text-center px-4">
+      <div className="text-8xl mb-6">🔍</div>
+      <h1 className="text-4xl font-bold mb-4">404 — Page Not Found</h1>
+      <p className="text-gray-400 mb-8 max-w-md">
+        Oops! The page you're looking for doesn't exist or has been moved.
+      </p>
+      <button
+        onClick={() => navigate('/dashboard')}
+        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+      >
+        Go to Dashboard
+      </button>
+    </div>
+  )
+}
 
 function ProtectedRoute({
   children,
@@ -96,13 +119,15 @@ function ProtectedRoute({
 
 function AppContent() {
   const { isAuthenticated } = useAuth()
+  const location = useLocation()
 
-  useInterstitialAd()
+  useInterstitialAd(location.pathname)
 
   return (
     <div className="min-h-screen bg-black">
       <TopHeader />
       <CookieConsent />
+      {isAuthenticated && <FloatingHUD />}
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -147,7 +172,15 @@ function AppContent() {
           path="/shop"
           element={
             <ProtectedRoute>
-              <Shop />
+              <ShopNew />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ad-store"
+          element={
+            <ProtectedRoute>
+              <AdStore />
             </ProtectedRoute>
           }
         />
@@ -291,6 +324,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
       {isAuthenticated && <BottomNavigation />}

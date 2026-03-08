@@ -4,7 +4,7 @@ import Button from './Button'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 export default function TopHeader() {
-  const { user, isAuthenticated, signOut } = useAuth()
+  const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -23,13 +23,17 @@ export default function TopHeader() {
       '/rewards': 'Rewards',
       '/login': 'Sign In',
       '/signup': 'Sign Up',
+      '/shop': 'Shop',
+      '/ad-store': 'Ad Store',
+      '/wallet': 'Wallet',
+      '/ad-city': 'Ad City',
+      '/badges': 'Badges',
+      '/transactions': 'Transactions',
+      '/withdrawals': 'Withdrawals',
+      '/subscriptions': 'Subscriptions',
+      '/watch-ad': 'Watch Ad',
     }
     return pageNames[path] || 'Adify'
-  }
-
-  const handleSignOut = async () => {
-    await signOut()
-    navigate('/login')
   }
 
   const handleLogoClick = () => {
@@ -78,14 +82,13 @@ export default function TopHeader() {
 
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
-            <>
-              <span className="text-gray-400 text-sm hidden sm:block">
-                {user?.email}
-              </span>
-              <Button size="sm" variant="secondary" onClick={handleSignOut}>
-                Sign Out
-              </Button>
-            </>
+            <button
+              onClick={() => navigate('/settings')}
+              className="text-gray-400 hover:text-white transition-colors text-xl"
+              aria-label="Settings"
+            >
+              ⚙️
+            </button>
           ) : (
             <Button size="sm" onClick={() => navigate('/login')}>
               Sign In
