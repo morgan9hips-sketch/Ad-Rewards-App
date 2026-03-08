@@ -38,8 +38,7 @@ export default function Home() {
             Press Play to Earn Real Money
           </p>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Turn your time into rewards. Watch video ads, complete tasks, and
-            get paid through PayPal.
+            Turn your time into rewards. Complete tasks, earn coins, and redeem for airtime, gift cards, and vouchers.
           </p>
         </div>
 
@@ -90,8 +89,7 @@ export default function Home() {
               <div className="text-5xl mb-4">🎯</div>
               <h3 className="text-xl font-bold text-white mb-2">Get Paid</h3>
               <p className="text-gray-400">
-                Withdraw your earnings via PayPal once you reach the minimum
-                threshold.
+                Redeem your coins for airtime, gift cards, or store vouchers once you reach 10,000 coins (~$10 value).
               </p>
             </div>
           </Card>

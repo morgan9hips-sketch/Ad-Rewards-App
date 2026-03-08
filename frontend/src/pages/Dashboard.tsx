@@ -318,16 +318,16 @@ export default function Dashboard() {
           <Card>
             <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
             <div className="grid sm:grid-cols-2 gap-3">
-              <Button fullWidth onClick={() => navigate('/ads')}>
+              <Button fullWidth onClick={() => navigate('/ad-city')}>
                 <span className="flex items-center justify-center gap-2">
-                  <span>📺 Watch Videos</span>
+                  <span>🏙️ Complete Tasks</span>
                   <span className="flex items-center gap-1">
                     <img
                       src="/images/branding/Adcoin tiny 64x64.png"
                       alt="AdCoin"
                       className="w-5 h-5 inline"
                     />
-                    <span>100</span>
+                    <span>Earn Coins</span>
                   </span>
                 </span>
               </Button>

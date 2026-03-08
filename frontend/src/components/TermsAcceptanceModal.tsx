@@ -39,12 +39,16 @@ export default function TermsAcceptanceModal({
                   must be 18+ (or 13-17 with parental consent)
                 </li>
                 <li>
-                  <strong className="text-white">Earning System:</strong> Earn
-                  AdCoins by watching ads and playing games
+                  <strong className="text-white">Earning System:</strong> Complete tasks from partner networks (surveys, offers, games) to earn AdCoins
                 </li>
                 <li>
-                  <strong className="text-white">Withdrawal:</strong> Minimum
-                  20,000 coins required, PayPal only, 7-14 days processing
+                  <strong className="text-white">Redemption:</strong> Minimum 10,000 coins (~$10 USD equivalent) required. Redeem for airtime vouchers, gift cards, or store vouchers (varies by country)
+                </li>
+                <li>
+                  <strong className="text-white">Fulfillment:</strong> Manual processing within 1-7 business days. Rewards sent via email or in-app notification after approval
+                </li>
+                <li>
+                  <strong className="text-white">Available Rewards:</strong> Gift cards (Amazon, Google Play, Steam), mobile airtime (Vodacom, MTN), store vouchers (Takealot, Woolworths) - selection varies by country
                 </li>
                 <li>
                   <strong className="text-white">Balance Expiry:</strong> Coins
@@ -55,12 +59,10 @@ export default function TermsAcceptanceModal({
                   bots, multi-accounting, and fraud are strictly forbidden
                 </li>
                 <li>
-                  <strong className="text-white">AdMob Integration:</strong> We
-                  use Google AdMob to serve ads and collect advertising data
+                  <strong className="text-white">IP Address Collection:</strong> We collect your IP address for fraud prevention, geo-targeting eligible offers, and leaderboard rankings by region
                 </li>
                 <li>
-                  <strong className="text-white">Privacy:</strong> We collect
-                  your country (not exact location), usage data, and device info
+                  <strong className="text-white">Privacy:</strong> We collect your country (not exact location), task completion data, and device info for service operation
                 </li>
               </ul>
             </div>
@@ -93,14 +95,6 @@ export default function TermsAcceptanceModal({
                 >
                   🍪 Cookie Policy
                 </Link>
-                <span className="text-gray-500">•</span>
-                <Link
-                  to="/legal/admob"
-                  target="_blank"
-                  className="text-blue-400 hover:text-blue-300 underline text-sm"
-                >
-                  📱 AdMob Disclosure
-                </Link>
               </div>
             </div>
 
@@ -132,11 +126,11 @@ export default function TermsAcceptanceModal({
                   </Link>
                   , and{' '}
                   <Link
-                    to="/legal/admob"
+                    to="/legal/cookies"
                     target="_blank"
                     className="text-blue-400 hover:text-blue-300 underline"
                   >
-                    AdMob Data Usage Disclosure
+                    Cookie Policy
                   </Link>
                   .
                 </span>

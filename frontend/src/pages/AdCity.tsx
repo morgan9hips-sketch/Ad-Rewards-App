@@ -92,11 +92,42 @@ export default function AdCity() {
       </div>
 
       {tasks.length === 0 ? (
-        <Card>
-          <p className="text-center text-gray-400 py-8">
-            No tasks available in your region right now. Check back soon!
-          </p>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[
+            { type: 'Surveys', icon: '📋', color: 'blue' },
+            { type: 'Offers', icon: '🎁', color: 'purple' },
+            { type: 'Videos', icon: '📺', color: 'red' },
+            { type: 'App Installs', icon: '📱', color: 'green' },
+            { type: 'Shopping', icon: '🛒', color: 'yellow' },
+            { type: 'Games', icon: '🎮', color: 'pink' },
+          ].map((taskType) => (
+            <Card key={taskType.type} className="opacity-60">
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-xs px-2 py-1 bg-${taskType.color}-900 text-${taskType.color}-300 rounded`}>
+                    {taskType.type.toUpperCase()}
+                  </span>
+                  <span className="text-sm text-gray-500">Partner Network</span>
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                  <span className="text-2xl">{taskType.icon}</span>
+                  {taskType.type}
+                </h3>
+                <p className="text-sm text-gray-400">
+                  Complete {taskType.type.toLowerCase()} from our partner networks to earn coins
+                </p>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-gray-500 font-bold text-lg">
+                  Coming Soon
+                </div>
+                <div className="px-4 py-2 bg-gray-800 text-gray-500 rounded text-sm cursor-not-allowed">
+                  Launching Soon
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {tasks.map((task) => (
