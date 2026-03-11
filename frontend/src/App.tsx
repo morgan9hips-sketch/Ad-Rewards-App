@@ -127,7 +127,7 @@ function AppContent() {
 
   return (
     <div
-      className={`min-h-screen ${isMemberHomeDashboard ? 'bg-slate-100' : 'bg-black'}`}
+      className={`min-h-screen ${isMemberHomeDashboard ? 'bg-slate-950' : 'bg-black'}`}
     >
       {!isMemberHomeDashboard && <TopHeader />}
       <CookieConsent />

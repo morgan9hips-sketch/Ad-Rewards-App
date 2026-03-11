@@ -59,8 +59,8 @@ const featuredOffers = [
   {
     title: 'Premium Shopping Cashback',
     description:
-      'Activate this offer and earn boosted cashback on your next checkout.',
-    rewardLabel: 'Earn 30 SB',
+      'Activate this offer and unlock boosted earning multipliers on your next checkout.',
+    rewardLabel: 'Earn 30 AD COINS',
     imageSrc: '/images/branding/logo-full.png',
     imageAlt: 'Premium shopping cashback offer',
     actionLabel: 'Activate Offer',
@@ -69,8 +69,8 @@ const featuredOffers = [
   {
     title: 'Complete a Daily Survey',
     description:
-      'Answer today’s survey set and unlock bonus points after completion.',
-    rewardLabel: 'Earn 24 SB',
+      'Answer today’s high-value survey set and get accelerated AD COINS payouts.',
+    rewardLabel: 'Earn 24 AD COINS',
     imageSrc: '/images/branding/logo-icon.png',
     imageAlt: 'Daily survey offer',
     actionLabel: 'Take Survey',
@@ -79,8 +79,8 @@ const featuredOffers = [
   {
     title: 'Weekend Play Bonus',
     description:
-      'Hit high scores in mini games to claim a limited-time weekend boost.',
-    rewardLabel: 'Earn 18 SB',
+      'Hit high scores in mini games to claim a limited-time AD COINS bonus.',
+    rewardLabel: 'Earn 18 AD COINS',
     imageSrc: '/images/branding/Adcoin medium 256x256.png',
     imageAlt: 'Weekend play bonus offer',
     actionLabel: 'Play Now',
@@ -89,10 +89,10 @@ const featuredOffers = [
 ]
 
 const surveyRows = [
-  { topic: 'Streaming Habits', reward: '12 SB', estTime: '6 min' },
-  { topic: 'Mobile Gaming Trends', reward: '16 SB', estTime: '8 min' },
-  { topic: 'Smart Shopping Preferences', reward: '20 SB', estTime: '11 min' },
-  { topic: 'Travel and Lifestyle', reward: '15 SB', estTime: '7 min' },
+  { topic: 'Streaming Habits', reward: '12 AD COINS', estTime: '6 min' },
+  { topic: 'Mobile Gaming Trends', reward: '16 AD COINS', estTime: '8 min' },
+  { topic: 'Smart Shopping Preferences', reward: '20 AD COINS', estTime: '11 min' },
+  { topic: 'Travel and Lifestyle', reward: '15 AD COINS', estTime: '7 min' },
 ]
 
 const shopTiles = [
@@ -145,12 +145,6 @@ export default function Dashboard() {
     'w-full',
   ]
 
-  useEffect(() => {
-    if (!toastMessage) return
-    const timer = window.setTimeout(() => setToastMessage(null), 2600)
-    return () => window.clearTimeout(timer)
-  }, [toastMessage])
-
   const fetchDashboardData = useCallback(async () => {
     try {
       const token = session?.access_token
@@ -201,10 +195,16 @@ export default function Dashboard() {
     fetchDashboardData()
   }, [fetchDashboardData])
 
+  useEffect(() => {
+    if (!toastMessage) return
+    const timer = window.setTimeout(() => setToastMessage(null), 2600)
+    return () => window.clearTimeout(timer)
+  }, [toastMessage])
+
   const getDisplayName = () =>
     profile?.displayName || user?.email?.split('@')[0] || 'Member'
 
-  const formatPoints = (value: string | number | null | undefined) => {
+  const formatCoins = (value: string | number | null | undefined) => {
     if (value === null || value === undefined) return '0'
     const parsed = Number(value)
     if (Number.isNaN(parsed)) return '0'
@@ -249,7 +249,7 @@ export default function Dashboard() {
         return {
           id: tx.id,
           title: tx.description || tx.type,
-          amount: `${amount > 0 ? '+' : ''}${formatPoints(tx.coinsChange)} SB`,
+          amount: `${amount > 0 ? '+' : ''}${formatCoins(tx.coinsChange)} AD COINS`,
           status,
           time: new Date(tx.createdAt).toLocaleDateString(),
         }
@@ -260,14 +260,14 @@ export default function Dashboard() {
       {
         id: 1,
         title: 'Daily Survey Completed',
-        amount: '+12 SB',
+        amount: '+12 AD COINS',
         status: 'Posted',
         time: 'Today',
       },
       {
         id: 2,
         title: 'Featured Offer Validation',
-        amount: '+18 SB',
+        amount: '+18 AD COINS',
         status: 'Pending',
         time: 'Today',
       },
@@ -302,7 +302,7 @@ export default function Dashboard() {
 
   const handleDailyPoll = () => {
     setPollCompleted(true)
-    setToastMessage("Daily Poll completed! +5 SB added to today's goal.")
+    setToastMessage('Daily Poll completed! +5 AD COINS added to today\'s goal.')
   }
 
   const handleQuickLink = (link: 'poll' | 'receipts' | 'refer' | 'gift') => {
@@ -338,30 +338,30 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center bg-slate-100">
+      <div className="min-h-[70vh] flex items-center justify-center bg-slate-950 text-slate-100 antialiased dark">
         <LoadingSpinner
           size="large"
           withLogo={true}
-          text="Loading your member home..."
+          text="Loading your enterprise earning dashboard..."
         />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 pb-28 xl:pb-10 text-slate-900">
+    <div className="dark min-h-screen bg-slate-950 pb-28 text-slate-100 antialiased xl:pb-10">
       {showTermsModal && <TermsAcceptanceModal onAccept={handleTermsAccept} />}
       {showProfileSetup && (
         <ProfileSetup onComplete={handleProfileSetupComplete} />
       )}
 
       <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <nav className="rounded-[12px] border border-slate-200 bg-white px-4 py-3 shadow-sm">
+        <nav className="rounded-[12px] border border-slate-800 bg-slate-900/50 px-4 py-3 shadow-sm backdrop-blur-sm">
           <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
-              className="shrink-0"
+              className="shrink-0 transition duration-200 hover:opacity-90"
               aria-label="Go to member home"
             >
               <img
@@ -376,37 +376,37 @@ export default function Dashboard() {
               />
             </button>
 
-            <div className="hidden flex-1 items-center justify-center gap-2 md:flex">
+            <div className="hidden flex-1 items-center justify-center gap-6 md:flex">
               <button
                 type="button"
                 onClick={() => navigate('/shop')}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex items-center gap-2 text-[14px] font-medium text-slate-300 transition duration-200 hover:text-emerald-400"
               >
-                <Store size={16} />
+                <Store size={18} />
                 Shop
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/ad-city')}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex items-center gap-2 text-[14px] font-medium text-slate-300 transition duration-200 hover:text-emerald-400"
               >
-                <ClipboardList size={16} />
+                <ClipboardList size={18} />
                 Answer
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/mini-games')}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex items-center gap-2 text-[14px] font-medium text-slate-300 transition duration-200 hover:text-emerald-400"
               >
-                <Gamepad2 size={16} />
+                <Gamepad2 size={18} />
                 Play
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/ad-city')}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="inline-flex items-center gap-2 text-[14px] font-medium text-slate-300 transition duration-200 hover:text-emerald-400"
               >
-                <Compass size={16} />
+                <Compass size={18} />
                 Discover
               </button>
             </div>
@@ -415,19 +415,19 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => setShowActivityPanel(true)}
-                className="hidden items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 md:inline-flex"
+                className="hidden items-center rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400 md:inline-flex"
               >
-                <History size={16} />
-                Recent Activity
+                <History size={18} />
+                <span className="ml-2">Recent Activity</span>
               </button>
 
-              <div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-[#f5af02] transition hover:animate-pulse">
-                {formatPoints(userStats.pointsBalance)} SB
+              <div className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-5 py-2 text-sm font-semibold text-emerald-300 shadow-lg shadow-emerald-500/20">
+                {formatCoins(userStats.pointsBalance)} AD COINS
               </div>
 
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2">
-                <CircleUserRound size={18} className="text-[#005da4]" />
-                <span className="max-w-28 truncate text-sm font-semibold text-slate-700">
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900 px-3 py-2">
+                <CircleUserRound size={18} className="text-blue-400" />
+                <span className="max-w-28 truncate text-sm font-semibold text-slate-200">
                   {getDisplayName()}
                 </span>
               </div>
@@ -438,53 +438,55 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => navigate('/shop')}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400"
             >
-              <Store size={14} /> Shop
+              <Store size={18} /> Shop
             </button>
             <button
               type="button"
               onClick={() => navigate('/ad-city')}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400"
             >
-              <ClipboardList size={14} /> Answer
+              <ClipboardList size={18} /> Answer
             </button>
             <button
               type="button"
               onClick={() => navigate('/mini-games')}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400"
             >
-              <Gamepad2 size={14} /> Play
+              <Gamepad2 size={18} /> Play
             </button>
             <button
               type="button"
               onClick={() => navigate('/ad-city')}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400"
             >
-              <Compass size={14} /> Discover
+              <Compass size={18} /> Discover
             </button>
           </div>
         </nav>
 
-        <section className="mt-5 rounded-[12px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <section className="mt-5 rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm sm:p-5">
           <div className="grid gap-4 lg:grid-cols-[1.2fr_auto] lg:items-center">
             <div>
-              <p className="text-sm font-semibold text-[#005da4]">Daily Goal</p>
-              <p className="mt-1 text-sm font-medium text-slate-700">
-                Goal 1: 30 SB
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-slate-300">
+                Daily Goal
               </p>
-              <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-200">
+              <p className="mt-1 text-[12px] font-semibold uppercase tracking-wider text-emerald-400">
+                Goal 1: 30 AD COINS
+              </p>
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-800">
                 <div
-                  className={`h-full rounded-full bg-[#005da4] transition-all ${goalWidthClass}`}
+                  className={`h-full rounded-full bg-blue-500 transition-all duration-200 ${goalWidthClass}`}
                 />
               </div>
-              <p className="mt-2 text-xs text-slate-500">
-                {userStats.dailyProgress} / {userStats.dailyGoal} SB completed
+              <p className="mt-2 text-xs text-slate-400">
+                {userStats.dailyProgress} / {userStats.dailyGoal} AD COINS completed
               </p>
             </div>
 
-            <div className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-600">
-              <Flame size={16} />
+            <div className="inline-flex items-center gap-2 rounded-full border border-orange-400/20 bg-orange-500/10 px-4 py-2 text-sm font-semibold text-orange-300">
+              <Flame size={18} />
               Daily Streak: {userStats.dailyStreak} days
             </div>
           </div>
@@ -492,8 +494,8 @@ export default function Dashboard() {
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
           <aside className="hidden xl:block">
-            <div className="rounded-[12px] border border-slate-200 bg-white p-4 shadow-sm">
-              <h2 className="text-sm font-bold uppercase tracking-wide text-[#005da4]">
+            <div className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm">
+              <h2 className="text-sm font-bold uppercase tracking-wide text-slate-300">
                 Quick Links
               </h2>
 
@@ -501,10 +503,10 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => handleQuickLink('poll')}
-                  className="flex w-full items-center justify-between rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50"
+                  className="flex w-full items-center justify-between rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <ClipboardList size={15} className="text-[#005da4]" />
+                    <ClipboardList size={18} />
                     Daily Poll
                   </span>
                 </button>
@@ -512,10 +514,10 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => handleQuickLink('receipts')}
-                  className="flex w-full items-center justify-between rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50"
+                  className="flex w-full items-center justify-between rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <Receipt size={15} className="text-[#005da4]" />
+                    <Receipt size={18} />
                     Magic Receipts
                   </span>
                 </button>
@@ -523,10 +525,10 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => handleQuickLink('refer')}
-                  className="flex w-full items-center justify-between rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50"
+                  className="flex w-full items-center justify-between rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <Users size={15} className="text-[#005da4]" />
+                    <Users size={18} />
                     Refer & Earn
                   </span>
                 </button>
@@ -534,10 +536,10 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => handleQuickLink('gift')}
-                  className="flex w-full items-center justify-between rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50"
+                  className="flex w-full items-center justify-between rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <Gift size={15} className="text-[#005da4]" />
+                    <Gift size={18} />
                     Gift Card Store
                   </span>
                 </button>
@@ -546,14 +548,12 @@ export default function Dashboard() {
           </aside>
 
           <main className="space-y-6">
-            <section className="rounded-[12px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <section className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm sm:p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">
-                    Featured Offers
-                  </h2>
-                  <p className="text-sm text-slate-500">
-                    Handpicked ways to maximize today’s earnings.
+                  <h2 className="text-lg font-bold text-slate-100">Featured Offers</h2>
+                  <p className="text-sm text-slate-400">
+                    Handpicked ways to maximize today’s AD COINS earnings.
                   </p>
                 </div>
 
@@ -565,10 +565,10 @@ export default function Dashboard() {
                         current === 0 ? featuredOffers.length - 1 : current - 1,
                       )
                     }
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:bg-slate-50"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-slate-200 transition duration-200 hover:bg-slate-700"
                     aria-label="Previous offer"
                   >
-                    <ChevronLeft size={16} />
+                    <ChevronLeft size={18} />
                   </button>
                   <button
                     type="button"
@@ -577,10 +577,10 @@ export default function Dashboard() {
                         current === featuredOffers.length - 1 ? 0 : current + 1,
                       )
                     }
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:bg-slate-50"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-slate-800 text-slate-200 transition duration-200 hover:bg-slate-700"
                     aria-label="Next offer"
                   >
-                    <ChevronRight size={16} />
+                    <ChevronRight size={18} />
                   </button>
                 </div>
               </div>
@@ -594,6 +594,7 @@ export default function Dashboard() {
                   imageAlt={currentOffer.imageAlt}
                   actionLabel={currentOffer.actionLabel}
                   onAction={() => navigate(currentOffer.path)}
+                  hero
                 />
               </div>
 
@@ -603,8 +604,8 @@ export default function Dashboard() {
                     key={offer.title}
                     type="button"
                     onClick={() => setOfferIndex(index)}
-                    className={`h-2.5 w-2.5 rounded-full transition ${
-                      index === offerIndex ? 'bg-[#005da4]' : 'bg-slate-300'
+                    className={`h-2.5 w-2.5 rounded-full transition duration-200 ${
+                      index === offerIndex ? 'bg-blue-500' : 'bg-slate-700'
                     }`}
                     aria-label={`View offer ${index + 1}`}
                   />
@@ -612,16 +613,14 @@ export default function Dashboard() {
               </div>
             </section>
 
-            <section className="rounded-[12px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-              <h2 className="text-lg font-bold text-slate-900">
-                Recommended Surveys
-              </h2>
-              <p className="text-sm text-slate-500">
+            <section className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm sm:p-5">
+              <h2 className="text-lg font-bold text-slate-100">Recommended Surveys</h2>
+              <p className="text-sm text-slate-400">
                 Fast-start surveys selected for your profile.
               </p>
 
-              <div className="mt-4 overflow-hidden rounded-[12px] border border-slate-200">
-                <div className="hidden grid-cols-[1.2fr_0.5fr_0.5fr_0.45fr] bg-slate-50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500 md:grid">
+              <div className="mt-4 overflow-hidden rounded-[12px] border border-slate-800">
+                <div className="hidden grid-cols-[1.2fr_0.7fr_0.6fr_0.45fr] bg-slate-950/70 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-400 md:grid">
                   <span>Topic</span>
                   <span>Reward</span>
                   <span>Est. Time</span>
@@ -631,22 +630,18 @@ export default function Dashboard() {
                 {surveyRows.map((survey) => (
                   <div
                     key={survey.topic}
-                    className="grid gap-3 border-t border-slate-200 px-4 py-3 md:grid-cols-[1.2fr_0.5fr_0.5fr_0.45fr] md:items-center"
+                    className="grid gap-3 border-t border-slate-800 px-4 py-2 md:grid-cols-[1.2fr_0.7fr_0.6fr_0.45fr] md:items-center md:h-16"
                   >
-                    <p className="text-sm font-semibold text-slate-800">
-                      {survey.topic}
-                    </p>
-                    <p className="text-sm font-bold text-[#f5af02]">
-                      {survey.reward}
-                    </p>
-                    <p className="inline-flex items-center gap-1 text-sm text-slate-500">
-                      <Clock3 size={14} /> {survey.estTime}
+                    <p className="text-sm font-semibold text-slate-200">{survey.topic}</p>
+                    <p className="text-sm font-bold text-emerald-400">{survey.reward}</p>
+                    <p className="inline-flex items-center gap-2 text-sm text-slate-400">
+                      <Clock3 size={18} /> {survey.estTime}
                     </p>
                     <div className="md:text-right">
                       <button
                         type="button"
                         onClick={() => navigate('/ad-city')}
-                        className="inline-flex items-center rounded-full bg-[#005da4] px-4 py-2 text-xs font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                        className="inline-flex items-center rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400"
                       >
                         Start
                       </button>
@@ -656,9 +651,9 @@ export default function Dashboard() {
               </div>
             </section>
 
-            <section className="rounded-[12px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-              <h2 className="text-lg font-bold text-slate-900">Shop & Earn</h2>
-              <p className="text-sm text-slate-500">
+            <section className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm sm:p-5">
+              <h2 className="text-lg font-bold text-slate-100">Shop & Earn</h2>
+              <p className="text-sm text-slate-400">
                 Earn cashback rewards from top partner stores.
               </p>
 
@@ -666,17 +661,13 @@ export default function Dashboard() {
                 {shopTiles.map((brand) => (
                   <div
                     key={brand.name}
-                    className="rounded-[12px] border border-slate-200 bg-white p-3 text-center shadow-sm"
+                    className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-3 text-center shadow-sm backdrop-blur-sm"
                   >
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#005da4]/10 text-sm font-bold text-[#005da4]">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-sm font-bold text-emerald-400">
                       {brand.name.slice(0, 2).toUpperCase()}
                     </div>
-                    <p className="mt-2 text-sm font-semibold text-slate-800">
-                      {brand.name}
-                    </p>
-                    <p className="mt-1 text-xs font-semibold text-[#f5af02]">
-                      {brand.payout}
-                    </p>
+                    <p className="mt-2 text-sm font-semibold text-slate-200">{brand.name}</p>
+                    <p className="mt-1 text-xs font-semibold text-emerald-400">{brand.payout}</p>
                   </div>
                 ))}
               </div>
@@ -685,38 +676,38 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white px-4 py-2 shadow-[0_-2px_10px_rgba(15,23,42,0.08)] xl:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-800 bg-slate-950/95 px-4 py-2 backdrop-blur-sm xl:hidden">
         <div className="grid grid-cols-4 gap-2">
           <button
             type="button"
             onClick={() => handleQuickLink('poll')}
-            className="flex flex-col items-center gap-1 rounded-full px-2 py-2 text-[11px] font-semibold text-slate-700"
+            className="flex flex-col items-center gap-1 rounded-full border border-white/10 bg-blue-500 px-2 py-2 text-[11px] font-semibold text-white transition duration-200 hover:bg-blue-400"
           >
-            <ClipboardList size={16} className="text-[#005da4]" />
+            <ClipboardList size={18} />
             Daily Poll
           </button>
           <button
             type="button"
             onClick={() => handleQuickLink('receipts')}
-            className="flex flex-col items-center gap-1 rounded-full px-2 py-2 text-[11px] font-semibold text-slate-700"
+            className="flex flex-col items-center gap-1 rounded-full border border-white/10 bg-blue-500 px-2 py-2 text-[11px] font-semibold text-white transition duration-200 hover:bg-blue-400"
           >
-            <Receipt size={16} className="text-[#005da4]" />
+            <Receipt size={18} />
             Receipts
           </button>
           <button
             type="button"
             onClick={() => handleQuickLink('refer')}
-            className="flex flex-col items-center gap-1 rounded-full px-2 py-2 text-[11px] font-semibold text-slate-700"
+            className="flex flex-col items-center gap-1 rounded-full border border-white/10 bg-blue-500 px-2 py-2 text-[11px] font-semibold text-white transition duration-200 hover:bg-blue-400"
           >
-            <Users size={16} className="text-[#005da4]" />
+            <Users size={18} />
             Refer
           </button>
           <button
             type="button"
             onClick={() => handleQuickLink('gift')}
-            className="flex flex-col items-center gap-1 rounded-full px-2 py-2 text-[11px] font-semibold text-slate-700"
+            className="flex flex-col items-center gap-1 rounded-full border border-white/10 bg-blue-500 px-2 py-2 text-[11px] font-semibold text-white transition duration-200 hover:bg-blue-400"
           >
-            <Gift size={16} className="text-[#005da4]" />
+            <Gift size={18} />
             Gift Store
           </button>
         </div>
@@ -726,23 +717,21 @@ export default function Dashboard() {
         <div className="fixed inset-0 z-50">
           <button
             type="button"
-            className="absolute inset-0 bg-slate-900/45"
+            className="absolute inset-0 bg-slate-950/70"
             onClick={() => setShowActivityPanel(false)}
             aria-label="Close activity panel"
           />
 
-          <aside className="absolute right-0 top-0 h-full w-full max-w-md border-l border-slate-200 bg-white p-5 shadow-xl">
+          <aside className="absolute right-0 top-0 h-full w-full max-w-md border-l border-slate-800 bg-slate-950 p-5 shadow-xl">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900">
-                Recent Activity
-              </h3>
+              <h3 className="text-lg font-bold text-slate-100">Recent Activity</h3>
               <button
                 type="button"
                 onClick={() => setShowActivityPanel(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-slate-900 text-slate-200 transition duration-200 hover:bg-slate-800"
                 aria-label="Close"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 
@@ -750,34 +739,30 @@ export default function Dashboard() {
               {activityRows.map((row) => (
                 <div
                   key={row.id}
-                  className="rounded-[12px] border border-slate-200 bg-white p-3"
+                  className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-3 backdrop-blur-sm"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">
-                        {row.title}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">{row.time}</p>
+                      <p className="text-sm font-semibold text-slate-200">{row.title}</p>
+                      <p className="mt-1 text-xs text-slate-400">{row.time}</p>
                     </div>
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
                         row.status === 'Posted'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : 'bg-amber-100 text-amber-700'
+                          ? 'bg-emerald-500/15 text-emerald-300'
+                          : 'bg-amber-500/15 text-amber-300'
                       }`}
                     >
                       {row.status === 'Posted' ? (
-                        <CheckCircle2 size={12} />
+                        <CheckCircle2 size={18} />
                       ) : (
-                        <Hourglass size={12} />
+                        <Hourglass size={18} />
                       )}
                       {row.status}
                     </span>
                   </div>
 
-                  <p className="mt-2 text-sm font-bold text-[#f5af02]">
-                    {row.amount}
-                  </p>
+                  <p className="mt-2 text-sm font-bold text-emerald-400">{row.amount}</p>
                 </div>
               ))}
             </div>
@@ -786,9 +771,9 @@ export default function Dashboard() {
       )}
 
       {toastMessage && (
-        <div className="fixed right-4 top-4 z-[60] rounded-[12px] border border-[#005da4]/20 bg-white px-4 py-3 shadow-lg">
-          <div className="flex items-center gap-2 text-sm font-semibold text-[#005da4]">
-            <CheckCircle2 size={16} />
+        <div className="fixed right-4 top-4 z-[60] rounded-[12px] border border-emerald-400/20 bg-slate-900 px-4 py-3 shadow-lg shadow-emerald-500/20">
+          <div className="flex items-center gap-2 text-sm font-semibold text-emerald-300">
+            <CheckCircle2 size={18} />
             {toastMessage}
           </div>
         </div>
