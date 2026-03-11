@@ -120,14 +120,18 @@ function ProtectedRoute({
 function AppContent() {
   const { isAuthenticated } = useAuth()
   const location = useLocation()
+  const isMemberHomeDashboard =
+    isAuthenticated && location.pathname === '/dashboard'
 
   useInterstitialAd(location.pathname)
 
   return (
-    <div className="min-h-screen bg-black">
-      <TopHeader />
+    <div
+      className={`min-h-screen ${isMemberHomeDashboard ? 'bg-slate-100' : 'bg-black'}`}
+    >
+      {!isMemberHomeDashboard && <TopHeader />}
       <CookieConsent />
-      {isAuthenticated && <FloatingHUD />}
+      {isAuthenticated && !isMemberHomeDashboard && <FloatingHUD />}
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -327,8 +331,8 @@ function AppContent() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {isAuthenticated && <BottomNavigation />}
-      <Footer />
+      {isAuthenticated && !isMemberHomeDashboard && <BottomNavigation />}
+      {!isMemberHomeDashboard && <Footer />}
     </div>
   )
 }
