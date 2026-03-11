@@ -327,8 +327,8 @@ export async function getUserCurrencyInfo(
   let displayCurrency: string
 
   // Always use location-based detection - no manual currency selection allowed
-  if (method === 'coordinates' && detectedCountry) {
-    // Use country detected from coordinates (most accurate)
+  if ((method === 'coordinates' || method === 'ip') && detectedCountry) {
+    // Use country detected from coordinates or IP
     displayCurrency = getCurrencyForCountry(detectedCountry)
 
     // Update the user's detected country in the database

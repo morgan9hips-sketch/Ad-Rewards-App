@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { AuthRequest } from '../middleware/auth.js'
+import { getUserCurrencyInfo } from '../services/currencyService.js'
+import { getClientIP, detectCountryFromIP } from '../services/geoService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -15,15 +17,12 @@ router.get('/stats/24h', async (req: AuthRequest, res) => {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-    // Get user's currency preference if authenticated, otherwise default to USD
-    let currency = 'USD'
-    if (req.user?.id) {
-      const profile = await prisma.userProfile.findUnique({
-        where: { userId: req.user.id },
-        select: { preferredCurrency: true },
-      })
-      currency = profile?.preferredCurrency || 'USD'
-    }
+    // Geo-currency: same logic as /api/user/currency-info (IP-based)
+    const ipAddress = getClientIP(req)
+    const detectedCountry = detectCountryFromIP(ipAddress) || undefined
+    const currencyInfo = req.user?.id
+      ? await getUserCurrencyInfo(req.user.id, 'ip', detectedCountry)
+      : { displayCurrency: 'USD', exchangeRate: 1 }
 
     // Get withdrawals from last 24 hours
     const withdrawals = await prisma.withdrawal.findMany({
@@ -37,24 +36,21 @@ router.get('/stats/24h', async (req: AuthRequest, res) => {
 
     const totalWithdrawals = withdrawals.length
     
-    // Calculate total paid out in user's currency
-    let totalPaidOut = 0
-    withdrawals.forEach((w) => {
-      if (w.currencyCode === currency) {
-        totalPaidOut += parseFloat(w.amountLocal.toString())
-      } else {
-        // For simplicity, use USD as fallback
-        totalPaidOut += parseFloat(w.amountUsd.toString())
-      }
-    })
+    // Sum in USD (single source of truth), then convert to viewer's geo currency
+    const totalPaidOutUsd = withdrawals.reduce(
+      (sum, w) => sum + parseFloat(w.amountUsd.toString()),
+      0,
+    )
 
-    const avgPayout = totalWithdrawals > 0 ? totalPaidOut / totalWithdrawals : 0
+    const totalPaidOutLocal = totalPaidOutUsd * currencyInfo.exchangeRate
+    const avgPayoutLocal =
+      totalWithdrawals > 0 ? totalPaidOutLocal / totalWithdrawals : 0
 
     res.json({
       totalWithdrawals,
-      totalPaidOut: Math.round(totalPaidOut),
-      currency,
-      avgPayout: Math.round(avgPayout),
+      totalPaidOut: Number(totalPaidOutLocal.toFixed(2)),
+      currency: currencyInfo.displayCurrency,
+      avgPayout: Number(avgPayoutLocal.toFixed(2)),
     })
   } catch (error) {
     console.error('Error fetching platform stats:', error)

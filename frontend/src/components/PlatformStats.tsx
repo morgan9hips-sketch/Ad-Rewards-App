@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
+import { useCurrency } from '../contexts/CurrencyContext'
 
 interface PlatformStatsData {
   totalWithdrawals: number
@@ -13,6 +14,33 @@ export default function PlatformStats() {
   const { session } = useAuth()
   const [stats, setStats] = useState<PlatformStatsData | null>(null)
   const [loading, setLoading] = useState(true)
+  const { currencyInfo, formatAmount } = useCurrency()
+
+  const formatPossiblyLocal = (amount: number): string => {
+    // `formatAmount` expects an amount in USD and converts using exchangeRate.
+    // The platform stats endpoint may already return an amount in a local currency.
+    if (!currencyInfo) return amount.toLocaleString()
+
+    if (stats?.currency === 'USD') {
+      return formatAmount(amount)
+    }
+
+    if (stats?.currency && stats.currency === currencyInfo.displayCurrency) {
+      const decimals = currencyInfo.formatting.decimals
+      const formatted = amount.toFixed(decimals)
+      const withCommas = parseFloat(formatted).toLocaleString('en-US', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })
+
+      if (currencyInfo.formatting.position === 'before') {
+        return `${currencyInfo.formatting.symbol}${withCommas}`
+      }
+      return `${withCommas}${currencyInfo.formatting.symbol}`
+    }
+
+    return `${stats?.currency || ''} ${amount.toLocaleString()}`
+  }
 
   useEffect(() => {
     fetchStats()
@@ -73,13 +101,13 @@ export default function PlatformStats() {
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-400">Total Paid Out</span>
           <span className="text-lg font-bold text-green-500">
-            {stats.currency} {stats.totalPaidOut.toLocaleString()}
+            {formatPossiblyLocal(stats.totalPaidOut)}
           </span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-400">Average Payout</span>
           <span className="text-lg font-bold text-blue-500">
-            {stats.currency} {stats.avgPayout.toFixed(2)}
+            {formatPossiblyLocal(stats.avgPayout)}
           </span>
         </div>
       </div>

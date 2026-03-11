@@ -5,7 +5,6 @@ import {
   useEffect,
   ReactNode,
 } from 'react'
-import { useAuth } from './AuthContext'
 import { API_BASE_URL } from '../config/api'
 import { supabase } from '../lib/supabase'
 
@@ -23,6 +22,41 @@ interface CurrencyInfo {
   locationRequired: boolean
 }
 
+const CURRENCY_CACHE_KEY = 'adify_currency_info_v1'
+
+const buildUsdFallbackCurrencyInfo = (): CurrencyInfo => ({
+  displayCurrency: 'USD',
+  revenueCountry: null,
+  displayCountry: null,
+  exchangeRate: 1,
+  formatting: { symbol: '$', decimals: 2, position: 'before' },
+  locationDetected: false,
+  locationRequired: false,
+})
+
+const readCachedCurrencyInfo = (): CurrencyInfo | null => {
+  try {
+    const raw = localStorage.getItem(CURRENCY_CACHE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as { value?: CurrencyInfo; cachedAt?: number }
+    if (!parsed?.value) return null
+    return parsed.value
+  } catch {
+    return null
+  }
+}
+
+const writeCachedCurrencyInfo = (value: CurrencyInfo) => {
+  try {
+    localStorage.setItem(
+      CURRENCY_CACHE_KEY,
+      JSON.stringify({ value, cachedAt: Date.now() }),
+    )
+  } catch {
+    // ignore cache write failures
+  }
+}
+
 interface CurrencyContextType {
   currencyInfo: CurrencyInfo | null
   loading: boolean
@@ -37,7 +71,6 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(
 )
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const { session } = useAuth()
   const [currencyInfo, setCurrencyInfo] = useState<CurrencyInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [locationError, setLocationError] = useState(false)
@@ -61,23 +94,22 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true)
 
+      // If we have a recent cached currency, show it immediately while refreshing.
+      // This prevents "flashing" to USD during brief backend hiccups.
+      const cached = readCachedCurrencyInfo()
+      if (cached && !currencyInfo) {
+        setCurrencyInfo(cached)
+      }
+
       // Get the current user session
       const {
         data: { session },
       } = await supabase.auth.getSession()
 
       if (!session?.access_token) {
-        console.log('No authentication session - using fallback currency')
+        console.log('No authentication session - using cached or fallback currency')
         // Set fallback IMMEDIATELY - don't block UI
-        setCurrencyInfo({
-          displayCurrency: 'USD',
-          revenueCountry: null,
-          displayCountry: null,
-          exchangeRate: 1,
-          formatting: { symbol: '$', decimals: 2, position: 'before' },
-          locationDetected: false,
-          locationRequired: false,
-        })
+        setCurrencyInfo(cached || buildUsdFallbackCurrencyInfo())
         setLoading(false)
         return
       }
@@ -96,11 +128,13 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         const data = await response.json()
         console.log('Currency info loaded:', data)
-        setCurrencyInfo({
+        const next: CurrencyInfo = {
           ...data,
           locationDetected: data.locationDetected || false,
           locationRequired: data.locationRequired || false,
-        })
+        }
+        setCurrencyInfo(next)
+        writeCachedCurrencyInfo(next)
         setLocationError(false)
       } else {
         const errorData = await response.json().catch(() => ({}))
@@ -108,32 +142,17 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         // Don't block - allow IP-based fallback
         setLocationError(false)
 
-        // Set basic fallback currency info
-        setCurrencyInfo({
-          displayCurrency: 'USD',
-          revenueCountry: null,
-          displayCountry: null,
-          exchangeRate: 1,
-          formatting: { symbol: '$', decimals: 2, position: 'before' },
-          locationDetected: false,
-          locationRequired: false,
-        })
+        // Prefer cached geo-currency; otherwise USD fallback
+        setCurrencyInfo(cached || buildUsdFallbackCurrencyInfo())
       }
     } catch (error) {
       console.error('Error loading currency info:', error)
       // Don't block - allow access with fallback
       setLocationError(false)
 
-      // Set basic fallback currency info
-      setCurrencyInfo({
-        displayCurrency: 'USD',
-        revenueCountry: null,
-        displayCountry: null,
-        exchangeRate: 1,
-        formatting: { symbol: '$', decimals: 2, position: 'before' },
-        locationDetected: false,
-        locationRequired: false,
-      })
+      // Prefer cached geo-currency; otherwise USD fallback
+      const cached = readCachedCurrencyInfo()
+      setCurrencyInfo(cached || buildUsdFallbackCurrencyInfo())
     } finally {
       setLoading(false)
     }

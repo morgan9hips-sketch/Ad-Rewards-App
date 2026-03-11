@@ -235,7 +235,12 @@ router.get('/balance', async (req: AuthRequest, res) => {
     const cashUSD = parseFloat(profile.cashBalanceUsd.toString())
 
     // Get user's currency info
-    const currencyInfo = await getUserCurrencyInfo(userId, ipAddress)
+    const detectedCountry = detectCountryFromIP(ipAddress) || undefined
+    const currencyInfo = await getUserCurrencyInfo(
+      userId,
+      'ip',
+      detectedCountry,
+    )
     const cashLocal = cashUSD * currencyInfo.exchangeRate
 
     // Format the local amount
@@ -305,7 +310,8 @@ router.get('/currency-info', async (req: AuthRequest, res) => {
 
     // Fallback to IP-based detection
     if (!currencyInfo) {
-      currencyInfo = await getUserCurrencyInfo(userId, ipAddress)
+      const detectedCountry = detectCountryFromIP(ipAddress) || undefined
+      currencyInfo = await getUserCurrencyInfo(userId, 'ip', detectedCountry)
       locationDetected = false
     }
 

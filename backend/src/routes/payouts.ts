@@ -2,8 +2,12 @@ import { Router } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { AuthRequest } from '../middleware/auth.js'
 import { createPayout, getPayoutStatus } from '../services/paypalService.js'
-import { getUserCurrencyInfo, convertFromUSD, CURRENCY_FORMATS } from '../services/currencyService.js'
-import { getClientIP } from '../services/geoService.js'
+import {
+  getUserCurrencyInfo,
+  convertFromUSD,
+  CURRENCY_FORMATS,
+} from '../services/currencyService.js'
+import { getClientIP, detectCountryFromIP } from '../services/geoService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -17,7 +21,12 @@ router.get('/minimum', async (req: AuthRequest, res) => {
     const userId = req.user!.id
     const ipAddress = getClientIP(req)
     
-    const currencyInfo = await getUserCurrencyInfo(userId, ipAddress)
+    const detectedCountry = detectCountryFromIP(ipAddress) || undefined
+    const currencyInfo = await getUserCurrencyInfo(
+      userId,
+      'ip',
+      detectedCountry,
+    )
     const minWithdrawalUsd = parseFloat(process.env.MINIMUM_WITHDRAWAL_USD || '10')
     
     const minWithdrawalLocal = await convertFromUSD(
@@ -78,7 +87,12 @@ router.post('/request', async (req: AuthRequest, res) => {
     }
 
     // Get currency info
-    const currencyInfo = await getUserCurrencyInfo(userId, ipAddress)
+    const detectedCountry = detectCountryFromIP(ipAddress) || undefined
+    const currencyInfo = await getUserCurrencyInfo(
+      userId,
+      'ip',
+      detectedCountry,
+    )
     const minWithdrawalUsd = parseFloat(process.env.MINIMUM_WITHDRAWAL_USD || '10')
     
     // Check minimum balance
