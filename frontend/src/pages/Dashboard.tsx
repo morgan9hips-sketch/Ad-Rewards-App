@@ -91,7 +91,11 @@ const featuredOffers = [
 const surveyRows = [
   { topic: 'Streaming Habits', reward: '12 AD COINS', estTime: '6 min' },
   { topic: 'Mobile Gaming Trends', reward: '16 AD COINS', estTime: '8 min' },
-  { topic: 'Smart Shopping Preferences', reward: '20 AD COINS', estTime: '11 min' },
+  {
+    topic: 'Smart Shopping Preferences',
+    reward: '20 AD COINS',
+    estTime: '11 min',
+  },
   { topic: 'Travel and Lifestyle', reward: '15 AD COINS', estTime: '7 min' },
 ]
 
@@ -302,7 +306,7 @@ export default function Dashboard() {
 
   const handleDailyPoll = () => {
     setPollCompleted(true)
-    setToastMessage('Daily Poll completed! +5 AD COINS added to today\'s goal.')
+    setToastMessage("Daily Poll completed! +5 AD COINS added to today's goal.")
   }
 
   const handleQuickLink = (link: 'poll' | 'receipts' | 'refer' | 'gift') => {
@@ -481,7 +485,8 @@ export default function Dashboard() {
                 />
               </div>
               <p className="mt-2 text-xs text-slate-400">
-                {userStats.dailyProgress} / {userStats.dailyGoal} AD COINS completed
+                {userStats.dailyProgress} / {userStats.dailyGoal} AD COINS
+                completed
               </p>
             </div>
 
@@ -551,7 +556,9 @@ export default function Dashboard() {
             <section className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm sm:p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-100">Featured Offers</h2>
+                  <h2 className="text-lg font-bold text-slate-100">
+                    Featured Offers
+                  </h2>
                   <p className="text-sm text-slate-400">
                     Handpicked ways to maximize today’s AD COINS earnings.
                   </p>
@@ -614,7 +621,9 @@ export default function Dashboard() {
             </section>
 
             <section className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm sm:p-5">
-              <h2 className="text-lg font-bold text-slate-100">Recommended Surveys</h2>
+              <h2 className="text-lg font-bold text-slate-100">
+                Recommended Surveys
+              </h2>
               <p className="text-sm text-slate-400">
                 Fast-start surveys selected for your profile.
               </p>
@@ -632,8 +641,12 @@ export default function Dashboard() {
                     key={survey.topic}
                     className="grid gap-3 border-t border-slate-800 px-4 py-2 md:grid-cols-[1.2fr_0.7fr_0.6fr_0.45fr] md:items-center md:h-16"
                   >
-                    <p className="text-sm font-semibold text-slate-200">{survey.topic}</p>
-                    <p className="text-sm font-bold text-emerald-400">{survey.reward}</p>
+                    <p className="text-sm font-semibold text-slate-200">
+                      {survey.topic}
+                    </p>
+                    <p className="text-sm font-bold text-emerald-400">
+                      {survey.reward}
+                    </p>
                     <p className="inline-flex items-center gap-2 text-sm text-slate-400">
                       <Clock3 size={18} /> {survey.estTime}
                     </p>
@@ -666,8 +679,12 @@ export default function Dashboard() {
                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-sm font-bold text-emerald-400">
                       {brand.name.slice(0, 2).toUpperCase()}
                     </div>
-                    <p className="mt-2 text-sm font-semibold text-slate-200">{brand.name}</p>
-                    <p className="mt-1 text-xs font-semibold text-emerald-400">{brand.payout}</p>
+                    <p className="mt-2 text-sm font-semibold text-slate-200">
+                      {brand.name}
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-emerald-400">
+                      {brand.payout}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -724,7 +741,9 @@ export default function Dashboard() {
 
           <aside className="absolute right-0 top-0 h-full w-full max-w-md border-l border-slate-800 bg-slate-950 p-5 shadow-xl">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-100">Recent Activity</h3>
+              <h3 className="text-lg font-bold text-slate-100">
+                Recent Activity
+              </h3>
               <button
                 type="button"
                 onClick={() => setShowActivityPanel(false)}
@@ -743,7 +762,9 @@ export default function Dashboard() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-slate-200">{row.title}</p>
+                      <p className="text-sm font-semibold text-slate-200">
+                        {row.title}
+                      </p>
                       <p className="mt-1 text-xs text-slate-400">{row.time}</p>
                     </div>
                     <span
@@ -762,7 +783,9 @@ export default function Dashboard() {
                     </span>
                   </div>
 
-                  <p className="mt-2 text-sm font-bold text-emerald-400">{row.amount}</p>
+                  <p className="mt-2 text-sm font-bold text-emerald-400">
+                    {row.amount}
+                  </p>
                 </div>
               ))}
             </div>

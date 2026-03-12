@@ -20,6 +20,16 @@ const MONETAG_ZONES = {
 } as const
 
 /**
+ * Temporary kill-switch for Monetag during testing.
+ *
+ * This prevents third-party scripts/popunders from interrupting development
+ * flows (e.g. task/survey placeholder integration).
+ *
+ * To re-enable later, set `VITE_MONETAG_ENABLED=true` in your frontend env.
+ */
+const MONETAG_ENABLED = import.meta.env.VITE_MONETAG_ENABLED === 'true'
+
+/**
  * Get ad type from zone ID
  */
 function getAdType(zoneId: string): string {
@@ -41,6 +51,7 @@ export const monetagService = {
    * Used for push, banner, vignette, inpage ads
    */
   async trackPassiveImpression(zoneId: string, token: string): Promise<void> {
+    if (!MONETAG_ENABLED) return
     try {
       await fetch(`${API_BASE_URL}/api/ads/track-monetag`, {
         method: 'POST',
@@ -63,6 +74,7 @@ export const monetagService = {
    * Displays a banner that appears on page load
    */
   initVignetteBanner(): void {
+    if (!MONETAG_ENABLED) return
     if (typeof window === 'undefined') return
 
     const script = document.createElement('script')
@@ -80,6 +92,7 @@ export const monetagService = {
    * Displays push notification-style ads within the page
    */
   initInPagePush(): void {
+    if (!MONETAG_ENABLED) return
     if (typeof window === 'undefined') return
 
     const script = document.createElement('script')
@@ -102,6 +115,7 @@ export const monetagService = {
     onSuccess?: (coins: number) => void,
     onError?: (error: string) => void
   ): void {
+    if (!MONETAG_ENABLED) return
     if (typeof window === 'undefined') return
 
     // Load Monetag OnClick script
@@ -154,6 +168,7 @@ export const monetagService = {
    * Initialize all passive ad zones
    */
   initPassiveAds(): void {
+    if (!MONETAG_ENABLED) return
     this.initVignetteBanner()
     this.initInPagePush()
     console.log('✅ All passive Monetag ads initialized')
