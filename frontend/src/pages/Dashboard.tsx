@@ -13,6 +13,7 @@ import {
   History,
   Hourglass,
   Lock,
+  LogOut,
   Receipt,
   ShoppingBag,
   Store,
@@ -100,7 +101,7 @@ const featuredOffers = [
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { user, session } = useAuth()
+  const { user, session, signOut } = useAuth()
 
   const [loading, setLoading] = useState(true)
   const [balance, setBalance] = useState<UserBalance | null>(null)
@@ -276,6 +277,11 @@ export default function Dashboard() {
     fetchDashboardData()
   }
 
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/login')
+  }
+
   const handleDailyPoll = () => {
     setToastMessage('Daily Poll completed!')
   }
@@ -400,12 +406,25 @@ export default function Dashboard() {
                 {formatCoins(userStats.pointsBalance)} AD COINS
               </div>
 
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900 px-3 py-2">
+              <button
+                type="button"
+                onClick={() => navigate('/settings')}
+                className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900 px-3 py-2 transition duration-200 hover:border-slate-700 hover:bg-slate-800"
+              >
                 <CircleUserRound size={18} className="text-blue-400" />
                 <span className="max-w-28 truncate text-sm font-semibold text-slate-200">
                   {getDisplayName()}
                 </span>
-              </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSignOut}
+                title="Sign out"
+                className="inline-flex items-center justify-center rounded-full border border-slate-800 bg-slate-900 p-2 text-slate-400 transition duration-200 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+              >
+                <LogOut size={18} />
+              </button>
             </div>
           </div>
 
