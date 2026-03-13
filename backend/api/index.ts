@@ -31,6 +31,7 @@ import geoRoutes from '../src/routes/geo.js'
 import migrateRoutes from '../src/routes/migrate.js'
 import rewardRoutes from '../src/routes/reward.js'
 import v2Routes from '../src/routes/v2/index.js'
+import cpxCallbackRoutes from '../src/routes/cpxCallback.js'
 
 // Create Express app for Vercel
 const app = express()
@@ -49,6 +50,7 @@ app.use(
   }),
 )
 app.use(express.json({ limit: '1mb' }))
+app.use(express.urlencoded({ extended: true }))
 app.use(securityHeaders)
 app.use(xssSanitize)
 app.use(sanitizeBody)
@@ -58,6 +60,9 @@ app.use(ipRateLimiter)
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
+
+// CPX callback endpoint (public)
+app.use('/cpx-callback', cpxCallbackRoutes)
 
 // Mount routes with /api prefix (with authentication where needed)
 app.use('/api/user', authenticate, userRoutes)

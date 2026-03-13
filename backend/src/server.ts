@@ -29,6 +29,7 @@ import legalRoutes from './routes/legal.js'
 import geoRoutes from './routes/geo.js'
 import minigameRoutes from './routes/minigame.js'
 import v2Routes from './routes/v2/index.js'
+import cpxCallbackRoutes from './routes/cpxCallback.js'
 
 dotenv.config()
 
@@ -96,6 +97,7 @@ app.use(
   }),
 )
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 // Health check - both root and /health for different deployment scenarios
 app.get('/', (req, res) => {
@@ -111,6 +113,7 @@ app.get('/health', (req, res) => {
 })
 
 // Public routes
+app.use('/cpx-callback', cpxCallbackRoutes)
 app.use('/leaderboard', leaderboardRoutes)
 app.use('/api/leaderboard', leaderboardRoutes)
 app.use('/subscriptions/webhook', subscriptionsRoutes) // Webhook should be public

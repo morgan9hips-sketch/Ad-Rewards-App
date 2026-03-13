@@ -40,6 +40,7 @@ import Transactions from './pages/Transactions'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import AdCity from './pages/AdCity'
+import SurveyCenter from './pages/SurveyCenter'
 import AdStore from './pages/Shop'
 import ShopNew from './pages/ShopNew'
 import WalletV2 from './pages/WalletV2'
@@ -169,6 +170,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <AdCity />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/survey-center"
+          element={
+            <ProtectedRoute>
+              <SurveyCenter />
             </ProtectedRoute>
           }
         />

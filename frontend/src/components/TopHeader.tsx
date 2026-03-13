@@ -27,6 +27,7 @@ export default function TopHeader() {
       '/ad-store': 'Ad Store',
       '/wallet': 'Wallet',
       '/ad-city': 'Ad City',
+      '/survey-center': 'Survey Center',
       '/badges': 'Badges',
       '/transactions': 'Transactions',
       '/withdrawals': 'Withdrawals',
