@@ -8,12 +8,13 @@ import {
   ClipboardList,
   Clock3,
   Compass,
-  Flame,
   Gamepad2,
   Gift,
   History,
   Hourglass,
+  Lock,
   Receipt,
+  ShoppingBag,
   Store,
   Users,
   X,
@@ -41,6 +42,7 @@ interface Transaction {
 interface UserProfile {
   walletBalance: number
   totalEarned: number
+  countryCode?: string | null
   adsWatched: number
   tier: string
   displayName: string | null
@@ -52,7 +54,15 @@ interface UserStats {
   pointsBalance: number
   dailyGoal: number
   dailyProgress: number
-  dailyStreak: number
+}
+
+interface V2Task {
+  id: number
+  title: string
+  description?: string | null
+  type: string
+  provider: string
+  rewardCoins: number
 }
 
 const featuredOffers = [
@@ -60,52 +70,32 @@ const featuredOffers = [
     title: 'Premium Shopping Cashback',
     description:
       'Activate this offer and unlock boosted earning multipliers on your next checkout.',
-    rewardLabel: 'Earn 30 AD COINS',
+    rewardLabel: 'Earn AD COINS',
     imageSrc: '/images/branding/logo-full.png',
     imageAlt: 'Premium shopping cashback offer',
     actionLabel: 'Activate Offer',
     path: '/shop',
   },
   {
-    title: 'Complete a Daily Survey',
+    title: 'Complete a Daily Task',
     description:
-      'Answer today’s high-value survey set and get accelerated AD COINS payouts.',
-    rewardLabel: 'Earn 24 AD COINS',
+      'Complete active regional tasks and unlock accelerated AD COINS rewards.',
+    rewardLabel: 'Earn AD COINS',
     imageSrc: '/images/branding/logo-icon.png',
-    imageAlt: 'Daily survey offer',
-    actionLabel: 'Take Survey',
+    imageAlt: 'Daily task offer',
+    actionLabel: 'Open Tasks',
     path: '/ad-city',
   },
   {
     title: 'Weekend Play Bonus',
     description:
       'Hit high scores in mini games to claim a limited-time AD COINS bonus.',
-    rewardLabel: 'Earn 18 AD COINS',
+    rewardLabel: 'Earn AD COINS',
     imageSrc: '/images/branding/Adcoin medium 256x256.png',
     imageAlt: 'Weekend play bonus offer',
     actionLabel: 'Play Now',
     path: '/mini-games',
   },
-]
-
-const surveyRows = [
-  { topic: 'Streaming Habits', reward: '12 AD COINS', estTime: '6 min' },
-  { topic: 'Mobile Gaming Trends', reward: '16 AD COINS', estTime: '8 min' },
-  {
-    topic: 'Smart Shopping Preferences',
-    reward: '20 AD COINS',
-    estTime: '11 min',
-  },
-  { topic: 'Travel and Lifestyle', reward: '15 AD COINS', estTime: '7 min' },
-]
-
-const shopTiles = [
-  { name: 'Amazon', payout: 'Up to 5% Back' },
-  { name: 'Nike', payout: 'Up to 4% Back' },
-  { name: 'Walmart', payout: 'Up to 3% Back' },
-  { name: 'Target', payout: 'Up to 5% Back' },
-  { name: 'eBay', payout: 'Up to 2% Back' },
-  { name: 'AliExpress', payout: 'Up to 5% Back' },
 ]
 
 export default function Dashboard() {
@@ -116,13 +106,13 @@ export default function Dashboard() {
   const [balance, setBalance] = useState<UserBalance | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [tasks, setTasks] = useState<V2Task[]>([])
 
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [showTermsModal, setShowTermsModal] = useState(false)
   const [showActivityPanel, setShowActivityPanel] = useState(false)
 
   const [offerIndex, setOfferIndex] = useState(0)
-  const [pollCompleted, setPollCompleted] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   const goalWidthClasses = [
@@ -154,14 +144,17 @@ export default function Dashboard() {
       const token = session?.access_token
       if (!token) return
 
-      const [balanceRes, profileRes, txRes] = await Promise.all([
+      const [balanceRes, profileRes, txRes, tasksRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/user/balance`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(`${API_BASE_URL}/api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${API_BASE_URL}/api/user/transactions?perPage=10`, {
+        fetch(`${API_BASE_URL}/api/user/transactions?perPage=5`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_BASE_URL}/api/v2/tasks`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ])
@@ -187,6 +180,13 @@ export default function Dashboard() {
       if (txRes.ok) {
         const txData = await txRes.json()
         setTransactions(txData.transactions || [])
+      }
+
+      if (tasksRes.ok) {
+        const tasksData = await tasksRes.json()
+        setTasks(tasksData.tasks || [])
+      } else {
+        setTasks([])
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
@@ -217,32 +217,19 @@ export default function Dashboard() {
 
   const userStats: UserStats = useMemo(() => {
     const pointsBalance = Number(balance?.coins || 0)
-    const positiveToday = transactions.reduce((acc, tx) => {
-      const isToday =
-        new Date(tx.createdAt).toDateString() === new Date().toDateString()
-      const points = Number(tx.coinsChange)
-      if (!isToday || Number.isNaN(points) || points <= 0) return acc
-      return acc + Math.min(10, Math.round(points / 25))
-    }, 0)
-
-    const dailyProgress = pollCompleted
-      ? 30
-      : Math.max(6, Math.min(30, positiveToday + 8))
 
     return {
       pointsBalance,
       dailyGoal: 30,
-      dailyProgress,
-      dailyStreak: Math.max(
-        1,
-        Math.min(14, Math.floor((profile?.adsWatched || 12) / 4)),
-      ),
+      dailyProgress: Math.max(0, Math.min(30, pointsBalance)),
     }
-  }, [balance?.coins, pollCompleted, profile?.adsWatched, transactions])
+  }, [balance?.coins])
+
+  const recommendedTasks = useMemo(() => tasks.slice(0, 2), [tasks])
 
   const activityRows = useMemo(() => {
     if (transactions.length > 0) {
-      return transactions.slice(0, 8).map((tx) => {
+      return transactions.slice(0, 5).map((tx) => {
         const amount = Number(tx.coinsChange)
         const status =
           tx.type.toLowerCase().includes('pending') ||
@@ -260,22 +247,7 @@ export default function Dashboard() {
       })
     }
 
-    return [
-      {
-        id: 1,
-        title: 'Daily Survey Completed',
-        amount: '+12 AD COINS',
-        status: 'Posted',
-        time: 'Today',
-      },
-      {
-        id: 2,
-        title: 'Featured Offer Validation',
-        amount: '+18 AD COINS',
-        status: 'Pending',
-        time: 'Today',
-      },
-    ]
+    return []
   }, [transactions])
 
   const handleTermsAccept = async () => {
@@ -305,8 +277,7 @@ export default function Dashboard() {
   }
 
   const handleDailyPoll = () => {
-    setPollCompleted(true)
-    setToastMessage("Daily Poll completed! +5 AD COINS added to today's goal.")
+    setToastMessage('Daily Poll completed!')
   }
 
   const handleQuickLink = (link: 'poll' | 'receipts' | 'refer' | 'gift') => {
@@ -471,7 +442,7 @@ export default function Dashboard() {
         </nav>
 
         <section className="mt-5 rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm sm:p-5">
-          <div className="grid gap-4 lg:grid-cols-[1.2fr_auto] lg:items-center">
+          <div className="grid gap-4 lg:grid-cols-1 lg:items-center">
             <div>
               <p className="text-[12px] font-semibold uppercase tracking-wider text-slate-300">
                 Daily Goal
@@ -488,11 +459,6 @@ export default function Dashboard() {
                 {userStats.dailyProgress} / {userStats.dailyGoal} AD COINS
                 completed
               </p>
-            </div>
-
-            <div className="inline-flex items-center gap-2 rounded-full border border-orange-400/20 bg-orange-500/10 px-4 py-2 text-sm font-semibold text-orange-300">
-              <Flame size={18} />
-              Daily Streak: {userStats.dailyStreak} days
             </div>
           </div>
         </section>
@@ -622,33 +588,33 @@ export default function Dashboard() {
 
             <section className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm sm:p-5">
               <h2 className="text-lg font-bold text-slate-100">
-                Recommended Surveys
+                Recommended Tasks
               </h2>
               <p className="text-sm text-slate-400">
-                Fast-start surveys selected for your profile.
+                Geo-filtered tasks selected for your profile.
               </p>
 
               <div className="mt-4 overflow-hidden rounded-[12px] border border-slate-800">
                 <div className="hidden grid-cols-[1.2fr_0.7fr_0.6fr_0.45fr] bg-slate-950/70 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-400 md:grid">
-                  <span>Topic</span>
+                  <span>Task</span>
                   <span>Reward</span>
-                  <span>Est. Time</span>
+                  <span>Source</span>
                   <span className="text-right">Action</span>
                 </div>
 
-                {surveyRows.map((survey) => (
+                {recommendedTasks.map((task) => (
                   <div
-                    key={survey.topic}
+                    key={task.id}
                     className="grid gap-3 border-t border-slate-800 px-4 py-2 md:grid-cols-[1.2fr_0.7fr_0.6fr_0.45fr] md:items-center md:h-16"
                   >
                     <p className="text-sm font-semibold text-slate-200">
-                      {survey.topic}
+                      {task.title}
                     </p>
                     <p className="text-sm font-bold text-emerald-400">
-                      {survey.reward}
+                      {formatCoins(task.rewardCoins)} AD COINS
                     </p>
                     <p className="inline-flex items-center gap-2 text-sm text-slate-400">
-                      <Clock3 size={18} /> {survey.estTime}
+                      <Clock3 size={18} /> {task.provider}
                     </p>
                     <div className="md:text-right">
                       <button
@@ -661,29 +627,59 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ))}
+
+                {[0, 1].map((index) => (
+                  <div
+                    key={`coming-soon-task-${index}`}
+                    className="grid gap-3 border-t border-slate-800 px-4 py-2 md:grid-cols-[1.2fr_0.7fr_0.6fr_0.45fr] md:items-center md:h-16"
+                  >
+                    <p className="inline-flex items-center gap-2 text-sm font-semibold text-slate-400">
+                      <Lock size={18} /> Coming Soon
+                    </p>
+                    <p className="text-sm text-slate-500">—</p>
+                    <p className="text-sm text-slate-500">—</p>
+                    <div className="md:text-right">
+                      <span className="inline-flex items-center rounded-full border border-slate-700 px-6 py-2 text-sm font-semibold text-slate-500">
+                        Locked
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </section>
 
             <section className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm sm:p-5">
               <h2 className="text-lg font-bold text-slate-100">Shop & Earn</h2>
               <p className="text-sm text-slate-400">
-                Earn cashback rewards from top partner stores.
+                Stores shown are based on your region
+                {profile?.countryCode ? ` (${profile.countryCode})` : ''}
               </p>
 
               <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                {shopTiles.map((brand) => (
+                {[0, 1].map((index) => (
                   <div
-                    key={brand.name}
+                    key={`partner-store-${index}`}
                     className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-3 text-center shadow-sm backdrop-blur-sm"
                   >
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-sm font-bold text-emerald-400">
-                      {brand.name.slice(0, 2).toUpperCase()}
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+                      <ShoppingBag size={18} />
                     </div>
                     <p className="mt-2 text-sm font-semibold text-slate-200">
-                      {brand.name}
+                      Partner Store
                     </p>
-                    <p className="mt-1 text-xs font-semibold text-emerald-400">
-                      {brand.payout}
+                  </div>
+                ))}
+
+                {[0, 1, 2, 3].map((index) => (
+                  <div
+                    key={`coming-soon-store-${index}`}
+                    className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-3 text-center shadow-sm backdrop-blur-sm"
+                  >
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-800 text-slate-500">
+                      <Lock size={18} />
+                    </div>
+                    <p className="mt-2 text-sm font-semibold text-slate-400">
+                      Coming Soon
                     </p>
                   </div>
                 ))}
@@ -755,39 +751,49 @@ export default function Dashboard() {
             </div>
 
             <div className="mt-4 max-h-[calc(100vh-110px)] space-y-3 overflow-y-auto pr-1">
-              {activityRows.map((row) => (
-                <div
-                  key={row.id}
-                  className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-3 backdrop-blur-sm"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-200">
-                        {row.title}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-400">{row.time}</p>
-                    </div>
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
-                        row.status === 'Posted'
-                          ? 'bg-emerald-500/15 text-emerald-300'
-                          : 'bg-amber-500/15 text-amber-300'
-                      }`}
-                    >
-                      {row.status === 'Posted' ? (
-                        <CheckCircle2 size={18} />
-                      ) : (
-                        <Hourglass size={18} />
-                      )}
-                      {row.status}
-                    </span>
-                  </div>
-
-                  <p className="mt-2 text-sm font-bold text-emerald-400">
-                    {row.amount}
+              {activityRows.length === 0 ? (
+                <div className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-3 backdrop-blur-sm">
+                  <p className="text-sm font-semibold text-slate-300">
+                    No recent activity yet
                   </p>
                 </div>
-              ))}
+              ) : (
+                activityRows.map((row) => (
+                  <div
+                    key={row.id}
+                    className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-3 backdrop-blur-sm"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-200">
+                          {row.title}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-400">
+                          {row.time}
+                        </p>
+                      </div>
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
+                          row.status === 'Posted'
+                            ? 'bg-emerald-500/15 text-emerald-300'
+                            : 'bg-amber-500/15 text-amber-300'
+                        }`}
+                      >
+                        {row.status === 'Posted' ? (
+                          <CheckCircle2 size={18} />
+                        ) : (
+                          <Hourglass size={18} />
+                        )}
+                        {row.status}
+                      </span>
+                    </div>
+
+                    <p className="mt-2 text-sm font-bold text-emerald-400">
+                      {row.amount}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
           </aside>
         </div>
