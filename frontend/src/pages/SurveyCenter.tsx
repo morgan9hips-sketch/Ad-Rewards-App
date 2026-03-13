@@ -1,7 +1,8 @@
 import { ExternalLink, LayoutGrid, MoveLeft } from 'lucide-react'
-import { useMemo } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 type ProviderKey = 'bitlabs' | 'cpx-research' | 'theoremreach'
 
@@ -35,20 +36,48 @@ const surveyProviders: SurveyProvider[] = [
 
 export default function SurveyCenter() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { session } = useAuth()
+  const [launchingProvider, setLaunchingProvider] =
+    useState<ProviderKey | null>(null)
 
-  const cpxOfferUrl = useMemo(() => {
-    const userId = user?.id || ''
-    return `https://offers.cpx-research.com${encodeURIComponent(userId)}`
-  }, [user?.id])
-
-  const handleStartEarning = (provider: SurveyProvider) => {
-    if (provider.key === 'cpx-research') {
-      window.open(cpxOfferUrl, '_blank', 'noopener,noreferrer')
+  const handleStartEarning = async (provider: SurveyProvider) => {
+    if (provider.key !== 'cpx-research') {
+      navigate('/ad-city')
       return
     }
 
-    navigate('/ad-city')
+    const token = session?.access_token
+    if (!token) {
+      navigate('/login')
+      return
+    }
+
+    setLaunchingProvider(provider.key)
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cpx/offer-url`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch CPX offer URL: ${response.status}`)
+      }
+
+      const data = (await response.json()) as { offerUrl?: string }
+      if (!data.offerUrl) {
+        throw new Error('CPX offer URL missing from response')
+      }
+
+      window.open(data.offerUrl, '_blank', 'noopener,noreferrer')
+    } catch (error) {
+      console.error('Failed to launch CPX offerwall:', error)
+      window.alert('Unable to open CPX Research right now. Please try again.')
+    } finally {
+      setLaunchingProvider(null)
+    }
   }
 
   return (
@@ -97,10 +126,15 @@ export default function SurveyCenter() {
 
                 <button
                   type="button"
-                  onClick={() => handleStartEarning(provider)}
+                  onClick={() => {
+                    void handleStartEarning(provider)
+                  }}
+                  disabled={launchingProvider === provider.key}
                   className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:bg-blue-400"
                 >
-                  Start Earning
+                  {launchingProvider === provider.key
+                    ? 'Opening...'
+                    : 'Start Earning'}
                   <ExternalLink size={18} />
                 </button>
               </article>

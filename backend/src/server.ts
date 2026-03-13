@@ -30,6 +30,7 @@ import geoRoutes from './routes/geo.js'
 import minigameRoutes from './routes/minigame.js'
 import v2Routes from './routes/v2/index.js'
 import cpxCallbackRoutes from './routes/cpxCallback.js'
+import cpxOfferRoutes from './routes/cpxOffer.js'
 
 dotenv.config()
 
@@ -150,6 +151,8 @@ app.use('/geo', authenticate, geoRoutes)
 app.use('/api/geo', authenticate, geoRoutes)
 app.use('/minigame', authenticate, minigameRoutes)
 app.use('/api/minigame', authenticate, minigameRoutes)
+app.use('/cpx', authenticate, cpxOfferRoutes)
+app.use('/api/cpx', authenticate, cpxOfferRoutes)
 
 // V2 API namespace (with feature flag)
 app.use('/api/v2', v2Routes)

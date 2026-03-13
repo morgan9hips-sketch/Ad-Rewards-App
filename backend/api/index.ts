@@ -32,6 +32,7 @@ import migrateRoutes from '../src/routes/migrate.js'
 import rewardRoutes from '../src/routes/reward.js'
 import v2Routes from '../src/routes/v2/index.js'
 import cpxCallbackRoutes from '../src/routes/cpxCallback.js'
+import cpxOfferRoutes from '../src/routes/cpxOffer.js'
 
 // Create Express app for Vercel
 const app = express()
@@ -83,6 +84,7 @@ app.use('/api/geo-resolve', authenticate, geoRoutes) // Requires auth for user c
 app.use('/api/migrate', migrateRoutes) // One-time migration endpoint
 app.use('/api/reward', authenticate, rewardRoutes)
 app.use('/api/v2', v2Routes) // V2 API namespace (feature-flagged)
+app.use('/api/cpx', authenticate, cpxOfferRoutes)
 
 // Error handling middleware (must be last)
 app.use(errorLogger)
