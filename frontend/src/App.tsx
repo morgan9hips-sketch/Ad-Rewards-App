@@ -41,6 +41,12 @@ import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import AdCity from './pages/AdCity'
 import SurveyCenter from './pages/SurveyCenter'
+import TaskCenter from './pages/TaskCenter'
+import SurveysCategory from './pages/task-center/Surveys'
+import GamingCategory from './pages/task-center/Gaming'
+import OffersCategory from './pages/task-center/Offers'
+import VideosCategory from './pages/task-center/Videos'
+import CashbackCategory from './pages/task-center/Cashback'
 import AdStore from './pages/Shop'
 import ShopNew from './pages/ShopNew'
 import WalletV2 from './pages/WalletV2'
@@ -175,9 +181,53 @@ function AppContent() {
         />
         <Route
           path="/survey-center"
+          element={<Navigate to="/task-center" replace />}
+        />
+        <Route
+          path="/task-center"
           element={
             <ProtectedRoute>
-              <SurveyCenter />
+              <TaskCenter />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/task-center/surveys"
+          element={
+            <ProtectedRoute>
+              <SurveysCategory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/task-center/gaming"
+          element={
+            <ProtectedRoute>
+              <GamingCategory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/task-center/offers"
+          element={
+            <ProtectedRoute>
+              <OffersCategory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/task-center/videos"
+          element={
+            <ProtectedRoute>
+              <VideosCategory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/task-center/cashback"
+          element={
+            <ProtectedRoute>
+              <CashbackCategory />
             </ProtectedRoute>
           }
         />

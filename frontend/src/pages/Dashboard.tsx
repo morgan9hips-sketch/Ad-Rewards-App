@@ -85,7 +85,7 @@ const featuredOffers = [
     imageSrc: '/images/branding/logo-icon.png',
     imageAlt: 'Daily task offer',
     actionLabel: 'Open Tasks',
-    path: '/survey-center',
+    path: '/task-center',
   },
   {
     title: 'Weekend Play Bonus',
@@ -284,7 +284,7 @@ export default function Dashboard() {
 
   const handleQuickLink = (link: 'poll' | 'receipts' | 'refer' | 'gift') => {
     if (link === 'poll') {
-      navigate('/survey-center')
+      navigate('/task-center')
       return
     }
 
@@ -364,11 +364,11 @@ export default function Dashboard() {
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/survey-center')}
+                onClick={() => navigate('/task-center')}
                 className="inline-flex items-center gap-2 text-[14px] font-medium text-slate-300 transition duration-200 hover:text-emerald-400"
               >
                 <ClipboardList size={18} />
-                Answer
+                Tasks
               </button>
               <button
                 type="button"
@@ -380,7 +380,7 @@ export default function Dashboard() {
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/survey-center')}
+                onClick={() => navigate('/task-center')}
                 className="inline-flex items-center gap-2 text-[14px] font-medium text-slate-300 transition duration-200 hover:text-emerald-400"
               >
                 <Compass size={18} />
@@ -434,10 +434,10 @@ export default function Dashboard() {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/survey-center')}
+              onClick={() => navigate('/task-center')}
               className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400"
             >
-              <ClipboardList size={18} /> Answer
+              <ClipboardList size={18} /> Tasks
             </button>
             <button
               type="button"
@@ -448,7 +448,7 @@ export default function Dashboard() {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/survey-center')}
+              onClick={() => navigate('/task-center')}
               className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400"
             >
               <Compass size={18} /> Discover
@@ -634,7 +634,7 @@ export default function Dashboard() {
                     <div className="md:text-right">
                       <button
                         type="button"
-                        onClick={() => navigate('/survey-center')}
+                        onClick={() => navigate('/task-center')}
                         className="inline-flex items-center rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400"
                       >
                         Start

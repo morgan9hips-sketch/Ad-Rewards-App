@@ -8,7 +8,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: '/dashboard', icon: '🏠', label: 'Home' },
-  { path: '/survey-center', icon: '📋', label: 'Surveys' },
+  { path: '/task-center', icon: '📋', label: 'Tasks' },
   { path: '/shop', icon: '🛒', label: 'Shop' },
   { path: '/ad-store', icon: '🏪', label: 'Ad Store' },
   { path: '/mini-games', icon: '🎮', label: 'Games' },
