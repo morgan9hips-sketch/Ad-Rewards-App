@@ -33,6 +33,7 @@ import rewardRoutes from '../src/routes/reward.js'
 import v2Routes from '../src/routes/v2/index.js'
 import cpxCallbackRoutes from '../src/routes/cpxCallback.js'
 import cpxOfferRoutes from '../src/routes/cpxOffer.js'
+import bitlabsCallbackRoutes from '../src/routes/bitlabsCallback.js'
 
 // Create Express app for Vercel
 const app = express()
@@ -64,6 +65,8 @@ app.get('/api/health', (req, res) => {
 
 // CPX callback endpoint (public)
 app.use('/cpx-callback', cpxCallbackRoutes)
+// BitLabs callback endpoint (public)
+app.use('/api/bitlabs', bitlabsCallbackRoutes)
 
 // Mount routes with /api prefix (with authentication where needed)
 app.use('/api/user', authenticate, userRoutes)

@@ -43,9 +43,7 @@ export default function GamingCategory() {
                 BL
               </div>
 
-              <h2 className="mt-4 text-lg font-bold text-slate-100">
-                BitLabs
-              </h2>
+              <h2 className="mt-4 text-lg font-bold text-slate-100">BitLabs</h2>
               <p className="mt-2 min-h-[44px] text-sm leading-relaxed text-slate-300">
                 Try new mobile and desktop games and earn rewards for reaching
                 milestones.

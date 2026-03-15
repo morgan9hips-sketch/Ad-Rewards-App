@@ -31,6 +31,7 @@ import minigameRoutes from './routes/minigame.js'
 import v2Routes from './routes/v2/index.js'
 import cpxCallbackRoutes from './routes/cpxCallback.js'
 import cpxOfferRoutes from './routes/cpxOffer.js'
+import bitlabsCallbackRoutes from './routes/bitlabsCallback.js'
 
 dotenv.config()
 
@@ -115,6 +116,8 @@ app.get('/health', (req, res) => {
 
 // Public routes
 app.use('/cpx-callback', cpxCallbackRoutes)
+app.use('/bitlabs-callback', bitlabsCallbackRoutes)
+app.use('/api/bitlabs', bitlabsCallbackRoutes)
 app.use('/leaderboard', leaderboardRoutes)
 app.use('/api/leaderboard', leaderboardRoutes)
 app.use('/subscriptions/webhook', subscriptionsRoutes) // Webhook should be public

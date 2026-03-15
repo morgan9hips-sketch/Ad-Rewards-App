@@ -14,7 +14,8 @@ const categories: Category[] = [
     key: 'surveys',
     icon: '📋',
     label: 'Surveys',
-    description: 'Complete partner surveys tailored to your profile and earn AD COINS.',
+    description:
+      'Complete partner surveys tailored to your profile and earn AD COINS.',
     path: '/task-center/surveys',
   },
   {
@@ -28,7 +29,8 @@ const categories: Category[] = [
     key: 'offers',
     icon: '🛍️',
     label: 'Offers',
-    description: 'Complete brand offers and sign-ups from top advertisers worldwide.',
+    description:
+      'Complete brand offers and sign-ups from top advertisers worldwide.',
     path: '/task-center/offers',
   },
   {
