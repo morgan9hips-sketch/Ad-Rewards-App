@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/bitlabs/callback",
+      "destination": "https://api.adrevtechnologies.com/api/bitlabs/callback"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

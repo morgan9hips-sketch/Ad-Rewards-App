@@ -48,11 +48,34 @@ function plainError(res: Response, status = 200): Response {
  * Full path when mounted: GET /api/bitlabs/callback
  */
 router.get('/callback', async (req: Request, res: Response) => {
-  const { uid, currency, amount, transaction_id, signature } =
-    req.query as Record<string, string | undefined>
+  const { uid, currency, amount, transaction_id } = req.query as Record<
+    string,
+    string | undefined
+  >
+  const providedSignature = (req.query.signature ?? req.query.hash) as
+    | string
+    | undefined
+
+  // Disable caching for callback responses so every callback reaches origin.
+  res.setHeader(
+    'Cache-Control',
+    'no-store, no-cache, must-revalidate, max-age=0',
+  )
+
+  console.log('[BitLabs] Callback received', {
+    uid,
+    amount,
+    transaction_id,
+    hasSignature: Boolean(providedSignature),
+    source: req.query.signature
+      ? 'signature'
+      : req.query.hash
+        ? 'hash'
+        : 'none',
+  })
 
   // ── 1. Parameter presence check ─────────────────────────────────────────
-  if (!uid || !amount || !transaction_id || !signature) {
+  if (!uid || !amount || !transaction_id || !providedSignature) {
     console.warn('[BitLabs] Missing required query parameters', req.query)
     return plainError(res)
   }
@@ -66,12 +89,15 @@ router.get('/callback', async (req: Request, res: Response) => {
     secretConfigured = false
   }
 
-  if (!secretConfigured || expected !== signature.toLowerCase().trim()) {
+  if (
+    !secretConfigured ||
+    expected !== providedSignature.toLowerCase().trim()
+  ) {
     console.warn('[BitLabs] Signature mismatch', {
       uid,
       amount,
       transaction_id,
-      got: signature,
+      got: providedSignature,
       expected,
     })
     return plainError(res)
@@ -102,7 +128,7 @@ router.get('/callback', async (req: Request, res: Response) => {
           userId: uid,
           amount: amountCents,
           status: 1,
-          hash: signature,
+          hash: providedSignature,
           hashValid: true,
           sourceIp:
             (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??
