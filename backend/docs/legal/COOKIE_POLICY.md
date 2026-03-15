@@ -100,7 +100,7 @@ These cookies help us understand how users interact with the Platform so we can 
 
 **Third-Party Analytics Providers:**
 - **Google Analytics** (if implemented)
-  - Privacy Policy: https://policies.google.com/privacy
+  - Privacy Policy: https://our advertising network partners privacy policy pages
   - Opt-out: https://tools.google.com/dlpage/gaoptout
   - We use IP anonymization to protect privacy
 
@@ -110,7 +110,7 @@ These cookies help us understand how users interact with the Platform so we can 
 
 ### 3.4 Advertising Cookies (Third-Party)
 
-These cookies are set by our advertising partner, Google AdMob, to deliver personalized advertisements and measure ad effectiveness.
+These cookies are set by our advertising partner, Advertising Network Partner, to deliver personalized advertisements and measure ad effectiveness.
 
 **Purpose:**
 - Delivering relevant advertisements based on your interests
@@ -120,10 +120,10 @@ These cookies are set by our advertising partner, Google AdMob, to deliver perso
 - Cross-site tracking for ad targeting
 
 **Set By:**
-- **Google AdMob / Google Ads**
+- **Advertising Network Partners**
   - Multiple advertising cookies including `IDE`, `DSID`, `NID`, and others
-  - Privacy Policy: https://policies.google.com/privacy
-  - Advertising Choices: https://www.google.com/settings/ads
+  - Privacy Policy: https://our advertising network partners privacy policy pages
+  - Advertising Choices: https://your device and browser ad controls
 
 **Important Notes:**
 - We do not control advertising cookies; they are managed by Google
@@ -203,7 +203,7 @@ Collecting device characteristics to create a unique identifier.
 
 **Google Advertising ID (GAID) - Android:**
 - Unique identifier for advertising purposes
-- Used by AdMob for ad targeting
+- Used by Advertising Network Partner for ad targeting
 - Resettable through device settings (Settings → Google → Ads → Reset advertising ID)
 
 **Identifier for Advertisers (IDFA) - iOS:**
@@ -222,7 +222,7 @@ Collecting device characteristics to create a unique identifier.
 
 Third-party SDKs integrated into our mobile app may use tracking technologies:
 
-**Google AdMob SDK:**
+**Advertising Network Partner SDK:**
 - Collects advertising ID, device info, ad interaction data
 - See Google's SDK Privacy information
 
@@ -258,7 +258,7 @@ Third-party SDKs integrated into our mobile app may use tracking technologies:
 
 ### 5.4 Advertising and Monetization
 
-- **Ad Delivery:** Showing relevant ads through Google AdMob
+- **Ad Delivery:** Showing relevant ads through Advertising Network Partner
 - **Revenue Generation:** Earning advertising revenue to support the free tier
 - **Ad Measurement:** Tracking ad performance and effectiveness
 - **User Earnings:** Calculating AdCoins earned from ad interactions
@@ -274,19 +274,19 @@ Third-party SDKs integrated into our mobile app may use tracking technologies:
 
 Third parties may set cookies when you use the Adify Platform. We do not control these cookies.
 
-### 6.1 Google AdMob
+### 6.1 Advertising Network Partner
 
 **Cookies Set:** Multiple advertising and analytics cookies
 
 **Purpose:** Ad delivery, targeting, measurement, and optimization
 
-**Privacy Policy:** https://policies.google.com/privacy
+**Privacy Policy:** https://our advertising network partners privacy policy pages
 
 **Control:**
-- Google Ad Settings: https://www.google.com/settings/ads
+- Google Ad Settings: https://your device and browser ad controls
 - Google Analytics Opt-out: https://tools.google.com/dlpage/gaoptout
 
-**Note:** AdMob is essential to our business model. Blocking AdMob cookies may affect ad-supported earning opportunities.
+**Note:** Advertising Network Partner is essential to our business model. Blocking Advertising Network Partner cookies may affect ad-supported earning opportunities.
 
 ### 6.2 Payment Processors
 
@@ -389,7 +389,7 @@ Most browsers allow you to control cookies through settings:
 
 Control personalized advertising from Google:
 
-1. Visit: https://www.google.com/settings/ads
+1. Visit: https://your device and browser ad controls
 2. Sign in to your Google account
 3. Toggle "Ads Personalization" on/off
 4. Manage ad topics and interests
@@ -691,7 +691,7 @@ Please also review:
 
 - **Privacy Policy:** Comprehensive data protection information
 - **Terms of Service:** Platform usage terms
-- **AdMob Disclosure:** Google AdMob integration details
+- **Advertising Network Partner Disclosure:** Advertising Network Partner integration details
 
 ---
 
@@ -705,7 +705,7 @@ Please also review:
 
 ✅ **Optional cookies** (functional, analytics, advertising) can be controlled through settings
 
-✅ **Google AdMob** sets advertising cookies to deliver and measure ads
+✅ **Advertising Network Partner** sets advertising cookies to deliver and measure ads
 
 ✅ **You have control** through Platform settings, browser settings, and device settings
 

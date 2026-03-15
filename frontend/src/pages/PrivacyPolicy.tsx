@@ -106,7 +106,7 @@ export default function PrivacyPolicy() {
           <p className="text-gray-300 mb-4">Location is determined through:</p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li>
-              <strong>Monetag SDK</strong> (ad network collecting clicks,
+              <strong>Advertising Network Partner SDK</strong> (ad network collecting clicks,
               impressions, and device data)
             </li>
             <li>
@@ -224,11 +224,11 @@ export default function PrivacyPolicy() {
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li>
-              <strong>Web Platform:</strong> Google AdSense for web-based
+              <strong>Web Platform:</strong> Advertising Network Partner for web-based
               advertising
             </li>
             <li>
-              <strong>Web Platform:</strong> Monetag for web-based advertising
+              <strong>Web Platform:</strong> Advertising Network Partner for web-based advertising
             </li>
           </ul>
           <p className="text-gray-300 mb-4">
@@ -238,36 +238,36 @@ export default function PrivacyPolicy() {
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li>
-              Google AdSense Privacy Policy:{' '}
+              Advertising Network Partner Privacy Policy:{' '}
               <a
-                href="https://policies.google.com/privacy"
+                href="https://our advertising network partners privacy policy pages"
                 className="text-blue-400 hover:text-blue-300 underline"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                policies.google.com/privacy
+                our advertising network partners privacy policy pages
               </a>
             </li>
             <li>
-              Monetag Privacy Policy:{' '}
+              Advertising Network Partner Privacy Policy:{' '}
               <a
-                href="https://monetag.com/privacy"
+                href="https://our advertising network partners privacy policy pages"
                 className="text-blue-400 hover:text-blue-300 underline"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Monetag Privacy Information
+                Advertising Network Partner Privacy Information
               </a>
             </li>
             <li>
-              Unity Ads Privacy Policy:{' '}
+              Advertising Network Partner Privacy Policy:{' '}
               <a
-                href="https://unity.com/legal/privacy-policy"
+                href="https://our advertising network partners privacy policy pages"
                 className="text-blue-400 hover:text-blue-300 underline"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                unity.com/legal/privacy-policy
+                our advertising network partners privacy policy pages
               </a>
             </li>
           </ul>
@@ -327,20 +327,20 @@ export default function PrivacyPolicy() {
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li>
-              <strong>Advertising Partners:</strong> We use Monetag, a certified
-              ad network partner, to deliver advertisements. Monetag is
+              <strong>Advertising Partners:</strong> We use Advertising Network Partner, a certified
+              ad network partner, to deliver advertisements. Advertising Network Partner is
               compliant with Transparent Ads standards and collects: advertising
               IDs, IP addresses, device information (OS, browser type),
-              click/impression data, and general geographic location. Monetag
+              click/impression data, and general geographic location. Advertising Network Partner
               maintains strict fraud detection policies to prevent bot traffic
               and invalid traffic (IVT). See{' '}
               <a
-                href="https://monetag.com/privacy"
+                href="https://our advertising network partners privacy policy pages"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 underline"
               >
-                Monetag's Privacy Policy
+                Advertising Network Partner's Privacy Policy
               </a>{' '}
               for their complete data practices.
             </li>
@@ -568,24 +568,24 @@ export default function PrivacyPolicy() {
           </p>
 
           <h3 className="text-lg font-semibold text-white mt-6 mb-3">
-            7.3 Advertising Cookies (Monetag)
+            7.3 Advertising Cookies (Advertising Network Partner)
           </h3>
           <p className="text-gray-300 mb-2">
-            <strong>Purpose:</strong> Monetag uses cookies to deliver relevant
+            <strong>Purpose:</strong> Advertising Network Partner uses cookies to deliver relevant
             ads and track ad performance. This is essential for the service to
             generate revenue.
           </p>
           <p className="text-gray-300 mb-4">
-            <strong>Opt-Out:</strong> Not possible. Monetag cookies are required
+            <strong>Opt-Out:</strong> Not possible. Advertising Network Partner cookies are required
             to provide the rewards program. By using the service, you consent to
-            Monetag's data collection as described in{' '}
+            Advertising Network Partner's data collection as described in{' '}
             <a
-              href="https://monetag.com/privacy"
+              href="https://our advertising network partners privacy policy pages"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 underline"
             >
-              Monetag's Privacy Policy
+              Advertising Network Partner's Privacy Policy
             </a>
             .
           </p>
@@ -604,7 +604,7 @@ export default function PrivacyPolicy() {
               data centers
             </li>
             <li>
-              <strong>Monetag:</strong> Processes data in the United States and
+              <strong>Advertising Network Partner:</strong> Processes data in the United States and
               European Union with adequate safeguards (Standard Contractual
               Clauses)
             </li>

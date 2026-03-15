@@ -1,5 +1,10 @@
 import LegalPage from './LegalPage'
 
-export default function AdMob() {
-  return <LegalPage endpoint="admob" title="AdMob Data Usage Disclosure" />
+export default function AdvertisingPartners() {
+  return (
+    <LegalPage
+      endpoint="admob"
+      title="Advertising Network Partners Data Usage Disclosure"
+    />
+  )
 }

@@ -76,8 +76,8 @@ Each individual is permitted only one (1) active account on the Platform. Creati
 Adify operates as a rewards-based platform that connects users with advertisers. The Platform generates revenue through advertising partnerships, and a portion of this revenue is distributed to users in the form of AdCoins based on their engagement activities. Advertisements may appear during user sessions to support the platform.
 
 **Important:** Different advertising technologies are used based on the platform:
-- **Web Platform:** Google AdSense
-- **Mobile Platform:** Google AdMob and/or Unity Ads
+- **Web Platform:** Advertising Network Partner
+- **Mobile Platform:** Advertising Network Partners
 
 Users are never required or incentivized to click on advertisements. Rewards are earned through active participation in sessions and platform activities.
 
@@ -94,7 +94,7 @@ AdCoins serve as the Platform's virtual currency and primary unit for tracking u
 
 The Platform operates on a revenue-sharing model:
 
-1. **Advertising Revenue:** Generated primarily through Google AdMob when users view advertisements
+1. **Advertising Revenue:** Generated primarily through Advertising Network Partner when users view advertisements
 2. **Platform Fee:** The Company retains a percentage to cover operational costs, development, fraud prevention, payment processing, and profit
 3. **User Distribution:** The remaining portion is distributed to users as AdCoins based on their engagement
 
@@ -124,10 +124,10 @@ Your account dashboard provides real-time information about:
 
 ### 5.1 Video Advertisement Viewing
 
-Users can earn AdCoins by viewing video advertisements through Google AdMob:
+Users can earn AdCoins by viewing video advertisements through Advertising Network Partner:
 
 - **Engagement Requirement:** Users must watch videos to completion to receive credit
-- **Availability:** Video advertisements are subject to availability from AdMob and may vary by region
+- **Availability:** Video advertisements are subject to availability from Advertising Network Partner and may vary by region
 - **Earnings Calculation:** AdCoins earned per video are calculated based on the advertising revenue generated and applicable Regional Rate Multiplier
 - **Fair Use:** Excessive or automated video viewing may be flagged by our fraud detection systems
 
@@ -216,7 +216,7 @@ Regional Rate Multipliers may be updated periodically to reflect:
 
 - Changes in advertising market conditions
 - Currency exchange rate fluctuations
-- New market data from AdMob
+- New market data from Advertising Network Partner
 - Platform economic adjustments
 
 Users will be notified of material changes to their Regional Rate Multiplier through in-app notifications and email.
@@ -667,7 +667,7 @@ TO THE MAXIMUM EXTENT PERMITTED BY LAW, OUR TOTAL LIABILITY TO YOU FOR ALL CLAIM
 
 We are not responsible for:
 
-- Google AdMob service availability or issues
+- Advertising Network Partner service availability or issues
 - PayPal payment processing delays or failures
 - Third-party service outages affecting the Platform
 - Actions or omissions of third-party service providers
@@ -959,7 +959,7 @@ Except as required by law, termination does not entitle you to refunds of:
 
 ### 18.1 Entire Agreement
 
-These Terms, together with our Privacy Policy, Cookie Policy, AdMob Disclosure, and any other policies incorporated by reference, constitute the entire agreement between you and AdRev Technologies (Pty) Ltd regarding the Platform and supersede all prior agreements and understandings.
+These Terms, together with our Privacy Policy, Cookie Policy, Advertising Network Partner Disclosure, and any other policies incorporated by reference, constitute the entire agreement between you and AdRev Technologies (Pty) Ltd regarding the Platform and supersede all prior agreements and understandings.
 
 ### 18.2 Severability
 

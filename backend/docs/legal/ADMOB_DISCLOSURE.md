@@ -1,19 +1,19 @@
-# Google AdMob Disclosure
+# Advertising Network Partner Disclosure
 
 **Effective Date:** January 26, 2026  
 **Last Updated:** January 26, 2026
 
 ## 1. Introduction
 
-This disclosure provides transparent information about how AdRev Technologies (Pty) Ltd ("we," "us," or "our") uses Google AdMob in the Adify Platform and how this integration affects your privacy and user experience. This document should be read in conjunction with our Privacy Policy, Terms of Service, and Cookie Policy.
+This disclosure provides transparent information about how AdRev Technologies (Pty) Ltd ("we," "us," or "our") uses Advertising Network Partner in the Adify Platform and how this integration affects your privacy and user experience. This document should be read in conjunction with our Privacy Policy, Terms of Service, and Cookie Policy.
 
-**Important:** Google AdMob is a critical component of the Adify business model. Advertising revenue generated through AdMob enables us to offer the free tier of our service and reward users with AdCoins. By using the Adify Platform, you acknowledge and accept the integration of Google AdMob as described in this disclosure.
+**Important:** Advertising Network Partner is a critical component of the Adify business model. Advertising revenue generated through Advertising Network Partner enables us to offer the free tier of our service and reward users with AdCoins. By using the Adify Platform, you acknowledge and accept the integration of Advertising Network Partner as described in this disclosure.
 
-## 2. What is Google AdMob?
+## 2. What is Advertising Network Partner?
 
 ### 2.1 Overview
 
-**Google AdMob** is Google's mobile advertising platform that connects app developers with advertisers. AdMob delivers advertisements within mobile applications and enables developers to monetize their apps through ad revenue.
+**Advertising Network Partner** is Google's mobile advertising platform that connects app developers with advertisers. Advertising Network Partner delivers advertisements within mobile applications and enables developers to monetize their apps through ad revenue.
 
 **Key Components:**
 - Ad delivery network
@@ -22,9 +22,9 @@ This disclosure provides transparent information about how AdRev Technologies (P
 - Revenue optimization technology
 - Multiple ad format support
 
-### 2.2 AdMob in Adify
+### 2.2 Advertising Network Partner in Adify
 
-Adify integrates Google AdMob to:
+Adify integrates Advertising Network Partner to:
 
 - Display advertisements to Free Tier users
 - Generate revenue from ad impressions and clicks
@@ -32,7 +32,7 @@ Adify integrates Google AdMob to:
 - Provide various ad formats (video ads, rewarded ads, interstitial ads)
 - Enable users to earn rewards by engaging with advertisements
 
-**Business Model:** The Adify Platform operates on a revenue-sharing model where advertising revenue from AdMob is split between:
+**Business Model:** The Adify Platform operates on a revenue-sharing model where advertising revenue from Advertising Network Partner is split between:
 - Platform operational costs and profit
 - User earnings (AdCoins)
 - Payment processing and infrastructure
@@ -47,9 +47,9 @@ Adify integrates Google AdMob to:
 
 **Important Distinction:** Google is not just a service provider to us; they also have a direct relationship with you as a user through their advertising ecosystem.
 
-## 3. Data Collected by Google AdMob
+## 3. Data Collected by Advertising Network Partner
 
-Google AdMob collects various types of data when you use Adify. This data collection is governed primarily by Google's Privacy Policy, though we are required to disclose it to you.
+Advertising Network Partner collects various types of data when you use Adify. This data collection is governed primarily by Google's Privacy Policy, though we are required to disclose it to you.
 
 ### 3.1 Advertising Identifiers
 
@@ -73,7 +73,7 @@ Google AdMob collects various types of data when you use Adify. This data collec
 
 ### 3.2 Device Information
 
-AdMob collects technical device data:
+Advertising Network Partner collects technical device data:
 
 **Device Identifiers:**
 - Device ID or hardware ID
@@ -108,13 +108,13 @@ AdMob collects technical device data:
   - Determining advertising rates (CPM varies by country)
   - Regional Rate Multiplier calculation for Adify
 
-**Important:** AdMob does NOT collect precise GPS location through Adify (we do not request location permissions). However, approximate location is inferred from IP address.
+**Important:** Advertising Network Partner does NOT collect precise GPS location through Adify (we do not request location permissions). However, approximate location is inferred from IP address.
 
-**Privacy Note:** This differs from our Platform's location use. We only use country-level location for Regional Rate Multipliers, but AdMob may use city-level location for ad targeting.
+**Privacy Note:** This differs from our Platform's location use. We only use country-level location for Regional Rate Multipliers, but Advertising Network Partner may use city-level location for ad targeting.
 
 ### 3.4 Ad Interaction Data
 
-AdMob tracks how you interact with advertisements:
+Advertising Network Partner tracks how you interact with advertisements:
 
 **Impression Data:**
 - Which ads were displayed
@@ -164,10 +164,10 @@ Google may infer information about you based on your advertising ID activity:
 ### 3.6 Cross-App and Cross-Site Tracking
 
 **Advertising Ecosystem Tracking:**
-- AdMob is part of Google's broader advertising network
+- Advertising Network Partner is part of Google's broader advertising network
 - Your advertising ID may be tracked across:
-  - Multiple apps using AdMob
-  - Websites using Google Ads
+  - Multiple apps using Advertising Network Partner
+  - Websites using Advertising Network Partners
   - Other Google advertising products
 - Google builds an advertising profile across these platforms
 
@@ -180,7 +180,7 @@ Google may infer information about you based on your advertising ID activity:
 
 ### 3.7 Analytics Data
 
-AdMob includes analytics functionality:
+Advertising Network Partner includes analytics functionality:
 
 **User Behavior Analytics:**
 - Session duration
@@ -197,9 +197,9 @@ AdMob includes analytics functionality:
 
 **Purpose:** Helping us optimize ad placement and user experience.
 
-## 4. How Google Uses AdMob Data
+## 4. How Google Uses Advertising Network Partner Data
 
-Google uses data collected through AdMob for multiple purposes beyond just serving ads within Adify:
+Google uses data collected through Advertising Network Partner for multiple purposes beyond just serving ads within Adify:
 
 ### 4.1 Ad Personalization
 
@@ -215,7 +215,7 @@ Google uses data collected through AdMob for multiple purposes beyond just servi
 
 ### 4.2 Google's Business Purposes
 
-Google may use AdMob data for:
+Google may use Advertising Network Partner data for:
 
 - **Product Development:** Improving Google's advertising products
 - **Machine Learning:** Training AI models for ad targeting
@@ -240,7 +240,7 @@ Google may use AdMob data for:
 
 ### 4.4 Legal and Security Purposes
 
-Google may use or disclose AdMob data for:
+Google may use or disclose Advertising Network Partner data for:
 
 - Complying with legal obligations
 - Responding to law enforcement requests
@@ -257,7 +257,7 @@ Google may use or disclose AdMob data for:
 
 **Note:** We do not control Google's data retention. Review Google's Privacy Policy for their retention practices.
 
-## 5. Your Rights and Choices Regarding AdMob
+## 5. Your Rights and Choices Regarding Advertising Network Partner
 
 ### 5.1 Opt-Out of Personalized Ads
 
@@ -273,7 +273,7 @@ Google may use or disclose AdMob data for:
 4. **Effect:** Limits cross-app tracking and personalized ads
 
 **Google Ad Settings (All Platforms):**
-1. Visit https://www.google.com/settings/ads
+1. Visit https://your device and browser ad controls
 2. Sign in to your Google Account
 3. Toggle off "Ads Personalization"
 4. Manage ad topics and advertisers
@@ -312,27 +312,27 @@ On older iOS versions:
 If you're in the EU/EEA, you have additional rights:
 
 **Consent Requirement:**
-- AdMob data processing requires your consent under GDPR
+- Advertising Network Partner data processing requires your consent under GDPR
 - We request this consent through our cookie/tracking consent banner
 - You can withdraw consent through app settings
 
 **GDPR Rights Against Google:**
-- **Access:** Request data Google has collected via AdMob
+- **Access:** Request data Google has collected via Advertising Network Partner
 - **Rectification:** Correct inaccurate data
-- **Erasure:** Request deletion of AdMob data
+- **Erasure:** Request deletion of Advertising Network Partner data
 - **Portability:** Receive your data in portable format
 - **Objection:** Object to processing for legitimate interests
 
 **Exercising Rights:**
 - For data we control: privacy@adrevtechnologies.co.za
-- For data Google controls: Use Google's Privacy Controls (https://myaccount.google.com/privacy) or contact Google directly
+- For data Google controls: Use Google's Privacy Controls (https://your device and browser privacy controls) or contact Google directly
 
 ### 5.5 California Users' Rights (CCPA)
 
 California residents have rights under CCPA:
 
 **Right to Know:**
-- Categories of personal information collected via AdMob (disclosed in this document)
+- Categories of personal information collected via Advertising Network Partner (disclosed in this document)
 - Business purposes for collection
 - Third parties with whom data is shared
 
@@ -354,25 +354,25 @@ California residents have rights under CCPA:
 **Alternative to Opting Out:**
 - Subscribe to Adify Elite (premium tier)
 - Enjoy ad-free experience
-- No AdMob ads displayed (AdMob SDK may still be present for technical reasons)
-- Significantly reduces AdMob data collection
+- No Advertising Network Partner ads displayed (Advertising Network Partner SDK may still be present for technical reasons)
+- Significantly reduces Advertising Network Partner data collection
 - No trade-off in ad relevance or earnings (Elite users don't earn from ads)
 
-**Note:** Even Elite users may have AdMob SDK present in the app, but ads are not displayed, and data collection is minimized.
+**Note:** Even Elite users may have Advertising Network Partner SDK present in the app, but ads are not displayed, and data collection is minimized.
 
-## 6. Children's Privacy and AdMob
+## 6. Children's Privacy and Advertising Network Partner
 
 ### 6.1 COPPA Compliance
 
 **Users Under 13:**
 - Strictly prohibited from using Adify
 - If detected, accounts are immediately deleted
-- AdMob ads are **not** shown to children under 13 (as they cannot use the Platform)
+- Advertising Network Partner ads are **not** shown to children under 13 (as they cannot use the Platform)
 
 **Users 13-17 (with parental consent):**
 - May use Adify with verified parental consent
 - Subject to Google's families policies
-- We configure AdMob to respect child-directed content policies
+- We configure Advertising Network Partner to respect child-directed content policies
 
 ### 6.2 Google's Families Policies
 
@@ -386,17 +386,17 @@ For users 13-17, we comply with:
 
 Parents of users aged 13-17 can:
 
-- Request information about AdMob data collection for their child
-- Request deletion of child's AdMob data
+- Request information about Advertising Network Partner data collection for their child
+- Request deletion of child's Advertising Network Partner data
 - Revoke consent and terminate child's account
 
 **Contact:** privacy@adrevtechnologies.co.za with subject "Parental Request - [Child's Account]"
 
-## 7. AdMob Data Security
+## 7. Advertising Network Partner Data Security
 
 ### 7.1 Google's Security Measures
 
-Google implements security measures for AdMob data:
+Google implements security measures for Advertising Network Partner data:
 
 - **Encryption in Transit:** TLS encryption for data transmission
 - **Encryption at Rest:** Data stored in encrypted form
@@ -406,32 +406,32 @@ Google implements security measures for AdMob data:
 
 ### 7.2 Our Security Measures
 
-We secure the AdMob integration:
+We secure the Advertising Network Partner integration:
 
-- **SDK Updates:** Keeping AdMob SDK up-to-date with latest security patches
+- **SDK Updates:** Keeping Advertising Network Partner SDK up-to-date with latest security patches
 - **Secure Implementation:** Following Google's best practices for integration
-- **Limited Permissions:** Requesting only necessary permissions for AdMob functionality
-- **Monitoring:** Tracking AdMob SDK for unusual behavior
+- **Limited Permissions:** Requesting only necessary permissions for Advertising Network Partner functionality
+- **Monitoring:** Tracking Advertising Network Partner SDK for unusual behavior
 
 ### 7.3 Data Breach Notification
 
-**If AdMob Data is Breached:**
+**If Advertising Network Partner Data is Breached:**
 - Google will notify us per their Data Processing Agreement
 - We will notify affected users as required by GDPR/POPIA (within 72 hours)
 - Notification will include nature of breach, data affected, and remediation steps
 
 **Reporting Suspected Breaches:**
-- Contact: security@google.com (for AdMob issues)
+- Contact: security@google.com (for Advertising Network Partner issues)
 - Contact: support@adrevtechnologies.co.za (for Adify issues)
 
-## 8. AdMob Data Sharing
+## 8. Advertising Network Partner Data Sharing
 
 ### 8.1 Within Google
 
-AdMob data may be shared across Google's services:
+Advertising Network Partner data may be shared across Google's services:
 
 **Google Services with Potential Data Access:**
-- Google Ads
+- Advertising Network Partners
 - Google Analytics (if we use it)
 - Google Marketing Platform
 - DoubleClick
@@ -456,24 +456,24 @@ AdMob data may be shared across Google's services:
 
 ### 8.3 With Third-Party Ad Networks (Mediation)
 
-If we use AdMob's mediation feature to show ads from other networks:
+If we use Advertising Network Partner's mediation feature to show ads from other networks:
 
 **Additional Networks May Include:**
 - Facebook Audience Network
-- Unity Ads
+- Advertising Network Partner
 - AppLovin
 - Other mobile ad networks
 
 **Data Sharing:**
-- These networks receive similar data as AdMob
+- These networks receive similar data as Advertising Network Partner
 - Each network has its own privacy policy
 - You may need to opt out from each network separately
 
-**Current Status:** [Note: Update this section based on whether Adify uses AdMob mediation]
+**Current Status:** [Note: Update this section based on whether Adify uses Advertising Network Partner mediation]
 
 ### 8.4 Legal Disclosures
 
-Google may disclose AdMob data in response to:
+Google may disclose Advertising Network Partner data in response to:
 
 - Legal processes (subpoenas, court orders)
 - Government requests
@@ -482,9 +482,9 @@ Google may disclose AdMob data in response to:
 
 ## 9. International Data Transfers
 
-### 9.1 Where AdMob Data is Processed
+### 9.1 Where Advertising Network Partner Data is Processed
 
-AdMob data may be processed globally:
+Advertising Network Partner data may be processed globally:
 
 **Primary Locations:**
 - United States (Google's headquarters and main data centers)
@@ -513,9 +513,9 @@ AdMob data may be processed globally:
 - Right to object to transfers (may limit service functionality)
 - Right to lodge complaints with supervisory authorities
 
-## 10. AdMob vs. Our Direct Data Collection
+## 10. Advertising Network Partner vs. Our Direct Data Collection
 
-It's important to distinguish what we collect versus what Google AdMob collects:
+It's important to distinguish what we collect versus what Advertising Network Partner collects:
 
 ### 10.1 Data We Collect Directly
 
@@ -528,7 +528,7 @@ It's important to distinguish what we collect versus what Google AdMob collects:
 
 **Control:** Covered by our Privacy Policy; you can exercise rights by contacting us.
 
-### 10.2 Data AdMob Collects
+### 10.2 Data Advertising Network Partner Collects
 
 - Advertising ID (GAID/IDFA)
 - Device information (model, OS, screen size, IP address)
@@ -541,15 +541,15 @@ It's important to distinguish what we collect versus what Google AdMob collects:
 
 ### 10.3 Shared Data
 
-Some data is shared between us and AdMob:
+Some data is shared between us and Advertising Network Partner:
 
 - Device identifiers (we see anonymized versions; Google sees full identifiers)
 - Ad revenue data (both parties need this for revenue sharing)
-- User location (we use country; AdMob uses city-level from IP)
+- User location (we use country; Advertising Network Partner uses city-level from IP)
 
 ## 11. Impact on User Experience
 
-### 11.1 Benefits of AdMob Integration
+### 11.1 Benefits of Advertising Network Partner Integration
 
 **For Users:**
 - Free access to Adify Platform
@@ -571,8 +571,8 @@ Some data is shared between us and AdMob:
 - Less data shared = less relevant ads = privacy protection
 
 **Free Tier vs. Elite:**
-- Free Tier: Ads displayed, AdMob data collected, can earn AdCoins
-- Elite: Ad-free, minimal AdMob data collection, subscription fee
+- Free Tier: Ads displayed, Advertising Network Partner data collected, can earn AdCoins
+- Elite: Ad-free, minimal Advertising Network Partner data collection, subscription fee
 
 ### 11.3 Ad Frequency and Experience
 
@@ -590,7 +590,7 @@ Some data is shared between us and AdMob:
 
 ### 12.1 Google's Certifications
 
-Google AdMob complies with:
+Advertising Network Partner complies with:
 
 - **GDPR** (General Data Protection Regulation - EU)
 - **CCPA** (California Consumer Privacy Act)
@@ -600,45 +600,45 @@ Google AdMob complies with:
 
 ### 12.2 Our Responsibilities
 
-As an AdMob publisher, we must:
+As an Advertising Network Partner publisher, we must:
 
-- **Disclose AdMob Use:** Provide transparent information (this disclosure)
+- **Disclose Advertising Network Partner Use:** Provide transparent information (this disclosure)
 - **Obtain Consent:** Request consent where required by law (EU users)
 - **Child Protection:** Ensure children under 13 don't use the service
-- **Policy Compliance:** Follow Google's AdMob Publisher Policies
+- **Policy Compliance:** Follow Google's Advertising Network Partner Publisher Policies
 - **Cooperation:** Cooperate with Google on policy enforcement
 
 ### 12.3 Publisher Policies
 
-We comply with Google's AdMob Publisher Policies, including:
+We comply with Google's Advertising Network Partner Publisher Policies, including:
 
 - Prohibited content restrictions (no illegal, adult, or harmful content)
 - Traffic quality standards (no invalid traffic, bots, or fraud)
 - Ad placement policies (ads must be clearly distinguishable)
 - User experience requirements (reasonable ad load, no deceptive practices)
 
-**Enforcement:** Violation could result in AdMob account suspension, impacting the entire Adify Platform.
+**Enforcement:** Violation could result in Advertising Network Partner account suspension, impacting the entire Adify Platform.
 
-## 13. Changes to AdMob Integration
+## 13. Changes to Advertising Network Partner Integration
 
 ### 13.1 Notification of Changes
 
 We will notify you if:
 
-- We change how we use AdMob
-- We add AdMob mediation partners
-- We implement new AdMob features that affect data collection
-- Google makes significant changes to AdMob's data practices
+- We change how we use Advertising Network Partner
+- We add Advertising Network Partner mediation partners
+- We implement new Advertising Network Partner features that affect data collection
+- Google makes significant changes to Advertising Network Partner's data practices
 
 **Method:** Email notification and Platform announcement.
 
 ### 13.2 Google's Policy Updates
 
-Google may update its Privacy Policy or AdMob practices:
+Google may update its Privacy Policy or Advertising Network Partner practices:
 
 - We monitor Google's policy changes
 - Material changes will be communicated to users
-- Review Google's Privacy Policy periodically: https://policies.google.com/privacy
+- Review Google's Privacy Policy periodically: https://our advertising network partners privacy policy pages
 
 ### 13.3 Your Recourse
 
@@ -653,19 +653,19 @@ If you disagree with changes:
 ### 14.1 Google's Privacy Resources
 
 **Google Privacy Policy:**
-https://policies.google.com/privacy
+https://our advertising network partners privacy policy pages
 
-**Google AdMob Privacy Information:**
-https://support.google.com/admob/answer/6128543
+**Advertising Network Partner Privacy Information:**
+https://our advertising network partner information pages
 
 **Google Ad Settings:**
-https://www.google.com/settings/ads
+https://your device and browser ad controls
 
 **Google Privacy Controls:**
-https://myaccount.google.com/privacy
+https://your device and browser privacy controls
 
 **Google Data & Privacy:**
-https://myaccount.google.com/data-and-privacy
+https://your device and browser privacy controls
 
 **Google's Advertising Principles:**
 https://policies.google.com/technologies/ads
@@ -700,31 +700,31 @@ https://www.justice.gov.za/inforeg/
 
 ## 15. Frequently Asked Questions (FAQ)
 
-**Q: Can I use Adify without AdMob?**
-A: No, AdMob is integral to the free tier. To avoid ads, subscribe to Elite.
+**Q: Can I use Adify without Advertising Network Partner?**
+A: No, Advertising Network Partner is integral to the free tier. To avoid ads, subscribe to Elite.
 
-**Q: Does AdMob track me outside of Adify?**
-A: Yes, AdMob (via your advertising ID) tracks you across apps and potentially websites using Google's ad network.
+**Q: Does Advertising Network Partner track me outside of Adify?**
+A: Yes, Advertising Network Partner (via your advertising ID) tracks you across apps and potentially websites using Google's ad network.
 
 **Q: Can I earn AdCoins if I opt out of personalized ads?**
 A: Yes, but less personalized ads may be less engaging, potentially affecting earnings.
 
-**Q: What happens to my AdMob data if I delete my Adify account?**
-A: We delete our data, but Google retains AdMob data per their retention policy. Contact Google to request AdMob data deletion.
+**Q: What happens to my Advertising Network Partner data if I delete my Adify account?**
+A: We delete our data, but Google retains Advertising Network Partner data per their retention policy. Contact Google to request Advertising Network Partner data deletion.
 
-**Q: Are Elite users tracked by AdMob?**
-A: AdMob SDK may be present, but ads are not shown, and data collection is minimized.
+**Q: Are Elite users tracked by Advertising Network Partner?**
+A: Advertising Network Partner SDK may be present, but ads are not shown, and data collection is minimized.
 
-**Q: How do I know if an ad is from AdMob vs. another network?**
-A: Currently, all ads are from AdMob (unless mediation is enabled). Check this disclosure for updates.
+**Q: How do I know if an ad is from Advertising Network Partner vs. another network?**
+A: Currently, all ads are from Advertising Network Partner (unless mediation is enabled). Check this disclosure for updates.
 
 **Q: Can advertisers see my personal information?**
 A: No, advertisers receive aggregate, anonymized reports, not individual user data.
 
-**Q: Is AdMob GDPR-compliant?**
-A: Yes, Google AdMob complies with GDPR. We obtain consent from EU users as required.
+**Q: Is Advertising Network Partner GDPR-compliant?**
+A: Yes, Advertising Network Partner complies with GDPR. We obtain consent from EU users as required.
 
-**Q: Can I request my AdMob data?**
+**Q: Can I request my Advertising Network Partner data?**
 A: Yes, use Google's data download tools: https://takeout.google.com/ (includes advertising data if you're signed into a Google Account).
 
 **Q: What if I see an inappropriate ad?**
@@ -732,20 +732,20 @@ A: Report it to support@adrevtechnologies.co.za immediately. We'll work with Goo
 
 ## 16. Contact Information
 
-### 16.1 AdMob-Related Privacy Inquiries
+### 16.1 Advertising Network Partner-Related Privacy Inquiries
 
 **Email:** privacy@adrevtechnologies.co.za  
-**Subject:** "AdMob Privacy Inquiry"
+**Subject:** "Advertising Network Partner Privacy Inquiry"
 
-### 16.2 Google AdMob Support
+### 16.2 Advertising Network Partner Support
 
-For issues directly related to Google's AdMob practices:
+For issues directly related to Google's Advertising Network Partner practices:
 
 **Google Privacy Help Center:**
 https://support.google.com/policies/
 
-**Google AdMob Support:**
-https://support.google.com/admob/
+**Advertising Network Partner Support:**
+https://our advertising network partner support pages
 
 ### 16.3 Reporting Ad Issues
 
@@ -771,9 +771,9 @@ privacy@adrevtechnologies.co.za
 
 By using the Adify Platform, you acknowledge that:
 
-✅ You have read and understood this AdMob Disclosure
+✅ You have read and understood this Advertising Network Partner Disclosure
 
-✅ You understand that Google AdMob is integrated into Adify
+✅ You understand that Advertising Network Partner is integrated into Adify
 
 ✅ You consent to Google's collection and use of data as described (where consent is required by law)
 
@@ -781,17 +781,17 @@ By using the Adify Platform, you acknowledge that:
 
 ✅ You can upgrade to Elite Tier for an ad-free experience
 
-✅ You accept that AdMob integration is essential to the free tier business model
+✅ You accept that Advertising Network Partner integration is essential to the free tier business model
 
-**For EU/EEA Users:** If you do not consent to AdMob's data processing, you may:
-- Upgrade to Elite Tier (ad-free, minimal AdMob data collection)
+**For EU/EEA Users:** If you do not consent to Advertising Network Partner's data processing, you may:
+- Upgrade to Elite Tier (ad-free, minimal Advertising Network Partner data collection)
 - Discontinue use of the Platform
 
-**For All Users:** You can manage AdMob data collection through device settings and Google Ad Settings as described in Section 5.
+**For All Users:** You can manage Advertising Network Partner data collection through device settings and Google Ad Settings as described in Section 5.
 
 ---
 
-**Thank you for taking the time to understand how Google AdMob is integrated into Adify. We are committed to transparency and giving you control over your data and advertising experience.**
+**Thank you for taking the time to understand how Advertising Network Partner is integrated into Adify. We are committed to transparency and giving you control over your data and advertising experience.**
 
 **Effective Date:** January 26, 2026  
 **Last Updated:** January 26, 2026

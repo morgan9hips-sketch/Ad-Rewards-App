@@ -111,13 +111,13 @@ Through our integrations with advertising partners, we collect:
 - See each partner's privacy policy for details on their data practices
 
 **Platform-Specific Technologies:**
-- **Web Platform:** Google AdSense
-- **Mobile Platform:** Google AdMob and/or Unity Ads
+- **Web Platform:** Advertising Network Partner
+- **Mobile Platform:** Advertising Network Partners
 
 **Important Note:** Advertising data collection is governed by each partner's privacy policy. We recommend reviewing:
-- Google Privacy Policy: https://policies.google.com/privacy
-- Google AdMob Partner Information: https://support.google.com/admob/answer/6128543
-- Unity Ads Privacy Policy: https://unity.com/legal/privacy-policy
+- Google Privacy Policy: https://our advertising network partners privacy policy pages
+- Advertising Network Partner Partner Information: https://our advertising network partner information pages
+- Advertising Network Partner Privacy Policy: https://our advertising network partners privacy policy pages
 
 **User Control:** Users are never required or incentivized to click on advertisements. All ad interactions must be genuine and voluntary.
 
@@ -297,10 +297,10 @@ We share your personal information only in the following circumstances:
 **Advertising Partners:**
 - **Data Shared:** Device identifiers, ad interaction data, location (country), demographic data
 - **Purpose:** Ad delivery, targeting, and revenue generation
-- **Web Platform:** Google AdSense - https://policies.google.com/privacy
-- **Mobile Platform:** Google AdMob and/or Unity Ads
-  - AdMob: https://policies.google.com/privacy
-  - Unity: https://unity.com/legal/privacy-policy
+- **Web Platform:** Advertising Network Partner - https://our advertising network partners privacy policy pages
+- **Mobile Platform:** Advertising Network Partners
+  - Advertising Network Partner: https://our advertising network partners privacy policy pages
+  - Unity: https://our advertising network partners privacy policy pages
 - **Contractual Protections:** Data Processing Agreements with advertising partners
 
 **PayPal (Payment Processor):**
@@ -683,7 +683,7 @@ We collect the same information from minors as adults, but with additional prote
 
 - **Minimal Collection:** We collect only information necessary for service provision
 - **Parental Access:** Parents can review their child's information at any time
-- **Limited Sharing:** We do not share minor data except as essential for service (AdMob, PayPal for withdrawals)
+- **Limited Sharing:** We do not share minor data except as essential for service (Advertising Network Partner, PayPal for withdrawals)
 - **No Marketing:** We do not send marketing communications to users under 18
 
 ### 8.4 Parental Rights for Minor Users
@@ -827,7 +827,7 @@ We implement comprehensive security measures to protect your personal informatio
 
 All third-party service providers are required to maintain security standards:
 
-- **Google AdMob:** Google's enterprise-grade security
+- **Advertising Network Partner:** Google's enterprise-grade security
 - **PayPal:** PCI DSS Level 1 compliance
 - **Supabase:** SOC 2 Type II certified, ISO 27001 compliant
 - **Vercel:** SOC 2 Type II certified
@@ -940,7 +940,7 @@ Your data may be processed in the following locations:
 - Company headquarters and operations
 
 **United States:**
-- Google AdMob (advertising)
+- Advertising Network Partner (advertising)
 - Vercel (application hosting)
 - PayPal (payment processing)
 
@@ -996,7 +996,7 @@ For detailed information about our use of cookies and tracking technologies, ple
 - Essential cookies (required for service operation)
 - Functional cookies (remember preferences)
 - Analytics cookies (understand usage patterns)
-- Advertising cookies (AdMob advertising)
+- Advertising cookies (Advertising Network Partner advertising)
 
 **Your Cookie Choices:**
 - Accept or reject non-essential cookies through cookie banner
@@ -1004,7 +1004,7 @@ For detailed information about our use of cookies and tracking technologies, ple
 - Note: Blocking essential cookies may impair functionality
 
 **Third-Party Cookies:**
-- Google AdMob sets advertising cookies
+- Advertising Network Partner sets advertising cookies
 - Analytics providers may set cookies
 - See Cookie Policy for complete list
 

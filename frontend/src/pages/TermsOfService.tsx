@@ -12,8 +12,8 @@ export default function TermsOfService() {
             <strong>Effective Date:</strong> January 16, 2026
           </p>
           <p className="text-gray-300 mb-6">
-            Welcome to Adify ("we," "our," or "us"). By accessing or using
-            our service, you agree to be bound by these Terms of Service. Please
+            Welcome to Adify ("we," "our," or "us"). By accessing or using our
+            service, you agree to be bound by these Terms of Service. Please
             read them carefully.
           </p>
 
@@ -64,12 +64,12 @@ export default function TermsOfService() {
           </ul>
 
           <h2 className="text-xl font-bold text-white mt-8 mb-4">
-            1.5 Monetag Ad Network Compliance
+            1.5 Advertising Network Partner Ad Network Compliance
           </h2>
           <p className="text-gray-300 mb-4">
-            Our advertisements are served through Monetag, a certified ad
-            network. By using our service, you agree to comply with all Monetag
-            policies and requirements:
+            Our advertisements are served through Advertising Network Partner, a
+            certified ad network. By using our service, you agree to comply with
+            all Advertising Network Partner policies and requirements:
           </p>
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li>
@@ -79,10 +79,10 @@ export default function TermsOfService() {
               strictly prohibited.
             </li>
             <li>
-              <strong>Fraud Prevention:</strong> Monetag employs advanced fraud
-              detection. Any attempt to manipulate ad metrics, use automated
-              tools, or generate artificial impressions will result in account
-              suspension and earnings forfeiture.
+              <strong>Fraud Prevention:</strong> Advertising Network Partner
+              employs advanced fraud detection. Any attempt to manipulate ad
+              metrics, use automated tools, or generate artificial impressions
+              will result in account suspension and earnings forfeiture.
             </li>
             <li>
               <strong>Ad Interaction Authenticity:</strong> Users must not
@@ -92,25 +92,25 @@ export default function TermsOfService() {
             <li>
               <strong>Geographic Compliance:</strong> Users must not use VPNs,
               proxies, or location spoofing to appear in geographic regions
-              other than their actual location, as this violates Monetag's
-              traffic quality standards.
+              other than their actual location, as this violates Advertising
+              Network Partner's traffic quality standards.
             </li>
             <li>
               <strong>Refund Policy:</strong> Any earnings generated from
               invalid traffic may be withheld or refunded to advertisers, and
               your account may be suspended for investigating or contesting
-              Monetag's fraud detection results.
+              Advertising Network Partner's fraud detection results.
             </li>
           </ul>
           <p className="text-gray-300 mb-4">
             See{' '}
             <a
-              href="https://monetag.com/publishers"
+              href="https://our advertising network partner policy pages"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 underline"
             >
-              Monetag's Publisher Policies
+              Advertising Network Partner's Publisher Policies
             </a>{' '}
             for complete requirements.
           </p>
@@ -170,7 +170,9 @@ export default function TermsOfService() {
                 Privacy Policy
               </Link>
             </li>
-            <li>Google's advertising policies and terms of service</li>
+            <li>
+              Our advertising network partners' policies and terms of service
+            </li>
             <li>PayPal's terms of service and acceptable use policies</li>
             <li>
               All applicable local, state, national, and international laws
@@ -380,8 +382,8 @@ export default function TermsOfService() {
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li>
               We are not liable for service interruptions, downtime, technical
-              issues, or third-party service failures (including Monetag or
-              PayPal).
+              issues, or third-party service failures (including Advertising
+              Network Partner or PayPal).
             </li>
             <li>
               We may suspend or discontinue the service at any time without
@@ -437,8 +439,8 @@ export default function TermsOfService() {
             </li>
             <li>Creation of multiple accounts</li>
             <li>
-              Violation of Monetag publisher policies or ad network terms of
-              service
+              Violation of Advertising Network Partner publisher policies or ad
+              network terms of service
             </li>
             <li>
               Generation of invalid traffic (bot impressions, auto-refreshed
@@ -501,8 +503,8 @@ export default function TermsOfService() {
           <p className="text-gray-300 mb-4">
             <strong>Our Rights:</strong> All content, features, functionality,
             logos, trademarks, service marks, and trade names displayed on the
-            service are the exclusive property of Adify and are protected
-            by copyright, trademark, and other intellectual property laws.
+            service are the exclusive property of Adify and are protected by
+            copyright, trademark, and other intellectual property laws.
           </p>
           <p className="text-gray-300 mb-4">
             <strong>License to Us:</strong> By using the service, you grant us a
@@ -600,8 +602,8 @@ export default function TermsOfService() {
           </h3>
           <p className="text-gray-300 mb-4">
             These Terms, together with our Privacy Policy, constitute the entire
-            agreement between you and Adify regarding the service and
-            supersede all prior agreements and understandings.
+            agreement between you and Adify regarding the service and supersede
+            all prior agreements and understandings.
           </p>
 
           <h3 className="text-lg font-semibold text-white mt-6 mb-3">
