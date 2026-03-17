@@ -1,5 +1,9 @@
-import { LayoutGrid, MoveLeft } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { LayoutGrid, MoveLeft, Trophy } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { useCurrency } from '../contexts/CurrencyContext'
+import { API_BASE_URL } from '../config/api'
 
 interface Category {
   key: string
@@ -7,6 +11,13 @@ interface Category {
   label: string
   description: string
   path: string
+}
+
+interface FeaturedTask {
+  id: number
+  title: string
+  rewardCoins: number
+  provider: string
 }
 
 const categories: Category[] = [
@@ -49,8 +60,75 @@ const categories: Category[] = [
   },
 ]
 
+const progressWidthClasses = [
+  'w-0',
+  'w-[5%]',
+  'w-[10%]',
+  'w-[15%]',
+  'w-[20%]',
+  'w-[25%]',
+  'w-[30%]',
+  'w-[35%]',
+  'w-[40%]',
+  'w-[45%]',
+  'w-[50%]',
+  'w-[55%]',
+  'w-[60%]',
+  'w-[65%]',
+  'w-[70%]',
+  'w-[75%]',
+  'w-[80%]',
+  'w-[85%]',
+  'w-[90%]',
+  'w-[95%]',
+  'w-full',
+]
+
 export default function TaskCenter() {
   const navigate = useNavigate()
+  const { session } = useAuth()
+  const { formatAmount } = useCurrency()
+  const [featuredTasks, setFeaturedTasks] = useState<FeaturedTask[]>([])
+  const [taskWinStreak, setTaskWinStreak] = useState(0)
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const token = session?.access_token
+        if (!token) return
+
+        const response = await fetch(`${API_BASE_URL}/api/tasks/featured`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        if (!response.ok) return
+        const data = await response.json()
+        setFeaturedTasks(data.tasks || [])
+        setTaskWinStreak(data.taskWinStreak || 0)
+      } catch (error) {
+        console.error('Error fetching featured tasks:', error)
+      }
+    }
+
+    fetchFeatured()
+  }, [session?.access_token])
+
+  const streakProgress = useMemo(() => {
+    const completedInCurrentCycle = taskWinStreak % 5
+    return {
+      completedInCurrentCycle,
+      remaining: 5 - completedInCurrentCycle,
+      percent: Math.round((completedInCurrentCycle / 5) * 100),
+    }
+  }, [taskWinStreak])
+
+  const streakProgressWidthClass = useMemo(() => {
+    const index = Math.max(
+      0,
+      Math.min(20, Math.round(streakProgress.percent / 5)),
+    )
+    return progressWidthClasses[index]
+  }, [streakProgress.percent])
 
   return (
     <div className="min-h-screen bg-slate-950 pb-24 text-slate-100">
@@ -79,6 +157,51 @@ export default function TaskCenter() {
           <p className="mt-2 text-sm text-slate-400 sm:text-base">
             Browse earning opportunities by category and start earning AD COINS.
           </p>
+
+          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="rounded-[12px] border border-slate-800 bg-slate-900/70 p-4">
+              <div className="flex items-center gap-2 text-emerald-300 text-sm font-semibold uppercase tracking-wide">
+                <Trophy size={16} /> Win Streak
+              </div>
+              <p className="mt-2 text-2xl font-bold text-slate-100">
+                {taskWinStreak} tasks
+              </p>
+              <p className="mt-1 text-sm text-slate-400">
+                {streakProgress.remaining === 5
+                  ? 'Complete 5 tasks to unlock +50 AD COINS bonus.'
+                  : `${streakProgress.remaining} more task(s) to unlock +50 AD COINS.`}
+              </p>
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-800">
+                <div
+                  className={`h-full bg-blue-500 transition-all duration-300 ${streakProgressWidthClass}`}
+                />
+              </div>
+            </div>
+
+            <div className="rounded-[12px] border border-slate-800 bg-slate-900/70 p-4">
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-300">
+                Featured Task
+              </p>
+              {featuredTasks[0] ? (
+                <>
+                  <p className="mt-2 text-lg font-bold text-slate-100">
+                    {featuredTasks[0].title}
+                  </p>
+                  <p className="mt-1 text-sm text-emerald-400">
+                    {featuredTasks[0].rewardCoins.toLocaleString()} AD COINS (
+                    {formatAmount(featuredTasks[0].rewardCoins / 100)})
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {featuredTasks[0].provider}
+                  </p>
+                </>
+              ) : (
+                <p className="mt-2 text-sm text-slate-400">
+                  No featured tasks available yet.
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Category grid */}
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">

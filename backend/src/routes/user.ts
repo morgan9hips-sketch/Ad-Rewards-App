@@ -14,7 +14,6 @@ import {
   getUserLocationInfoFromCoordinates,
   getUserLocationInfo,
 } from '../services/geoService.js'
-import { checkSignupBonusEligibility } from '../services/signupBonusService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -100,9 +99,6 @@ router.get('/profile', async (req: AuthRequest, res) => {
           preferredCurrency: currency || 'ZAR', // Default to ZAR
         },
       })
-
-      // NEW: Check signup bonus eligibility for new users
-      await checkSignupBonusEligibility(userId, countryCode || 'ZA')
     } else {
       // Update lastLogin
       await prisma.userProfile.update({
@@ -340,7 +336,8 @@ router.get('/transactions', async (req: AuthRequest, res) => {
     const rawPage = parseInt(req.query.page as string)
     const rawPerPage = parseInt(req.query.perPage as string)
     const page = isNaN(rawPage) || rawPage < 1 ? 1 : rawPage
-    const perPage = isNaN(rawPerPage) || rawPerPage < 1 ? 20 : Math.min(rawPerPage, 100)
+    const perPage =
+      isNaN(rawPerPage) || rawPerPage < 1 ? 20 : Math.min(rawPerPage, 100)
     const type = req.query.type as string | undefined
 
     // Verify user exists before fetching transactions
@@ -365,10 +362,14 @@ router.get('/transactions', async (req: AuthRequest, res) => {
       perPage,
     })
   } catch (error) {
-    console.error('Error fetching transactions:', error instanceof Error ? error.message : error)
+    console.error(
+      'Error fetching transactions:',
+      error instanceof Error ? error.message : error,
+    )
     res.status(500).json({
       error: 'Failed to load transactions',
-      message: 'Please try again in a moment. If this persists, contact support.',
+      message:
+        'Please try again in a moment. If this persists, contact support.',
       code: 'TRANSACTION_LOAD_ERROR',
     })
   }
@@ -387,42 +388,6 @@ router.get('/detect-country', async (req: AuthRequest, res) => {
   } catch (error) {
     console.error('Error detecting country:', error)
     res.status(500).json({ error: 'Failed to detect country' })
-  }
-})
-
-// Get user signup bonus information
-router.get('/signup-bonus', async (req: AuthRequest, res) => {
-  try {
-    const userId = req.user!.id
-
-    // Check if user has a signup bonus
-    const signupBonus = await prisma.signupBonus.findUnique({
-      where: { userId: userId },
-    })
-
-    if (!signupBonus) {
-      return res.json({
-        eligible: false,
-      })
-    }
-
-    // Get user profile for country info
-    const profile = await prisma.userProfile.findUnique({
-      where: { userId: userId },
-      select: { country: true },
-    })
-
-    res.json({
-      eligible: true,
-      userNumber: signupBonus.userNumberInRegion,
-      countryCode: profile?.country || signupBonus.countryCode,
-      bonusCoins: signupBonus.bonusCoins,
-      bonusValue: parseFloat(signupBonus.bonusValueZar.toString()),
-      claimed: !!signupBonus.creditedAt,
-    })
-  } catch (error) {
-    console.error('Error fetching signup bonus:', error)
-    res.status(500).json({ error: 'Failed to fetch signup bonus information' })
   }
 })
 
@@ -461,28 +426,28 @@ router.delete('/account', async (req: AuthRequest, res) => {
       await tx.gameSession.deleteMany({ where: { userId: userId } })
       await tx.transaction.deleteMany({ where: { userId: userId } })
       await tx.withdrawal.deleteMany({ where: { userId: userId } })
-      await tx.referral.deleteMany({ 
-        where: { 
-          OR: [
-            { referrerId: userId },
-            { refereeId: userId }
-          ]
-        } 
+      await tx.referral.deleteMany({
+        where: {
+          OR: [{ referrerId: userId }, { refereeId: userId }],
+        },
       })
       await tx.signupBonus.deleteMany({ where: { userId: userId } })
       await tx.userBadge.deleteMany({ where: { userId: userId } })
-      
+
       // Finally delete the user profile
       await tx.userProfile.delete({ where: { userId: userId } })
     })
 
-    res.json({ 
-      success: true, 
-      message: 'Account successfully deleted. All personal data has been removed from our systems.' 
+    res.json({
+      success: true,
+      message:
+        'Account successfully deleted. All personal data has been removed from our systems.',
     })
   } catch (error) {
     console.error('Error deleting account:', error)
-    res.status(500).json({ error: 'Failed to delete account. Please contact support.' })
+    res
+      .status(500)
+      .json({ error: 'Failed to delete account. Please contact support.' })
   }
 })
 
@@ -497,10 +462,11 @@ router.post('/update-location', async (req: AuthRequest, res) => {
     }
 
     // Use geoService to detect country from coordinates
-    const { getUserLocationInfoFromCoordinates } = await import('../services/geoService.js')
+    const { getUserLocationInfoFromCoordinates } =
+      await import('../services/geoService.js')
     const locationInfo = getUserLocationInfoFromCoordinates(
       parseFloat(latitude),
-      parseFloat(longitude)
+      parseFloat(longitude),
     )
 
     if (locationInfo.countryCode) {
@@ -521,7 +487,9 @@ router.post('/update-location', async (req: AuthRequest, res) => {
         currency: locationInfo.currency,
       })
     } else {
-      res.status(400).json({ error: 'Could not determine country from coordinates' })
+      res
+        .status(400)
+        .json({ error: 'Could not determine country from coordinates' })
     }
   } catch (error) {
     console.error('Error updating location:', error)

@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { Prisma, PrismaClient } from '@prisma/client'
 import { createHash } from 'node:crypto'
+import { applyTaskWinStreakAndReferralShare } from '../services/retentionService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -194,6 +195,13 @@ async function processCallback(
         referenceType: 'cpx_survey',
       },
     })
+
+    await applyTaskWinStreakAndReferralShare(
+      tx,
+      payload.userId,
+      payload.amount,
+      'cpx_survey',
+    )
 
     await surveyHistory.update({
       where: { transId: payload.transId },

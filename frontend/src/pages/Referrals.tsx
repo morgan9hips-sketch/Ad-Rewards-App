@@ -1,16 +1,45 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import { API_BASE_URL } from '../config/api'
 import Card from '../components/Card'
 import Button from '../components/Button'
 import LoadingSpinner from '../components/LoadingSpinner'
 
+const progressWidthClasses = [
+  'w-0',
+  'w-[5%]',
+  'w-[10%]',
+  'w-[15%]',
+  'w-[20%]',
+  'w-[25%]',
+  'w-[30%]',
+  'w-[35%]',
+  'w-[40%]',
+  'w-[45%]',
+  'w-[50%]',
+  'w-[55%]',
+  'w-[60%]',
+  'w-[65%]',
+  'w-[70%]',
+  'w-[75%]',
+  'w-[80%]',
+  'w-[85%]',
+  'w-[90%]',
+  'w-[95%]',
+  'w-full',
+]
+
 interface ReferralStats {
   totalReferrals: number
   pendingReferrals: number
+  activeReferrals: number
   qualifiedReferrals: number
   paidReferrals: number
   totalCoinsEarned: number
+  currentEarnRate: number
+  nextMilestoneTarget: number | null
+  nextMilestoneRate: number | null
 }
 
 interface Referral {
@@ -20,10 +49,12 @@ interface Referral {
   createdAt: string
   qualifiedAt: string | null
   paidAt: string | null
+  refereeTotalCoins: string
 }
 
 export default function Referrals() {
   const { session } = useAuth()
+  const { formatAmount } = useCurrency()
   const [loading, setLoading] = useState(true)
   const [referralCode, setReferralCode] = useState('')
   const [referralLink, setReferralLink] = useState('')
@@ -93,9 +124,29 @@ export default function Referrals() {
 
   const shareViaEmail = () => {
     const subject = 'Join Adify with my referral!'
-    const body = `Hi!\n\nI'm using Adify to earn coins by watching ads. Join me using my referral code: ${referralCode}\n\n${referralLink}\n\nYou'll get a bonus when you sign up!`
+    const body = `Hi!\n\nI'm using Adify to earn coins by completing tasks and offers. Join me with my referral link:\n\n${referralLink}\n\nI earn a share of your task earnings, and you keep 100% of your rewards.`
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   }
+
+  const formatCoins = (coins: number | string) => {
+    const value = Number(coins || 0)
+    return Number.isFinite(value) ? value.toLocaleString() : '0'
+  }
+
+  const formatCoinsWithLocal = (coins: number | string) => {
+    const numericCoins = Number(coins || 0)
+    return `${formatCoins(numericCoins)} AD COINS (${formatAmount(numericCoins / 100)})`
+  }
+
+  const progressTarget = stats?.nextMilestoneTarget
+  const activeReferrals = stats?.activeReferrals || 0
+  const milestoneProgress = progressTarget
+    ? Math.min(100, Math.round((activeReferrals / progressTarget) * 100))
+    : 100
+  const milestoneProgressClass =
+    progressWidthClasses[
+      Math.max(0, Math.min(20, Math.round(milestoneProgress / 5)))
+    ]
 
   if (loading) {
     return (
@@ -115,7 +166,7 @@ export default function Referrals() {
         <h1 className="text-3xl font-bold mb-6">🎁 Referral Program</h1>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <Card className="p-4">
             <div className="text-sm text-gray-400">Total Referrals</div>
             <div className="text-2xl font-bold text-white">
@@ -123,24 +174,57 @@ export default function Referrals() {
             </div>
           </Card>
           <Card className="p-4">
-            <div className="text-sm text-gray-400">Qualified</div>
+            <div className="text-sm text-gray-400">Active Referrals</div>
             <div className="text-2xl font-bold text-green-500">
-              {stats?.qualifiedReferrals || 0}
+              {stats?.activeReferrals || 0}
             </div>
           </Card>
           <Card className="p-4">
-            <div className="text-sm text-gray-400">Paid Out</div>
+            <div className="text-sm text-gray-400">Current Earn Rate</div>
             <div className="text-2xl font-bold text-blue-500">
-              {stats?.paidReferrals || 0}
+              {Math.round((stats?.currentEarnRate || 0.1) * 100)}%
             </div>
           </Card>
           <Card className="p-4">
-            <div className="text-sm text-gray-400">Coins Earned</div>
+            <div className="text-sm text-gray-400">Pending</div>
+            <div className="text-2xl font-bold text-orange-500">
+              {stats?.pendingReferrals || 0}
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="text-sm text-gray-400">Referral Share Earned</div>
             <div className="text-2xl font-bold text-yellow-500">
-              {stats?.totalCoinsEarned.toLocaleString() || 0}
+              {formatCoins(stats?.totalCoinsEarned || 0)}
+            </div>
+            <div className="text-xs text-gray-400 mt-1">
+              {formatAmount((stats?.totalCoinsEarned || 0) / 100)}
             </div>
           </Card>
         </div>
+
+        <Card className="mb-6 p-6">
+          <h2 className="text-xl font-bold mb-4">Milestone Boost</h2>
+          {progressTarget ? (
+            <>
+              <p className="text-sm text-gray-300 mb-3">
+                {activeReferrals}/{progressTarget} active referrals to unlock{' '}
+                <span className="text-blue-400 font-semibold">
+                  {Math.round((stats?.nextMilestoneRate || 0) * 100)}%
+                </span>{' '}
+                referral share.
+              </p>
+              <div className="h-2 rounded-full bg-gray-800 overflow-hidden">
+                <div
+                  className={`h-full bg-blue-500 transition-all duration-300 ${milestoneProgressClass}`}
+                />
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-green-400">
+              Maximum referral tier unlocked at 15% share.
+            </p>
+          )}
+        </Card>
 
         {/* Referral Link */}
         <Card className="mb-6 p-6">
@@ -201,18 +285,19 @@ export default function Referrals() {
             <div className="flex items-start space-x-3">
               <div className="text-2xl">3️⃣</div>
               <div>
-                <div className="font-bold">They reach threshold</div>
+                <div className="font-bold">They complete tasks</div>
                 <div className="text-sm text-gray-400">
-                  When they reach minimum withdrawal threshold, you both benefit
+                  You earn an ongoing percentage of eligible referral task
+                  rewards
                 </div>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <div className="text-2xl">4️⃣</div>
               <div>
-                <div className="font-bold">You earn 1000 coins!</div>
+                <div className="font-bold">Hit milestones for higher rates</div>
                 <div className="text-sm text-gray-400">
-                  Automatically credited to your account
+                  3 active referrals = 12%, 10 active referrals = 15%
                 </div>
               </div>
             </div>
@@ -241,8 +326,17 @@ export default function Referrals() {
                     <div className="text-sm text-gray-400">
                       Joined {new Date(referral.createdAt).toLocaleDateString()}
                     </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Lifetime earned:{' '}
+                      {formatCoinsWithLocal(referral.refereeTotalCoins)}
+                    </div>
                   </div>
                   <div>
+                    {referral.status === 'active' && (
+                      <span className="px-3 py-1 bg-emerald-500 text-white text-xs rounded-full">
+                        🔥 Active
+                      </span>
+                    )}
                     {referral.status === 'paid' && (
                       <span className="px-3 py-1 bg-green-500 text-white text-xs rounded-full">
                         ✓ Paid

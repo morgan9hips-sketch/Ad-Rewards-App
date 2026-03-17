@@ -17,6 +17,7 @@
 import { Router, Request, Response } from 'express'
 import { createHmac } from 'node:crypto'
 import { Prisma, PrismaClient } from '@prisma/client'
+import { applyTaskWinStreakAndReferralShare } from '../services/retentionService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -176,6 +177,13 @@ router.get('/callback', async (req: Request, res: Response) => {
           referenceType: 'bitlabs_reward',
         },
       })
+
+      await applyTaskWinStreakAndReferralShare(
+        tx,
+        uid,
+        coinsToAward,
+        'bitlabs_reward',
+      )
 
       // ── 8. Mark processed ────────────────────────────────────────────────
       await surveyHistory.update({

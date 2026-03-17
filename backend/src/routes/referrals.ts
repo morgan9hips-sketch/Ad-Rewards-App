@@ -6,12 +6,6 @@ import { nanoid } from 'nanoid'
 const router = Router()
 const prisma = new PrismaClient()
 
-const REFERRAL_BONUS_COINS = 1000
-const REFERRAL_BONUS_VALUE_ZAR = 10.0
-// TODO: Get min threshold from config or exchange rate service
-// For now using approximate R150 = $8.11 USD (at R18.5 per USD)
-const MIN_THRESHOLD_USD = 8.11
-
 /**
  * GET /api/referrals/my-code
  * Get user's unique referral code
@@ -60,6 +54,13 @@ router.get('/stats', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
 
+    const profile = await prisma.userProfile.findUnique({
+      where: { userId },
+      select: {
+        referralEarnRate: true,
+      },
+    })
+
     const referrals = await prisma.referral.findMany({
       where: { referrerId: userId },
       include: {
@@ -68,6 +69,7 @@ router.get('/stats', async (req: AuthRequest, res) => {
             email: true,
             displayName: true,
             createdAt: true,
+            totalCoinsEarned: true,
           },
         },
       },
@@ -75,19 +77,47 @@ router.get('/stats', async (req: AuthRequest, res) => {
     })
 
     const totalReferrals = referrals.length
-    const pendingReferrals = referrals.filter((r) => r.status === 'pending').length
-    const qualifiedReferrals = referrals.filter((r) => r.status === 'qualified').length
+    const pendingReferrals = referrals.filter(
+      (r) => r.status === 'pending',
+    ).length
+    const activeReferrals = referrals.filter((r) =>
+      ['active', 'qualified', 'paid'].includes(r.status),
+    ).length
+    const qualifiedReferrals = referrals.filter(
+      (r) => r.status === 'qualified',
+    ).length
     const paidReferrals = referrals.filter((r) => r.status === 'paid').length
-    const totalCoinsEarned = paidReferrals * REFERRAL_BONUS_COINS
+
+    const referralShare = await prisma.transaction.aggregate({
+      where: {
+        userId,
+        type: 'referral_share',
+      },
+      _sum: {
+        coinsChange: true,
+      },
+    })
+
+    const totalCoinsEarned = Number(referralShare._sum.coinsChange || 0)
+
+    const currentEarnRate = Number(profile?.referralEarnRate || 0.1)
+    const nextMilestoneTarget =
+      activeReferrals < 3 ? 3 : activeReferrals < 10 ? 10 : null
+    const nextMilestoneRate =
+      activeReferrals < 3 ? 0.12 : activeReferrals < 10 ? 0.15 : null
 
     res.json({
       success: true,
       stats: {
         totalReferrals,
         pendingReferrals,
+        activeReferrals,
         qualifiedReferrals,
         paidReferrals,
         totalCoinsEarned,
+        currentEarnRate,
+        nextMilestoneTarget,
+        nextMilestoneRate,
       },
       referrals: referrals.map((r) => ({
         id: r.id,
@@ -96,6 +126,7 @@ router.get('/stats', async (req: AuthRequest, res) => {
         createdAt: r.createdAt,
         qualifiedAt: r.qualifiedAt,
         paidAt: r.paidAt,
+        refereeTotalCoins: r.referee.totalCoinsEarned.toString(),
       })),
     })
   } catch (error: any) {
@@ -267,93 +298,5 @@ router.get('/lookup/:code', async (req, res) => {
     })
   }
 })
-
-/**
- * Check if user qualifies for referral bonus
- * Called automatically when user reaches threshold
- */
-export async function checkReferralQualification(userId: string): Promise<void> {
-  try {
-    // Check if user was referred
-    const referral = await prisma.referral.findFirst({
-      where: {
-        refereeId: userId,
-        status: 'pending',
-      },
-    })
-
-    if (!referral) {
-      return
-    }
-
-    // Get user's cash balance
-    const user = await prisma.userProfile.findUnique({
-      where: { userId: userId },
-      select: { cashBalanceUsd: true },
-    })
-
-    if (!user || Number(user.cashBalanceUsd) < MIN_THRESHOLD_USD) {
-      return
-    }
-
-    // Mark referral as qualified
-    await prisma.referral.update({
-      where: { id: referral.id },
-      data: {
-        status: 'qualified',
-        qualifiedAt: new Date(),
-      },
-    })
-
-    // Credit referrer with bonus
-    await prisma.$transaction(async (tx) => {
-      // Add coins to referrer
-      await tx.userProfile.update({
-        where: { userId: referral.referrerId },
-        data: {
-          coinsBalance: { increment: REFERRAL_BONUS_COINS },
-          totalCoinsEarned: { increment: REFERRAL_BONUS_COINS },
-        },
-      })
-
-      // Add cash value to referrer
-      await tx.userProfile.update({
-        where: { userId: referral.referrerId },
-        data: {
-          cashBalanceUsd: {
-            increment: REFERRAL_BONUS_VALUE_ZAR / 18.5,
-          },
-          totalCashEarnedUsd: {
-            increment: REFERRAL_BONUS_VALUE_ZAR / 18.5,
-          },
-        },
-      })
-
-      // Create transaction record
-      await tx.transaction.create({
-        data: {
-          userId: referral.referrerId,
-          type: 'referral_bonus',
-          coinsChange: REFERRAL_BONUS_COINS,
-          cashChangeUsd: REFERRAL_BONUS_VALUE_ZAR / 18.5,
-          description: `Referral bonus - Friend reached threshold`,
-        },
-      })
-
-      // Mark as paid
-      await tx.referral.update({
-        where: { id: referral.id },
-        data: {
-          status: 'paid',
-          paidAt: new Date(),
-        },
-      })
-    })
-
-    console.log(`Referral bonus paid for referral ${referral.id}`)
-  } catch (error) {
-    console.error('Error checking referral qualification:', error)
-  }
-}
 
 export default router

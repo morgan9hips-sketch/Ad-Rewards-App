@@ -34,6 +34,9 @@ import v2Routes from '../src/routes/v2/index.js'
 import cpxCallbackRoutes from '../src/routes/cpxCallback.js'
 import cpxOfferRoutes from '../src/routes/cpxOffer.js'
 import bitlabsCallbackRoutes from '../src/routes/bitlabsCallback.js'
+import theoremreachCallbackRoutes from '../src/routes/theoremreachCallback.js'
+import tasksRoutes from '../src/routes/tasks.js'
+import activityRoutes from '../src/routes/activity.js'
 
 // Create Express app for Vercel
 const app = express()
@@ -67,6 +70,8 @@ app.get('/api/health', (req, res) => {
 app.use('/cpx-callback', cpxCallbackRoutes)
 // BitLabs callback endpoint (public)
 app.use('/api/bitlabs', bitlabsCallbackRoutes)
+// TheoremReach callback endpoint (public)
+app.use('/api/theoremreach', theoremreachCallbackRoutes)
 
 // Mount routes with /api prefix (with authentication where needed)
 app.use('/api/user', authenticate, userRoutes)
@@ -82,6 +87,8 @@ app.use('/api/game', authenticate, gameRoutes)
 app.use('/api/referrals', referralsRoutes) // Has public routes, uses middleware internally
 app.use('/api/coin-valuation', authenticate, coinValuationRoutes)
 app.use('/api/platform', platformRoutes) // Public
+app.use('/api/tasks', authenticate, tasksRoutes)
+app.use('/api/activity', authenticate, activityRoutes)
 app.use('/api/legal', legalRoutes) // Public
 app.use('/api/geo-resolve', authenticate, geoRoutes) // Requires auth for user context
 app.use('/api/migrate', migrateRoutes) // One-time migration endpoint

@@ -3,10 +3,11 @@ import { createClient } from '@supabase/supabase-js'
 import { PrismaClient, UserRole } from '@prisma/client'
 import { getClientIP, detectCountryFromIP } from '../services/geoService.js'
 import { getCurrencyForCountry } from '../services/currencyService.js'
+import { applyDailyLoginStreak } from '../services/retentionService.js'
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
+  process.env.SUPABASE_ANON_KEY!,
 )
 
 // FIX: Prevent Prisma connection pooling issues in serverless
@@ -34,11 +35,15 @@ function shouldBeBetaUser(): boolean {
   // Beta program cutoff date: March 1, 2026
   const betaCutoffDate = new Date('2026-03-01T00:00:00Z')
   const now = new Date()
-  
+
   return now < betaCutoffDate
 }
 
-export async function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
+export async function authenticate(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     // List of public routes that don't require authentication
     const publicRoutes = [
@@ -47,10 +52,12 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
       '/api/referrals/lookup',
       '/referrals/lookup',
     ]
-    
+
     // Check if this is a public route
-    const isPublicRoute = publicRoutes.some(route => req.path.startsWith(route))
-    
+    const isPublicRoute = publicRoutes.some((route) =>
+      req.path.startsWith(route),
+    )
+
     if (isPublicRoute) {
       return next()
     }
@@ -61,7 +68,10 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
     }
 
     const token = authHeader.substring(7)
-    const { data: { user }, error } = await supabase.auth.getUser(token)
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token)
 
     if (error || !user) {
       console.error('❌ Auth error:', error)
@@ -78,21 +88,21 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
       const ip = getClientIP(req)
       const countryCode = detectCountryFromIP(ip) || 'US'
       const currency = getCurrencyForCountry(countryCode)
-      
+
       // Generate unique wallet ID
       let walletId = generateWalletId()
-      
+
       // Ensure wallet ID is unique (max 10 attempts)
       let attempts = 0
       while (attempts < 10) {
         const existing = await prisma.userProfile.findUnique({
-          where: { walletId: walletId }
+          where: { walletId: walletId },
         })
         if (!existing) break
         walletId = generateWalletId()
         attempts++
       }
-      
+
       // If still not unique after 10 attempts, throw error
       if (attempts >= 10) {
         throw new Error('Failed to generate unique wallet ID after 10 attempts')
@@ -112,6 +122,15 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
       })
     }
 
+    try {
+      await applyDailyLoginStreak(user.id)
+    } catch (streakError) {
+      console.error(
+        '⚠️ Failed to apply daily streak:',
+        streakError instanceof Error ? streakError.message : streakError,
+      )
+    }
+
     req.user = {
       id: user.id,
       email: user.email!,
@@ -120,13 +139,25 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
 
     next()
   } catch (error) {
-    console.error('❌ Authentication error:', error instanceof Error ? error.message : error)
+    console.error(
+      '❌ Authentication error:',
+      error instanceof Error ? error.message : error,
+    )
     console.error('Stack:', error instanceof Error ? error.stack : null)
-    res.status(500).json({ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' })
+    res
+      .status(500)
+      .json({
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      })
   }
 }
 
-export async function requireAdmin(req: AuthRequest, res: Response, next: NextFunction) {
+export async function requireAdmin(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) {
   if (!req.user) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
@@ -138,13 +169,19 @@ export async function requireAdmin(req: AuthRequest, res: Response, next: NextFu
   next()
 }
 
-export async function requireSuperAdmin(req: AuthRequest, res: Response, next: NextFunction) {
+export async function requireSuperAdmin(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) {
   if (!req.user) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
   if (req.user.role !== 'SUPER_ADMIN') {
-    return res.status(403).json({ error: 'Forbidden: Super Admin access required' })
+    return res
+      .status(403)
+      .json({ error: 'Forbidden: Super Admin access required' })
   }
 
   next()

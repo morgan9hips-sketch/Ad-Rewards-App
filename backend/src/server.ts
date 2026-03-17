@@ -32,6 +32,9 @@ import v2Routes from './routes/v2/index.js'
 import cpxCallbackRoutes from './routes/cpxCallback.js'
 import cpxOfferRoutes from './routes/cpxOffer.js'
 import bitlabsCallbackRoutes from './routes/bitlabsCallback.js'
+import theoremreachCallbackRoutes from './routes/theoremreachCallback.js'
+import tasksRoutes from './routes/tasks.js'
+import activityRoutes from './routes/activity.js'
 
 dotenv.config()
 
@@ -118,6 +121,7 @@ app.get('/health', (req, res) => {
 app.use('/cpx-callback', cpxCallbackRoutes)
 app.use('/bitlabs-callback', bitlabsCallbackRoutes)
 app.use('/api/bitlabs', bitlabsCallbackRoutes)
+app.use('/api/theoremreach', theoremreachCallbackRoutes)
 app.use('/leaderboard', leaderboardRoutes)
 app.use('/api/leaderboard', leaderboardRoutes)
 app.use('/subscriptions/webhook', subscriptionsRoutes) // Webhook should be public
@@ -150,6 +154,10 @@ app.use('/coin-valuation', authenticate, coinValuationRoutes)
 app.use('/api/coin-valuation', authenticate, coinValuationRoutes)
 app.use('/platform', authenticate, platformRoutes)
 app.use('/api/platform', authenticate, platformRoutes)
+app.use('/tasks', authenticate, tasksRoutes)
+app.use('/api/tasks', authenticate, tasksRoutes)
+app.use('/activity', authenticate, activityRoutes)
+app.use('/api/activity', authenticate, activityRoutes)
 app.use('/geo', authenticate, geoRoutes)
 app.use('/api/geo', authenticate, geoRoutes)
 app.use('/minigame', authenticate, minigameRoutes)

@@ -152,6 +152,9 @@ model UserProfile {
   // Activity tracking for balance expiry
   lastLogin   DateTime @default(now()) @map("last_login")
   lastLoginAt DateTime @default(now()) @map("last_login_at")
+  loginStreak Int      @default(0) @map("login_streak")
+  lastLoginDate DateTime? @map("last_login_date") @db.Date
+  taskWinStreak Int    @default(0) @map("task_win_streak")
 
   // Legal compliance
   acceptedTermsAt DateTime? @map("accepted_terms_at")
@@ -159,6 +162,7 @@ model UserProfile {
   // Referral system
   referralCode String? @unique @map("referral_code") @db.VarChar(8)
   referredBy   String? @map("referred_by")
+  referralEarnRate Decimal @default(0.1000) @map("referral_earn_rate") @db.Decimal(5, 4)
 
   // Signup bonus eligibility
   isEligibleForSignupBonus Boolean @default(false) @map("is_eligible_for_signup_bonus")
@@ -179,6 +183,7 @@ model UserProfile {
   referralsGiven      Referral[]           @relation("Referrer")
   referralsReceived   Referral[]           @relation("Referee")
   signupBonus         SignupBonus?
+  monthlyLeaderboardAwards MonthlyLeaderboardAward[]
   gameSessions        GameSession[]
   betaDebt            BetaDebt?
   monetagImpressions  MontagImpression[]
@@ -571,6 +576,21 @@ model SignupBonus {
   @@index([countryCode])
   @@index([eligible])
   @@map("signup_bonuses")
+}
+
+model MonthlyLeaderboardAward {
+  id          Int         @id @default(autoincrement())
+  month       String      @db.VarChar(7)
+  userId      String      @map("user_id")
+  user        UserProfile @relation(fields: [userId], references: [userId])
+  rank        Int
+  coinsAwarded Int        @map("coins_awarded")
+  awardedAt   DateTime    @default(now()) @map("awarded_at")
+
+  @@unique([month, userId])
+  @@index([month])
+  @@index([userId])
+  @@map("monthly_leaderboard_awards")
 }
 
 model Notification {

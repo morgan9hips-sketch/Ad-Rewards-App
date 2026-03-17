@@ -8,6 +8,7 @@ import {
   ClipboardList,
   Clock3,
   Compass,
+  Flame,
   Gamepad2,
   Gift,
   History,
@@ -25,6 +26,7 @@ import ProfileSetup from '../components/ProfileSetup'
 import TermsAcceptanceModal from '../components/TermsAcceptanceModal'
 import RewardCard from '../components/RewardCard'
 import { useAuth } from '../contexts/AuthContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import { API_BASE_URL } from '../config/api'
 
 interface UserBalance {
@@ -49,6 +51,8 @@ interface UserProfile {
   displayName: string | null
   profileSetupCompleted: boolean
   acceptedTermsAt: string | null
+  loginStreak?: number
+  taskWinStreak?: number
 }
 
 interface UserStats {
@@ -64,6 +68,18 @@ interface V2Task {
   type: string
   provider: string
   rewardCoins: number
+}
+
+interface ActivityFeedItem {
+  id: string
+  eventType: 'withdrawal' | 'earning'
+  actor: string
+  message: string
+  coins?: string
+  amountUsd?: number
+  amountLocal?: number | null
+  currencyCode?: string
+  createdAt: string
 }
 
 const featuredOffers = [
@@ -102,12 +118,18 @@ const featuredOffers = [
 export default function Dashboard() {
   const navigate = useNavigate()
   const { user, session, signOut } = useAuth()
+  const { formatAmount } = useCurrency()
 
   const [loading, setLoading] = useState(true)
   const [balance, setBalance] = useState<UserBalance | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [tasks, setTasks] = useState<V2Task[]>([])
+  const [featuredTasks, setFeaturedTasks] = useState<V2Task[]>([])
+  const [taskWinStreak, setTaskWinStreak] = useState(0)
+  const [liveFeed, setLiveFeed] = useState<ActivityFeedItem[]>([])
+  const [scarcityCountdown, setScarcityCountdown] = useState(90)
+  const [scarcitySlots, setScarcitySlots] = useState(3)
 
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [showTermsModal, setShowTermsModal] = useState(false)
@@ -145,7 +167,14 @@ export default function Dashboard() {
       const token = session?.access_token
       if (!token) return
 
-      const [balanceRes, profileRes, txRes, tasksRes] = await Promise.all([
+      const [
+        balanceRes,
+        profileRes,
+        txRes,
+        tasksRes,
+        featuredRes,
+        activityRes,
+      ] = await Promise.all([
         fetch(`${API_BASE_URL}/api/user/balance`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
@@ -156,6 +185,12 @@ export default function Dashboard() {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(`${API_BASE_URL}/api/v2/tasks`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_BASE_URL}/api/tasks/featured`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_BASE_URL}/api/activity/feed`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ])
@@ -189,6 +224,19 @@ export default function Dashboard() {
       } else {
         setTasks([])
       }
+
+      if (featuredRes.ok) {
+        const featuredData = await featuredRes.json()
+        setFeaturedTasks(featuredData.tasks || [])
+        setTaskWinStreak(featuredData.taskWinStreak || 0)
+      } else {
+        setFeaturedTasks([])
+      }
+
+      if (activityRes.ok) {
+        const activityData = await activityRes.json()
+        setLiveFeed(activityData.feed || [])
+      }
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
     } finally {
@@ -199,6 +247,40 @@ export default function Dashboard() {
   useEffect(() => {
     fetchDashboardData()
   }, [fetchDashboardData])
+
+  useEffect(() => {
+    const token = session?.access_token
+    if (!token) return
+
+    const interval = window.setInterval(async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/activity/feed`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!response.ok) return
+        const data = await response.json()
+        setLiveFeed(data.feed || [])
+      } catch (error) {
+        console.error('Error refreshing activity feed:', error)
+      }
+    }, 60000)
+
+    return () => window.clearInterval(interval)
+  }, [session?.access_token])
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setScarcityCountdown((current) => {
+        if (current <= 1) {
+          setScarcitySlots(Math.max(1, Math.floor(Math.random() * 4) + 1))
+          return 90
+        }
+        return current - 1
+      })
+    }, 1000)
+
+    return () => window.clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     if (!toastMessage) return
@@ -226,9 +308,31 @@ export default function Dashboard() {
     }
   }, [balance?.coins])
 
-  const recommendedTasks = useMemo(() => tasks.slice(0, 2), [tasks])
+  const recommendedTasks = useMemo(
+    () => (featuredTasks.length > 0 ? featuredTasks : tasks).slice(0, 3),
+    [featuredTasks, tasks],
+  )
 
   const activityRows = useMemo(() => {
+    if (liveFeed.length > 0) {
+      return liveFeed.map((entry) => {
+        const isWithdrawal = entry.eventType === 'withdrawal'
+        const amount = isWithdrawal
+          ? entry.amountUsd
+            ? formatAmount(entry.amountUsd)
+            : 'Withdrawal'
+          : `${entry.coins ? `+${formatCoins(entry.coins)} AD COINS` : 'Earning'}`
+
+        return {
+          id: entry.id,
+          title: `${entry.actor} ${entry.message}`,
+          amount,
+          status: 'Posted',
+          time: new Date(entry.createdAt).toLocaleString(),
+        }
+      })
+    }
+
     if (transactions.length > 0) {
       return transactions.slice(0, 5).map((tx) => {
         const amount = Number(tx.coinsChange)
@@ -249,7 +353,7 @@ export default function Dashboard() {
     }
 
     return []
-  }, [transactions])
+  }, [liveFeed, transactions, formatAmount])
 
   const handleTermsAccept = async () => {
     try {
@@ -399,7 +503,10 @@ export default function Dashboard() {
               </button>
 
               <div className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-5 py-2 text-sm font-semibold text-emerald-300 shadow-lg shadow-emerald-500/20">
-                {formatCoins(userStats.pointsBalance)} AD COINS
+                <div>{formatCoins(userStats.pointsBalance)} AD COINS</div>
+                <div className="text-[10px] font-medium text-emerald-200/90">
+                  {formatAmount(userStats.pointsBalance / 100)}
+                </div>
               </div>
 
               <button
@@ -475,6 +582,44 @@ export default function Dashboard() {
                 completed
               </p>
             </div>
+          </div>
+        </section>
+
+        <section className="mt-4 grid gap-4 lg:grid-cols-3">
+          <div className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-300">
+              <Flame size={16} /> Daily Streak
+            </div>
+            <p className="mt-2 text-2xl font-bold text-slate-100">
+              {profile?.loginStreak || 0} days
+            </p>
+            <p className="mt-1 text-xs text-slate-400">
+              Daily streak check-in is rewarded once per day.
+            </p>
+          </div>
+
+          <div className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-blue-300">
+              Win Streak Bonus
+            </p>
+            <p className="mt-2 text-2xl font-bold text-slate-100">
+              {taskWinStreak} tasks
+            </p>
+            <p className="mt-1 text-xs text-slate-400">
+              Every 5 completed tasks awards +50 AD COINS.
+            </p>
+          </div>
+
+          <div className="rounded-[12px] border border-orange-500/30 bg-orange-500/10 p-4 shadow-sm backdrop-blur-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-orange-200">
+              Limited Featured Slots
+            </p>
+            <p className="mt-2 text-2xl font-bold text-white">
+              {scarcitySlots} left
+            </p>
+            <p className="mt-1 text-xs text-orange-100/80">
+              Refreshing in {scarcityCountdown}s
+            </p>
           </div>
         </section>
 
@@ -627,6 +772,9 @@ export default function Dashboard() {
                     </p>
                     <p className="text-sm font-bold text-emerald-400">
                       {formatCoins(task.rewardCoins)} AD COINS
+                      <span className="ml-2 text-xs font-medium text-slate-400">
+                        ({formatAmount(task.rewardCoins / 100)})
+                      </span>
                     </p>
                     <p className="inline-flex items-center gap-2 text-sm text-slate-400">
                       <Clock3 size={18} /> {task.provider}

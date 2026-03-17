@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Card from '../components/Card'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { useAuth } from '../contexts/AuthContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import { API_BASE_URL } from '../config/api'
 
 interface LeaderboardEntry {
@@ -23,13 +24,30 @@ interface LeaderboardResponse {
   currentUser: CurrentUser | null
 }
 
+interface MonthlyPrize {
+  rank: number
+  coins: number
+}
+
+interface MonthlyLeaderboardResponse {
+  month: string
+  leaderboard: LeaderboardEntry[]
+  prizes: MonthlyPrize[]
+  countdownMs: number
+}
+
 export default function Leaderboard() {
-  const { session } = useAuth()
+  const { session, user } = useAuth()
+  const { formatAmount } = useCurrency()
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<LeaderboardResponse>({
     leaderboard: [],
     currentUser: null,
   })
+  const [monthly, setMonthly] = useState<MonthlyLeaderboardResponse | null>(
+    null,
+  )
+  const [countdownMs, setCountdownMs] = useState(0)
 
   useEffect(() => {
     fetchLeaderboard()
@@ -47,15 +65,45 @@ export default function Leaderboard() {
         headers: { Authorization: `Bearer ${token}` },
       })
 
+      const monthlyRes = await fetch(
+        `${API_BASE_URL}/api/leaderboard/monthly?userId=${encodeURIComponent(user?.id || '')}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      )
+
       if (res.ok) {
         const leaderboardData = await res.json()
         setData(leaderboardData)
+      }
+
+      if (monthlyRes.ok) {
+        const monthlyData = await monthlyRes.json()
+        setMonthly(monthlyData)
+        setCountdownMs(monthlyData.countdownMs || 0)
       }
     } catch (error) {
       console.error('Error fetching leaderboard:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setCountdownMs((value) => (value > 0 ? Math.max(0, value - 1000) : 0))
+    }, 1000)
+
+    return () => window.clearInterval(timer)
+  }, [])
+
+  const formatCountdown = (milliseconds: number) => {
+    const totalSeconds = Math.floor(milliseconds / 1000)
+    const days = Math.floor(totalSeconds / 86400)
+    const hours = Math.floor((totalSeconds % 86400) / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`
   }
 
   const getRankEmoji = (rank: number) => {
@@ -75,6 +123,11 @@ export default function Leaderboard() {
     return parseInt(coins).toLocaleString()
   }
 
+  const formatCoinsLocal = (coins: string) => {
+    const numeric = Number(coins || 0)
+    return formatAmount(numeric / 100)
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -90,6 +143,40 @@ export default function Leaderboard() {
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
       <h1 className="text-3xl font-bold text-white mb-6">🏆 TOP EARNERS</h1>
+
+      {monthly && (
+        <Card className="mb-6">
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-gray-400">
+                Monthly Competition ({monthly.month})
+              </p>
+              <p className="text-white font-semibold">
+                Time left: {formatCountdown(countdownMs)}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {monthly.prizes.map((prize) => (
+                <div
+                  key={prize.rank}
+                  className="rounded-lg border border-gray-700 bg-gray-800/70 px-4 py-3"
+                >
+                  <p className="text-xs text-gray-400">
+                    Rank #{prize.rank} Prize
+                  </p>
+                  <p className="text-yellow-400 font-bold">
+                    {prize.coins.toLocaleString()} AD COINS
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {formatAmount(prize.coins / 100)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
 
       {data.leaderboard.length === 0 ? (
         <Card>
@@ -132,6 +219,9 @@ export default function Leaderboard() {
                         className="w-6 h-6 inline"
                       />
                     </div>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {formatCoinsLocal(entry.coins)}
+                    </p>
                   </div>
                 </div>
               </Card>
@@ -155,6 +245,9 @@ export default function Leaderboard() {
                     className="w-8 h-8"
                   />
                 </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  {formatCoinsLocal(data.currentUser.coins)}
+                </p>
                 <p className="text-green-400 text-sm mt-2">Keep going! 💪</p>
               </div>
             </Card>

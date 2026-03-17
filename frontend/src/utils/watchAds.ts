@@ -11,7 +11,7 @@ type AdEventResponse = {
 
 async function postAdEvent(
   authToken: string,
-  event: 'ad_requested' | 'ad_returned'
+  event: 'ad_requested' | 'ad_returned',
 ): Promise<AdEventResponse> {
   const response = await fetch(`${API_BASE_URL}/api/reward/ad-event`, {
     method: 'POST',
@@ -30,46 +30,31 @@ async function postAdEvent(
   return data
 }
 
-export async function watchAd(authToken: string) {
-  const adWindow = window.open(
-    '/ad-bridge.html',
-    '_blank',
-    'width=480,height=800'
-  )
+async function postWatchAd(authToken: string): Promise<AdEventResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/reward/watch-ad`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      'Content-Type': 'application/json',
+    },
+  })
 
-  if (!adWindow) {
-    return { success: false, error: 'Popup blocked. Please allow popups.' }
+  const data = (await response.json()) as AdEventResponse
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to process ad reward')
   }
 
-  await postAdEvent(authToken, 'ad_requested')
+  return data
+}
 
-  return await new Promise<AdEventResponse>((resolve) => {
-    let resolved = false
-
-    const finalize = async () => {
-      if (resolved) return
-      resolved = true
-
-      try {
-        const result = await postAdEvent(authToken, 'ad_returned')
-        resolve(result)
-      } catch (error) {
-        resolve({
-          success: false,
-          error: error instanceof Error ? error.message : 'Ad event failed',
-        })
-      } finally {
-        adWindow.close()
-      }
+export async function watchAd(authToken: string) {
+  try {
+    await postAdEvent(authToken, 'ad_requested')
+    return await postWatchAd(authToken)
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Ad event failed',
     }
-
-    window.addEventListener('focus', finalize, { once: true })
-
-    const pollClosed = window.setInterval(() => {
-      if (adWindow.closed) {
-        window.clearInterval(pollClosed)
-        finalize()
-      }
-    }, 500)
-  })
+  }
 }

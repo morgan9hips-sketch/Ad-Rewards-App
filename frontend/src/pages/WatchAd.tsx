@@ -25,7 +25,6 @@ export default function WatchAd() {
       const result = await watchAd(token)
       if (result.success && result.rewardGranted) {
         setStatus(`Reward granted: ${result.coinsEarned || 0} AdCoins`)
-        window.location.reload()
         return
       }
       if (result.success) {
