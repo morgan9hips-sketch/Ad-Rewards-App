@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Card from '../components/Card'
 import { useNavigate } from 'react-router-dom'
+import { useCurrency } from '../contexts/CurrencyContext'
 
 interface RedemptionItem {
   id: string
@@ -36,6 +37,11 @@ const categoryLabels = {
 export default function ShopNew() {
   const [activeCategory, setActiveCategory] = useState<'all' | 'airtime' | 'giftcard' | 'voucher'>('all')
   const navigate = useNavigate()
+  const { formatAmount } = useCurrency()
+
+  const minimumShopCoins = 10000
+  const minimumShopValue = 'R10'
+  const minimumWithdrawalUsd = 10
 
   const filteredItems = activeCategory === 'all'
     ? redemptionItems
@@ -53,8 +59,11 @@ export default function ShopNew() {
       <Card className="mb-6 bg-gradient-to-r from-yellow-900/30 to-orange-900/30 border-yellow-500/30">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-yellow-400 font-semibold text-sm">Minimum to redeem</p>
-            <p className="text-white text-2xl font-bold">10,000 coins = R10</p>
+            <p className="text-yellow-400 font-semibold text-sm">Minimum shop item</p>
+            <p className="text-white text-2xl font-bold">{minimumShopCoins.toLocaleString()} coins = {minimumShopValue}</p>
+            <p className="text-xs text-gray-300 mt-1">
+              Withdrawal unlocks only after {formatAmount(minimumWithdrawalUsd)} ({minimumWithdrawalUsd.toFixed(2)} USD equivalent).
+            </p>
           </div>
           <div className="text-5xl">🪙</div>
         </div>
@@ -127,14 +136,14 @@ export default function ShopNew() {
             <span className="text-2xl">2️⃣</span>
             <div>
               <p className="font-semibold text-white">Reach 10,000 Coins</p>
-              <p className="text-gray-400">Minimum redemption threshold is 10,000 coins (~R10 value)</p>
+              <p className="text-gray-400">Use coins for entry-level shop items starting at {minimumShopValue}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <span className="text-2xl">3️⃣</span>
             <div>
-              <p className="font-semibold text-white">Redeem Instantly</p>
-              <p className="text-gray-400">Choose your reward and it's delivered to your phone or email</p>
+              <p className="font-semibold text-white">Withdraw After Threshold</p>
+              <p className="text-gray-400">Cash withdrawal requires at least {minimumWithdrawalUsd.toFixed(2)} USD equivalent</p>
             </div>
           </div>
         </div>

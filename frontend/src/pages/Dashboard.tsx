@@ -496,18 +496,23 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => setShowActivityPanel(true)}
-                className="hidden items-center rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400 md:inline-flex"
+                className="inline-flex items-center rounded-full border border-white/10 bg-blue-500 px-3 py-2 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-400 sm:px-6"
               >
                 <History size={18} />
-                <span className="ml-2">Recent Activity</span>
+                <span className="ml-2 hidden sm:inline">Recent Activity</span>
               </button>
 
-              <div className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-5 py-2 text-sm font-semibold text-emerald-300 shadow-lg shadow-emerald-500/20">
+              <button
+                type="button"
+                onClick={() => navigate('/wallet')}
+                className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-5 py-2 text-left text-sm font-semibold text-emerald-300 shadow-lg shadow-emerald-500/20 transition duration-200 hover:border-emerald-300/40 hover:bg-emerald-500/15"
+                aria-label="Open wallet"
+              >
                 <div>{formatCoins(userStats.pointsBalance)} AD COINS</div>
                 <div className="text-[10px] font-medium text-emerald-200/90">
                   {formatAmount(userStats.pointsBalance / 100)}
                 </div>
-              </div>
+              </button>
 
               <button
                 type="button"
