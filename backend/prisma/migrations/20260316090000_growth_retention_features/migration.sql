@@ -27,4 +27,4 @@ ON "monthly_leaderboard_awards"("user_id");
 
 ALTER TABLE "monthly_leaderboard_awards"
 ADD CONSTRAINT "monthly_leaderboard_awards_user_id_fkey"
-FOREIGN KEY ("user_id") REFERENCES "user_profiles"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
+FOREIGN KEY ("user_id") REFERENCES "user_profiles"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
