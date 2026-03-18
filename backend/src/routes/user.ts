@@ -89,14 +89,28 @@ router.get('/profile', async (req: AuthRequest, res) => {
     if (!profile) {
       // Get user's country from IP automatically
       const clientIP = getClientIP(req)
-      const { countryCode, currency } = getUserLocationInfo(clientIP)
+      const { countryCode, currency: detectedCurrency } =
+        getUserLocationInfo(clientIP)
+      const currencyToCountry: Record<string, string> = {
+        ZAR: 'ZA',
+        USD: 'US',
+        NGN: 'NG',
+        KES: 'KE',
+        GBP: 'GB',
+        EUR: 'DE',
+        CAD: 'CA',
+        AUD: 'AU',
+      }
+      const resolvedCountryCode =
+        countryCode ?? currencyToCountry[detectedCurrency] ?? 'ZA'
 
       profile = await prisma.userProfile.create({
         data: {
           userId,
           email: req.user!.email,
-          country: countryCode || 'ZA', // Default to ZA if detection fails
-          preferredCurrency: currency || 'ZAR', // Default to ZAR
+          country: resolvedCountryCode,
+          countryCode: resolvedCountryCode,
+          preferredCurrency: detectedCurrency || 'ZAR',
         },
       })
     } else {
@@ -425,7 +439,6 @@ router.delete('/account', async (req: AuthRequest, res) => {
       await tx.adView.deleteMany({ where: { userId: userId } })
       await tx.gameSession.deleteMany({ where: { userId: userId } })
       await tx.transaction.deleteMany({ where: { userId: userId } })
-      await tx.withdrawal.deleteMany({ where: { userId: userId } })
       await tx.referral.deleteMany({
         where: {
           OR: [{ referrerId: userId }, { refereeId: userId }],

@@ -176,51 +176,30 @@ export async function updateExchangeRates(): Promise<void> {
     const apiUrl =
       process.env.EXCHANGE_RATE_API_URL ||
       'https://api.exchangerate-api.com/v4/latest/USD'
-    
-    // Set timeout to prevent hanging
     const response = await axios.get(apiUrl, { timeout: 5000 })
-
-    if (!response.data || !response.data.rates) {
-      console.warn('Invalid response from exchange rate API, skipping update')
-      return // Don't throw - use cached rates
+    if (!response.data?.rates) {
+      console.warn('[FX] Invalid API response')
+      return
+    }
+    const rates: Record<string, number> = response.data.rates
+    const zarRate = rates['ZAR']
+    if (!zarRate) {
+      console.warn('[FX] ZAR missing')
+      return
     }
 
-    const rates = response.data.rates
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    // Update rates for each supported currency
-    for (const currency of SUPPORTED_CURRENCIES) {
-      if (currency === 'USD') continue // Skip base currency
-
-      const rate = rates[currency]
-      if (rate) {
-        await prisma.exchangeRate.upsert({
-          where: {
-            targetCurrency_date: {
-              targetCurrency: currency,
-              date: today,
-            },
-          },
-          create: {
-            baseCurrency: 'USD',
-            targetCurrency: currency,
-            rate: rate,
-            date: today,
-          },
-          update: {
-            rate: rate,
-          },
-        })
-      }
+    for (const [currency, usdRate] of Object.entries(rates)) {
+      const rateToZar = zarRate / usdRate
+      await prisma.$executeRaw`
+        INSERT INTO fx_rates (currency, rate_to_zar, fetched_at)
+        VALUES (${currency}, ${rateToZar}, now())
+        ON CONFLICT (currency)
+        DO UPDATE SET rate_to_zar = ${rateToZar}, fetched_at = now()
+      `
     }
-
-    console.log(
-      `✅ Exchange rates updated successfully for ${today.toISOString().split('T')[0]}`,
-    )
-  } catch (error) {
-    // Don't throw - let app continue with cached/fallback rates
-    console.error('❌ Failed to update exchange rates (non-critical):', error)
+    console.log(`[FX] ${Object.keys(rates).length} rates refreshed`)
+  } catch (err) {
+    console.error('[FX] Failed (non-critical):', err)
   }
 }
 
@@ -229,45 +208,12 @@ export async function updateExchangeRates(): Promise<void> {
  * Falls back to previous day's rate if today's rate is not available
  */
 export async function getExchangeRate(targetCurrency: string): Promise<number> {
-  if (targetCurrency === 'USD') {
-    return 1.0
-  }
-
   try {
-    // Try to get today's rate
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    let rate = await prisma.exchangeRate.findFirst({
-      where: {
-        targetCurrency: targetCurrency,
-        date: today,
-      },
-      orderBy: {
-        date: 'desc',
-      },
-    })
-
-    // If not found, get the most recent rate
-    if (!rate) {
-      rate = await prisma.exchangeRate.findFirst({
-        where: {
-          targetCurrency: targetCurrency,
-        },
-        orderBy: {
-          date: 'desc',
-        },
-      })
-    }
-
-    if (!rate) {
-      console.warn(`No exchange rate found for ${targetCurrency}, using 1.0`)
-      return 1.0
-    }
-
-    return parseFloat(rate.rate.toString())
-  } catch (error) {
-    console.error(`Error fetching exchange rate for ${targetCurrency}:`, error)
+    const rows = await prisma.$queryRaw<{ rate_to_zar: number }[]>`
+      SELECT rate_to_zar FROM fx_rates WHERE currency = ${targetCurrency} LIMIT 1
+    `
+    return rows.length ? Number(rows[0].rate_to_zar) : 1.0
+  } catch {
     return 1.0
   }
 }
@@ -279,12 +225,18 @@ export async function convertFromUSD(
   amountUSD: number,
   targetCurrency: string,
 ): Promise<number> {
-  if (targetCurrency === 'USD') {
-    return amountUSD
-  }
+  const usdToZar = await getExchangeRate('USD')
+  if (targetCurrency === 'ZAR') return amountUSD * usdToZar
+  const targetToZar = await getExchangeRate(targetCurrency)
+  if (targetToZar === 0) return amountUSD
+  return (amountUSD * usdToZar) / targetToZar
+}
 
-  const rate = await getExchangeRate(targetCurrency)
-  return amountUSD * rate
+export async function convertCoinsToLocalCurrency(
+  coins: number,
+  currency: string,
+): Promise<number> {
+  return convertFromUSD(coins * 0.01, currency)
 }
 
 /**
@@ -298,8 +250,17 @@ export async function convertToUSD(
     return amount
   }
 
-  const rate = await getExchangeRate(sourceCurrency)
-  return amount / rate
+  const usdToZar = await getExchangeRate('USD')
+  if (sourceCurrency === 'ZAR') {
+    return usdToZar === 0 ? amount : amount / usdToZar
+  }
+
+  const sourceToZar = await getExchangeRate(sourceCurrency)
+  if (usdToZar === 0) {
+    return amount
+  }
+
+  return (amount * sourceToZar) / usdToZar
 }
 
 /**
@@ -348,7 +309,7 @@ export async function getUserCurrencyInfo(
     displayCurrency = getCurrencyForCountry(fallbackCountry)
   }
 
-  const exchangeRate = await getExchangeRate(displayCurrency)
+  const exchangeRate = await convertFromUSD(1, displayCurrency)
   const formatting =
     CURRENCY_FORMATS[displayCurrency] || CURRENCY_FORMATS['USD']
 

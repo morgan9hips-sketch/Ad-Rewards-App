@@ -16,71 +16,36 @@ function anonymizeName(
 
 router.get('/feed', async (req: AuthRequest, res) => {
   try {
-    const [withdrawals, transactions] = await Promise.all([
-      prisma.withdrawal.findMany({
-        where: {
-          status: {
-            in: ['completed', 'processed', 'approved'],
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        coinsChange: {
+          gt: BigInt(0),
+        },
+        type: {
+          in: [
+            'coin_earned',
+            'task_win_streak_bonus',
+            'referral_share',
+            'daily_streak',
+          ],
+        },
+      },
+      select: {
+        id: true,
+        type: true,
+        coinsChange: true,
+        description: true,
+        createdAt: true,
+        user: {
+          select: {
+            displayName: true,
+            email: true,
           },
         },
-        select: {
-          id: true,
-          amountUsd: true,
-          currencyCode: true,
-          amountLocal: true,
-          requestedAt: true,
-          user: {
-            select: {
-              displayName: true,
-              email: true,
-            },
-          },
-        },
-        orderBy: { requestedAt: 'desc' },
-        take: 10,
-      }),
-      prisma.transaction.findMany({
-        where: {
-          coinsChange: {
-            gt: BigInt(0),
-          },
-          type: {
-            in: [
-              'coin_earned',
-              'task_win_streak_bonus',
-              'referral_share',
-              'daily_streak',
-            ],
-          },
-        },
-        select: {
-          id: true,
-          type: true,
-          coinsChange: true,
-          description: true,
-          createdAt: true,
-          user: {
-            select: {
-              displayName: true,
-              email: true,
-            },
-          },
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-      }),
-    ])
-
-    const withdrawalEvents = withdrawals.map((entry) => ({
-      id: `w-${entry.id}`,
-      eventType: 'withdrawal',
-      actor: anonymizeName(entry.user.displayName, entry.user.email),
-      message: 'completed a withdrawal',
-      amountUsd: Number(entry.amountUsd),
-      amountLocal: entry.amountLocal ? Number(entry.amountLocal) : null,
-      currencyCode: entry.currencyCode || 'USD',
-      createdAt: entry.requestedAt,
-    }))
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    })
 
     const earningEvents = transactions.map((entry) => ({
       id: `t-${entry.id}`,
@@ -91,7 +56,7 @@ router.get('/feed', async (req: AuthRequest, res) => {
       createdAt: entry.createdAt,
     }))
 
-    const feed = [...withdrawalEvents, ...earningEvents]
+    const feed = [...earningEvents]
       .sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),

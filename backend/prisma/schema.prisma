@@ -172,21 +172,13 @@ model UserProfile {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   adViews             AdView[]
-  withdrawals         Withdrawal[]
   badges              UserBadge[]
   transactions        Transaction[]
-  conversionDetails   ConversionDetail[]
-  locationConversions LocationConversion[]
-  adminActions        AdminAction[]        @relation("AdminActions")
-  adImpressions       AdImpression[]
-  expiredBalances     ExpiredBalance[]
   referralsGiven      Referral[]           @relation("Referrer")
   referralsReceived   Referral[]           @relation("Referee")
   signupBonus         SignupBonus?
   monthlyLeaderboardAwards MonthlyLeaderboardAward[]
   gameSessions        GameSession[]
-  betaDebt            BetaDebt?
-  monetagImpressions  MontagImpression[]
 
   @@index([totalCoinsEarned(sort: Desc), showOnLeaderboard])
   @@index([lastLogin])
@@ -248,56 +240,19 @@ model AdView {
   ipCountry String? @map("ip_country") // Detected from IP
   userAgent String? @map("user_agent")
 
-  // Location-based conversion tracking
-  poolId Int?                 @map("pool_id")
-  pool   LocationRevenuePool? @relation(fields: [poolId], references: [id])
-
   // Game session tracking
   gameSessionId String?      @map("game_session_id")
   gameSession   GameSession? @relation(fields: [gameSessionId], references: [id])
-
-  // Legacy conversion tracking
-  conversionBatchId Int?    @map("conversion_batch_id")
-  converted         Boolean @default(false)
 
   createdAt DateTime @default(now()) @map("created_at")
   viewedAt  DateTime @default(now()) @map("viewed_at")
 
   @@index([userId])
   @@index([adId])
-  @@index([converted])
   @@index([countryCode])
-  @@index([poolId])
   @@index([countryCode, createdAt])
-  @@index([userId, converted])
   @@index([gameSessionId])
   @@map("ad_views")
-}
-
-model Withdrawal {
-  id                  String      @id @default(uuid())
-  userId              String      @map("user_id")
-  user                UserProfile @relation(fields: [userId], references: [userId])
-  coinsWithdrawn      Int?        @default(15000) @map("coins_withdrawn")
-  rateMultiplier      Decimal?    @map("rate_multiplier") @db.Decimal(5, 2)
-  amountUsd           Decimal     @map("amount_usd") @db.Decimal(12, 4)
-  amountLocal         Decimal?    @map("amount_local") @db.Decimal(12, 4)
-  currencyCode        String?     @map("currency_code")
-  exchangeRate        Decimal?    @map("exchange_rate") @db.Decimal(10, 6)
-  method              String
-  status              String
-  paypalEmail         String      @map("paypal_email")
-  paypalTransactionId String?     @map("paypal_transaction_id")
-  transactionId       String?     @map("transaction_id")
-  requestedAt         DateTime    @default(now()) @map("requested_at")
-  processedAt         DateTime?   @map("processed_at")
-  completedAt         DateTime?   @map("completed_at")
-  failureReason       String?     @map("failure_reason")
-  createdAt           DateTime    @default(now()) @map("created_at")
-
-  @@index([userId])
-  @@index([status])
-  @@map("withdrawals")
 }
 
 model Badge {
@@ -346,178 +301,143 @@ model Transaction {
 }
 
 model SurveyHistory {
-  id         Int      @id @default(autoincrement())
-  provider   String   @default("cpx_research")
-  transId    String   @unique @map("trans_id")
-  userId     String   @map("user_id")
-  amount     Int
-  status     Int
-  hash       String
-  hashValid  Boolean  @default(false) @map("hash_valid")
-  sourceIp   String?  @map("source_ip")
-  processed  Boolean  @default(false)
-  notes      String?
-  processedAt DateTime? @map("processed_at")
-  createdAt  DateTime @default(now()) @map("created_at")
+  id                 Int       @id @default(autoincrement())
+  provider           String    @default("cpx_research")
+  transId            String    @unique @map("trans_id")
+  userId             String    @map("user_id")
+  amount             Int
+  status             Int
+  hash               String
+  hashValid          Boolean   @default(false) @map("hash_valid")
+  sourceIp           String?   @map("source_ip")
+  countryCode        String?   @map("country_code")
+  revenueUsd         Decimal?  @map("revenue_usd") @db.Decimal(12, 6)
+  userShareUsd       Decimal?  @map("user_share_usd") @db.Decimal(12, 6)
+  platformShareUsd   Decimal?  @map("platform_share_usd") @db.Decimal(12, 6)
+  splitPercent       Int?      @default(60) @map("split_percent")
+  rateToZarSnapshot  Decimal?  @map("rate_to_zar_snapshot") @db.Decimal(18, 8)
+  localValue         Decimal?  @map("local_value") @db.Decimal(12, 4)
+  currency           String?
+  processed          Boolean   @default(false)
+  notes              String?
+  processedAt        DateTime? @map("processed_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
 
   @@index([userId])
   @@index([status])
   @@map("survey_history")
 }
 
-model CoinConversion {
-  id                       Int       @id @default(autoincrement())
-  conversionDate           DateTime  @map("conversion_date") @db.Date
-  admobRevenueUsd          Decimal   @map("admob_revenue_usd") @db.Decimal(12, 4)
-  userRevenueShare         Decimal   @default(0.8500) @map("user_revenue_share") @db.Decimal(5, 4)
-  totalUserPayoutUsd       Decimal?  @map("total_user_payout_usd") @db.Decimal(12, 4)
-  totalCoinsConverted      BigInt?   @map("total_coins_converted")
-  conversionRateUsdPerCoin Decimal?  @map("conversion_rate_usd_per_coin") @db.Decimal(12, 8)
-  usersAffected            Int?      @map("users_affected")
-  status                   String    @default("pending")
-  processedAt              DateTime? @map("processed_at")
-  notes                    String?
-  createdAt                DateTime  @default(now()) @map("created_at")
+model FxRate {
+  currency  String   @id
+  rateToZar Decimal  @map("rate_to_zar") @db.Decimal(18, 8)
+  fetchedAt DateTime @map("fetched_at") @db.Timestamptz
 
-  conversionDetails ConversionDetail[]
+  @@map("fx_rates")
+}
 
-  @@index([conversionDate])
+model OfferWallHistory {
+  id                Int       @id @default(autoincrement())
+  provider          String    @default("cpx_research")
+  transId           String    @unique @map("trans_id")
+  userId            String    @map("user_id")
+  amount            Int
+  status            Int
+  hash              String
+  hashValid         Boolean   @default(false) @map("hash_valid")
+  offerType         String?   @map("offer_type")
+  offerName         String?   @map("offer_name")
+  sourceIp          String?   @map("source_ip")
+  countryCode       String?   @map("country_code")
+  revenueUsd        Decimal?  @map("revenue_usd") @db.Decimal(12, 6)
+  userShareUsd      Decimal?  @map("user_share_usd") @db.Decimal(12, 6)
+  platformShareUsd  Decimal?  @map("platform_share_usd") @db.Decimal(12, 6)
+  splitPercent      Int?      @default(60) @map("split_percent")
+  rateToZarSnapshot Decimal?  @map("rate_to_zar_snapshot") @db.Decimal(18, 8)
+  localValue        Decimal?  @map("local_value") @db.Decimal(12, 4)
+  currency          String?
+  processed         Boolean   @default(false)
+  notes             String?
+  processedAt       DateTime? @map("processed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
   @@index([status])
-  @@map("coin_conversions")
+  @@map("offer_wall_history")
 }
 
-model ConversionDetail {
-  id                 Int            @id @default(autoincrement())
-  conversionId       Int            @map("conversion_id")
-  conversion         CoinConversion @relation(fields: [conversionId], references: [id])
-  userId             String         @map("user_id")
-  user               UserProfile    @relation(fields: [userId], references: [userId])
-  coinsConverted     BigInt         @map("coins_converted")
-  cashReceivedUsd    Decimal        @map("cash_received_usd") @db.Decimal(12, 4)
-  conversionRateUsed Decimal        @map("conversion_rate_used") @db.Decimal(12, 8)
-  createdAt          DateTime       @default(now()) @map("created_at")
+model TheoremReachHistory {
+  id                Int       @id @default(autoincrement())
+  provider          String    @default("theoremreach")
+  transId           String    @unique @map("trans_id")
+  userId            String    @map("user_id")
+  amount            Int
+  status            Int
+  hashValid         Boolean   @default(false) @map("hash_valid")
+  sourceIp          String?   @map("source_ip")
+  countryCode       String?   @map("country_code")
+  revenueUsd        Decimal?  @map("revenue_usd") @db.Decimal(12, 6)
+  userShareUsd      Decimal?  @map("user_share_usd") @db.Decimal(12, 6)
+  platformShareUsd  Decimal?  @map("platform_share_usd") @db.Decimal(12, 6)
+  splitPercent      Int?      @default(60) @map("split_percent")
+  rateToZarSnapshot Decimal?  @map("rate_to_zar_snapshot") @db.Decimal(18, 8)
+  localValue        Decimal?  @map("local_value") @db.Decimal(12, 4)
+  currency          String?
+  processed         Boolean   @default(false)
+  notes             String?
+  processedAt       DateTime? @map("processed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
 
-  @@index([conversionId])
   @@index([userId])
-  @@map("conversion_details")
-}
-
-model ExchangeRate {
-  id             Int      @id @default(autoincrement())
-  baseCurrency   String   @default("USD") @map("base_currency")
-  targetCurrency String   @map("target_currency")
-  rate           Decimal  @db.Decimal(10, 6)
-  date           DateTime @db.Date
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  @@unique([targetCurrency, date])
-  @@index([targetCurrency])
-  @@index([date])
-  @@map("exchange_rates")
-}
-
-model AdminAction {
-  id         Int         @id @default(autoincrement())
-  adminId    String      @map("admin_id")
-  admin      UserProfile @relation("AdminActions", fields: [adminId], references: [userId])
-  action     String // "PROCESS_CONVERSION", "APPROVE_WITHDRAWAL", etc.
-  targetType String?     @map("target_type") // "USER", "CONVERSION", "WITHDRAWAL"
-  targetId   Int?        @map("target_id")
-  metadata   Json? // Additional data about the action
-  ipAddress  String?     @map("ip_address")
-  createdAt  DateTime    @default(now()) @map("created_at")
-
-  @@index([adminId])
-  @@index([action])
-  @@index([createdAt])
-  @@map("admin_actions")
-}
-
-model LocationRevenuePool {
-  id                 Int       @id @default(autoincrement())
-  countryCode        String    @map("country_code") // 'US', 'ZA', 'GB', etc.
-  month              DateTime  @db.Date
-  admobRevenueUsd    Decimal   @map("admob_revenue_usd") @db.Decimal(12, 4) // From AdMob dashboard (truth)
-  totalVideosWatched Int       @default(0) @map("total_videos_watched")
-  totalCoinsIssued   BigInt    @default(0) @map("total_coins_issued")
-  userShareUsd       Decimal   @map("user_share_usd") @db.Decimal(12, 4) // 85% of admobRevenueUsd
-  conversionRate     Decimal   @map("conversion_rate") @db.Decimal(12, 8) // userShareUsd / totalCoinsIssued
-  status             String    @default("pending") // 'pending', 'processing', 'completed'
-  processedAt        DateTime? @map("processed_at")
-  createdAt          DateTime  @default(now()) @map("created_at")
-
-  conversions LocationConversion[]
-  adViews     AdView[]
-
-  @@unique([countryCode, month])
-  @@index([countryCode])
-  @@index([month])
   @@index([status])
-  @@index([countryCode, month])
-  @@map("location_revenue_pools")
+  @@map("theoremreach_history")
 }
 
-model LocationConversion {
-  id              Int                 @id @default(autoincrement())
-  poolId          Int                 @map("pool_id")
-  pool            LocationRevenuePool @relation(fields: [poolId], references: [id])
-  userId          String              @map("user_id")
-  user            UserProfile         @relation(fields: [userId], references: [userId])
-  coinsConverted  BigInt              @map("coins_converted")
-  cashReceivedUsd Decimal             @map("cash_received_usd") @db.Decimal(12, 4)
-  conversionRate  Decimal             @map("conversion_rate") @db.Decimal(12, 8)
-  createdAt       DateTime            @default(now()) @map("created_at")
+model StoreCatalog {
+  id                Int          @id @default(autoincrement())
+  productType       String       @map("product_type")
+  provider          String
+  name              String
+  denominationLocal Decimal      @map("denomination_local") @db.Decimal(10, 2)
+  currencyCode      String       @map("currency_code")
+  countryCode       String       @map("country_code")
+  coinsRequired     Int          @map("coins_required")
+  isActive          Boolean      @default(true) @map("is_active")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  orders            StoreOrder[]
 
-  @@index([poolId])
-  @@index([userId])
-  @@map("location_conversions")
+  @@map("store_catalog")
 }
 
-model AdImpression {
-  id                String      @id @default(uuid())
-  userId            String      @map("user_id")
-  user              UserProfile @relation(fields: [userId], references: [userId])
-  adType            String      @map("ad_type") // 'rewarded', 'interstitial', 'banner'
-  adUnitId          String      @map("ad_unit_id")
-  revenueUsd        Decimal     @default(0) @map("revenue_usd") @db.Decimal(12, 4)
-  userEarningsUsd   Decimal     @default(0) @map("user_earnings_usd") @db.Decimal(12, 4)
-  companyRevenueUsd Decimal     @default(0) @map("company_revenue_usd") @db.Decimal(12, 4)
-  country           String
-  currency          String
-  impressionDate    DateTime    @default(now()) @map("impression_date")
+model StoreOrder {
+  id            Int          @id @default(autoincrement())
+  userId        String       @map("user_id")
+  catalogId     Int          @map("catalog_id")
+  productType   String       @map("product_type")
+  coinsSpent    Int          @map("coins_spent")
+  localAmount   Decimal      @map("local_amount") @db.Decimal(10, 2)
+  currencyCode  String       @map("currency_code")
+  status        String       @default("pending")
+  fulfilmentRef String?      @map("fulfilment_ref")
+  notes         String?
+  createdAt     DateTime     @default(now()) @map("created_at")
+  fulfilledAt   DateTime?    @map("fulfilled_at")
+  catalog       StoreCatalog @relation(fields: [catalogId], references: [id])
 
-  @@index([userId])
-  @@index([adType])
-  @@index([impressionDate])
-  @@map("ad_impressions")
+  @@map("store_orders")
 }
 
-model ExpiredBalance {
-  id         Int         @id @default(autoincrement())
-  userId     String      @map("user_id")
-  user       UserProfile @relation(fields: [userId], references: [userId])
-  expiryType String      @map("expiry_type") // 'coins' or 'cash'
-  amount     Decimal     @db.Decimal(12, 4) // Amount expired (coins or cash)
-  cashValue  Decimal     @map("cash_value") @db.Decimal(12, 4) // Equivalent ZAR/USD value
-  reason     String // 'coin_inactivity', 'cash_inactivity'
-  expiredAt  DateTime    @default(now()) @map("expired_at")
-
-  @@index([userId])
-  @@index([expiredAt])
-  @@index([expiryType])
-  @@map("expired_balances")
-}
-
-model CoinValuation {
+model TaskBonusProgress {
   id               Int      @id @default(autoincrement())
-  countryCode      String   @map("country_code")
-  valuePer100Coins Decimal  @map("value_per_100_coins") @db.Decimal(10, 4)
-  currencyCode     String   @map("currency_code")
-  calculatedAt     DateTime @default(now()) @map("calculated_at")
+  userId           String   @map("user_id")
+  periodStart      DateTime @map("period_start") @db.Date
+  completionsCount Int      @default(0) @map("completions_count")
+  bonusAwarded     Boolean  @default(false) @map("bonus_awarded")
+  bonusCoins       Int      @default(0) @map("bonus_coins")
+  createdAt        DateTime @default(now()) @map("created_at")
 
-  @@unique([countryCode, calculatedAt])
-  @@index([countryCode])
-  @@map("coin_valuations")
+  @@unique([userId, periodStart])
+  @@map("task_bonus_progress")
 }
 
 model GameSession {
@@ -605,61 +525,6 @@ model Notification {
   @@map("notifications")
 }
 
-model MontagImpression {
-  id                   Int         @id @default(autoincrement())
-  userId               String      @map("user_id")
-  user                 UserProfile @relation(fields: [userId], references: [userId])
-  adType               String      @map("ad_type") // 'rewarded', 'push', 'banner', 'vignette', 'inpage'
-  adZoneId             String      @map("ad_zone_id")
-  userSharePercent     Int         @map("user_share_percent") // 0 or 85
-  platformSharePercent Int         @map("platform_share_percent") // 100 or 15
-  estimatedRevenueUsd  Float       @default(0) @map("estimated_revenue_usd")
-  countryCode          String      @map("country_code")
-  isBetaMode           Boolean     @map("is_beta_mode")
-  betaMultiplier       Float       @map("beta_multiplier")
-  coinsAwarded         Int         @default(0) @map("coins_awarded")
-  createdAt            DateTime    @default(now()) @map("created_at")
-
-  @@index([userId, createdAt])
-  @@index([countryCode, adType])
-  @@map("monetag_impressions")
-}
-
-model RevenuePool {
-  id               Int       @id @default(autoincrement())
-  month            String
-  countryCode      String    @map("country_code")
-  totalRevenueUsd  Float     @map("total_revenue_usd")
-  userShareUsd     Float     @map("user_share_usd") // 85%
-  platformShareUsd Float     @map("platform_share_usd") // 15%
-  totalCoinsIssued BigInt    @map("total_coins_issued")
-  conversionRate   Float     @map("conversion_rate") // USD per coin
-  impressionCount  Int       @map("impression_count")
-  status           String    @default("pending") // pending, distributing, completed
-  startDate        DateTime  @map("start_date")
-  endDate          DateTime  @map("end_date")
-  distributedAt    DateTime? @map("distributed_at")
-  createdAt        DateTime  @default(now()) @map("created_at")
-
-  @@unique([month, countryCode])
-  @@index([status])
-  @@map("revenue_pools")
-}
-
-model BetaDebt {
-  id               Int         @id @default(autoincrement())
-  userId           String      @unique @map("user_id")
-  user             UserProfile @relation(fields: [userId], references: [userId])
-  totalCoinsEarned BigInt      @default(0) @map("total_coins_earned")
-  estimatedDebtUsd Float       @default(0) @map("estimated_debt_usd")
-  multiplier       Float       @default(1.5)
-  isPaid           Boolean     @default(false) @map("is_paid")
-  paidAt           DateTime?   @map("paid_at")
-  createdAt        DateTime    @default(now()) @map("created_at")
-  updatedAt        DateTime    @updatedAt @map("updated_at")
-
-  @@map("beta_debts")
-}
 
 // ─── V2 Data Ownership: Ledger Source-of-Truth ────────────────────────────────
 // Rules:

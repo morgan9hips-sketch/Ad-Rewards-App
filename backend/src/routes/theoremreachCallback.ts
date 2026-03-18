@@ -24,6 +24,7 @@ import { applyTaskWinStreakAndReferralShare } from '../services/retentionService
 
 const router = Router()
 const prisma = new PrismaClient()
+const THEOREM_USER_SHARE = 0.6
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -175,7 +176,11 @@ router.get('/callback', async (req: Request, res: Response) => {
       // Verify user exists
       const user = await tx.userProfile.findUnique({
         where: { userId: user_id },
-        select: { userId: true },
+        select: {
+          userId: true,
+          countryCode: true,
+          preferredCurrency: true,
+        },
       })
 
       if (!user) {
@@ -252,6 +257,53 @@ router.get('/callback', async (req: Request, res: Response) => {
           coinsRaw,
           'theoremreach_reward',
         )
+
+        const theoremreachHistory = (tx as any).theoremReachHistory
+        const preferredCurrency = user.preferredCurrency || 'ZAR'
+        const fxRate = await tx.fxRate.findUnique({
+          where: { currency: preferredCurrency },
+          select: { rateToZar: true },
+        })
+        const rateToZarSnapshot = fxRate ? Number(fxRate.rateToZar) : null
+        const userShareUsd = Number((coinsRaw * 0.01).toFixed(6))
+        const revenueUsd = Number(
+          (userShareUsd / THEOREM_USER_SHARE).toFixed(6),
+        )
+        const platformShareUsd = Number(
+          (revenueUsd * (1 - THEOREM_USER_SHARE)).toFixed(6),
+        )
+        const localValue =
+          rateToZarSnapshot === null
+            ? null
+            : Number((coinsRaw * 0.01 * rateToZarSnapshot).toFixed(4))
+
+        await theoremreachHistory.create({
+          data: {
+            provider: 'theoremreach',
+            transId: tx_id,
+            userId: user_id,
+            amount: coinsRaw,
+            status: 1,
+            hashValid: true,
+            sourceIp:
+              (req.headers['x-forwarded-for'] as string)
+                ?.split(',')[0]
+                ?.trim() ??
+              req.socket?.remoteAddress ??
+              '',
+            countryCode: user.countryCode,
+            revenueUsd,
+            userShareUsd,
+            platformShareUsd,
+            splitPercent: 60,
+            rateToZarSnapshot,
+            localValue,
+            currency: preferredCurrency,
+            processed: true,
+            processedAt: new Date(),
+            notes: `Credited ${coinsRaw} coins (currency=${currency ?? 'unknown'})`,
+          },
+        })
 
         await surveyHistory.update({
           where: { transId: tx_id },

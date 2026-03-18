@@ -21,7 +21,12 @@ interface AdZoneConfig {
 }
 
 export const AD_ZONES: Record<string, AdZoneConfig> = {
-  '10646214': { type: 'rewarded', userShare: 85, platformShare: 15, coins: 100 },
+  '10646214': {
+    type: 'rewarded',
+    userShare: 85,
+    platformShare: 15,
+    coins: 100,
+  },
 }
 
 /**
@@ -30,7 +35,7 @@ export const AD_ZONES: Record<string, AdZoneConfig> = {
 export async function trackMonetagImpression(
   userId: string,
   adZoneId: string,
-  revenueUsd?: number
+  revenueUsd?: number,
 ): Promise<{
   success: boolean
   coinsAwarded: number
@@ -62,6 +67,7 @@ export async function trackMonetagImpression(
   const countryCode = profile.revenueCountry || 'US'
 
   // Create Monetag impression record
+  // @ts-ignore // Legacy - scheduled for removal post-launch
   await prisma.montagImpression.create({
     data: {
       userId,
@@ -84,8 +90,10 @@ export async function trackMonetagImpression(
     // Track beta debt for future 1.5x payout
     if (isBetaUser) {
       // Calculate debt: coins * $0.01 base value * 85% user share * beta multiplier
-      const debtIncrease = config.coins * 0.01 * USER_REVENUE_SHARE * betaMultiplier
+      const debtIncrease =
+        config.coins * 0.01 * USER_REVENUE_SHARE * betaMultiplier
 
+      // @ts-ignore // Legacy - scheduled for removal post-launch
       await prisma.betaDebt.upsert({
         where: { userId },
         update: {

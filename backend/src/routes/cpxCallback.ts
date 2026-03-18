@@ -5,6 +5,7 @@ import { applyTaskWinStreakAndReferralShare } from '../services/retentionService
 
 const router = Router()
 const prisma = new PrismaClient()
+const CPX_USER_SHARE = 0.6
 
 const ALLOWED_IPS = new Set([
   '188.40.3.73',
@@ -18,6 +19,7 @@ interface CallbackPayload {
   amount: number
   status: number
   hash: string
+  revenueUsd?: number
 }
 
 const CALLBACK_FIELDS = [
@@ -87,6 +89,7 @@ function parsePayload(req: Request): CallbackPayload | null {
 
   const amountRaw = source.amount_local ?? source.amount ?? source.coins
   const statusRaw = source.status
+  const revenueRaw = source.revenue_usd ?? source.revenue
 
   if (
     !transId ||
@@ -100,6 +103,15 @@ function parsePayload(req: Request): CallbackPayload | null {
 
   const amount = Math.trunc(Number(amountRaw))
   const status = Number(statusRaw)
+  const parsedRevenueUsd =
+    revenueRaw === undefined ||
+    revenueRaw === null ||
+    String(revenueRaw).trim() === ''
+      ? undefined
+      : Number(revenueRaw)
+  const revenueUsd = Number.isFinite(parsedRevenueUsd)
+    ? parsedRevenueUsd
+    : undefined
 
   if (!Number.isFinite(amount) || amount < 0) {
     return null
@@ -115,6 +127,7 @@ function parsePayload(req: Request): CallbackPayload | null {
     amount,
     status,
     hash,
+    revenueUsd,
   }
 }
 
@@ -160,7 +173,11 @@ async function processCallback(
 
     const user = await tx.userProfile.findUnique({
       where: { userId: payload.userId },
-      select: { userId: true },
+      select: {
+        userId: true,
+        countryCode: true,
+        preferredCurrency: true,
+      },
     })
 
     if (!user) {
@@ -172,6 +189,21 @@ async function processCallback(
         },
       })
       return
+    }
+
+    if (payload.revenueUsd !== undefined) {
+      const expectedCoins = Math.floor(
+        (payload.revenueUsd * CPX_USER_SHARE) / 0.01,
+      )
+      if (Math.abs(expectedCoins - payload.amount) > 2) {
+        console.warn('[CPX] Coin mismatch', {
+          transId: payload.transId,
+          userId: payload.userId,
+          revenueUsd: payload.revenueUsd,
+          expectedCoins,
+          callbackAmount: payload.amount,
+        })
+      }
     }
 
     const updatedUser = await tx.userProfile.update({
@@ -203,9 +235,40 @@ async function processCallback(
       'cpx_survey',
     )
 
+    const preferredCurrency = user.preferredCurrency || 'ZAR'
+    const fxRate = await tx.fxRate.findUnique({
+      where: { currency: preferredCurrency },
+      select: { rateToZar: true },
+    })
+    const rateToZarSnapshot = fxRate ? Number(fxRate.rateToZar) : null
+    const localValue =
+      rateToZarSnapshot === null
+        ? null
+        : Number((payload.amount * 0.01 * rateToZarSnapshot).toFixed(4))
+    const revenueUsd =
+      payload.revenueUsd === undefined
+        ? null
+        : Number(payload.revenueUsd.toFixed(6))
+    const userShareUsd =
+      revenueUsd === null
+        ? null
+        : Number((revenueUsd * CPX_USER_SHARE).toFixed(6))
+    const platformShareUsd =
+      revenueUsd === null
+        ? null
+        : Number((revenueUsd * (1 - CPX_USER_SHARE)).toFixed(6))
+
     await surveyHistory.update({
       where: { transId: payload.transId },
       data: {
+        countryCode: user.countryCode,
+        revenueUsd,
+        userShareUsd,
+        platformShareUsd,
+        splitPercent: 60,
+        rateToZarSnapshot,
+        localValue,
+        currency: preferredCurrency,
         processed: true,
         processedAt: new Date(),
         notes: 'Completion credited',

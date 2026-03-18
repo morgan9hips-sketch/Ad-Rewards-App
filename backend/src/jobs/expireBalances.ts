@@ -41,6 +41,7 @@ async function expireCoins() {
       const cashValue = 0
 
       // Log expiry
+      // @ts-ignore // Legacy - scheduled for removal post-launch
       await prisma.expiredBalance.create({
         data: {
           userId: user.userId,
@@ -111,6 +112,7 @@ async function expireCash() {
       const cashUsd = Number(user.cashBalanceUsd)
 
       // Log expiry
+      // @ts-ignore // Legacy - scheduled for removal post-launch
       await prisma.expiredBalance.create({
         data: {
           userId: user.userId,

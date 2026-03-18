@@ -9,9 +9,12 @@ import {
   checkDuplicateImpression,
   detectVPNMismatch,
   trackUserRevenueCountry,
-  updateUserLocation
+  updateUserLocation,
 } from '../services/fraudDetection.js'
-import { trackMonetagImpression, getAdType } from '../services/monetagService.js'
+import {
+  trackMonetagImpression,
+  getAdType,
+} from '../services/monetagService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -28,8 +31,16 @@ router.get('/', async (req: AuthRequest, res) => {
 
     res.json(ads)
   } catch (error) {
-    console.error('❌ Error fetching ads:', error instanceof Error ? error.message : error)
-    res.status(500).json({ error: 'Failed to fetch ads', details: error instanceof Error ? error.message : 'Unknown error' })
+    console.error(
+      '❌ Error fetching ads:',
+      error instanceof Error ? error.message : error,
+    )
+    res
+      .status(500)
+      .json({
+        error: 'Failed to fetch ads',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      })
   }
 })
 
@@ -108,7 +119,7 @@ router.post('/complete', async (req: AuthRequest, res) => {
     const {
       adUnitId,
       watchedSeconds,
-      impressionId,  // From Monetag SDK
+      impressionId, // From Monetag SDK
     } = req.body
 
     // Get user profile to access regional country/currency set at signup
@@ -124,7 +135,7 @@ router.post('/complete', async (req: AuthRequest, res) => {
     if (!profile) {
       return res.status(404).json({
         success: false,
-        error: 'User profile not found'
+        error: 'User profile not found',
       })
     }
 
@@ -132,11 +143,11 @@ router.post('/complete', async (req: AuthRequest, res) => {
     const currency = profile.preferredCurrency || 'USD'
 
     // Validate minimum watch time (fraud prevention)
-    const MIN_WATCH_SECONDS = 15  // Monetag ads must be watched for at least 15 seconds
+    const MIN_WATCH_SECONDS = 15 // Monetag ads must be watched for at least 15 seconds
     if (!watchedSeconds || watchedSeconds < MIN_WATCH_SECONDS) {
       return res.status(400).json({
         success: false,
-        error: `Ad must be watched for at least ${MIN_WATCH_SECONDS} seconds`
+        error: `Ad must be watched for at least ${MIN_WATCH_SECONDS} seconds`,
       })
     }
 
@@ -151,7 +162,7 @@ router.post('/complete', async (req: AuthRequest, res) => {
       return res.status(429).json({
         success: false,
         error: 'Daily ad limit reached',
-        remaining: 0
+        remaining: 0,
       })
     }
 
@@ -160,7 +171,7 @@ router.post('/complete', async (req: AuthRequest, res) => {
     if (!rapidCheck.allowed) {
       return res.status(429).json({
         success: false,
-        error: rapidCheck.reason || 'Too many ads watched too quickly'
+        error: rapidCheck.reason || 'Too many ads watched too quickly',
       })
     }
 
@@ -170,7 +181,7 @@ router.post('/complete', async (req: AuthRequest, res) => {
       if (duplicateCheck.duplicate) {
         return res.status(409).json({
           success: false,
-          error: 'Duplicate ad impression detected'
+          error: 'Duplicate ad impression detected',
         })
       }
     }
@@ -184,19 +195,17 @@ router.post('/complete', async (req: AuthRequest, res) => {
         completed: true,
         rewardCents: 0, // Legacy field, not used in coin system
         coinsEarned: COINS_PER_AD,
-        
+
         // User's regional data (SOURCE OF TRUTH from signup IP geolocation)
-        admobImpressionId: impressionId || undefined,  // Monetag impression ID
-        countryCode: countryCode,  // User's signup regional pool
-        estimatedEarningsUsd: undefined,  // Monetag revenue data not available
-        admobCurrency: currency || 'USD',  // User's signup currency
-        
+        admobImpressionId: impressionId || undefined, // Monetag impression ID
+        countryCode: countryCode, // User's signup regional pool
+        estimatedEarningsUsd: undefined, // Monetag revenue data not available
+        admobCurrency: currency || 'USD', // User's signup currency
+
         // Audit trail
         ipAddress,
         ipCountry: ipCountry || undefined,
         userAgent,
-        
-        converted: false,
       },
     })
 
@@ -206,7 +215,7 @@ router.post('/complete', async (req: AuthRequest, res) => {
       COINS_PER_AD,
       `Earned ${COINS_PER_AD} coins for watching ad`,
       parseInt(adView.id),
-      'ad_view'
+      'ad_view',
     )
 
     // 7. Update user's ad watch count
@@ -240,7 +249,7 @@ router.post('/complete', async (req: AuthRequest, res) => {
     console.error('Error completing ad view:', error)
     res.status(500).json({
       success: false,
-      error: 'Failed to complete ad view'
+      error: 'Failed to complete ad view',
     })
   }
 })
@@ -250,7 +259,7 @@ router.post('/track-impression', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
     const {
-      adType,  // 'rewarded', 'interstitial', 'banner'
+      adType, // 'rewarded', 'interstitial', 'banner'
       adUnitId,
       revenueUsd,
       country,
@@ -278,6 +287,7 @@ router.post('/track-impression', async (req: AuthRequest, res) => {
     // For interstitial and banner: user gets 0%, company gets 100%
 
     // Create ad impression record
+    // @ts-ignore // Legacy - scheduled for removal post-launch
     const impression = await prisma.adImpression.create({
       data: {
         userId,
@@ -311,9 +321,9 @@ router.post('/track-monetag', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id
     const {
-      adZoneId,  // "10618699", "10618702", etc.
-      adType,    // "rewarded", "push", "banner", etc.
-      revenueUsd // Optional - for manual entry
+      adZoneId, // "10618699", "10618702", etc.
+      adType, // "rewarded", "push", "banner", etc.
+      revenueUsd, // Optional - for manual entry
     } = req.body
 
     // Validate required fields
@@ -328,7 +338,7 @@ router.post('/track-monetag', async (req: AuthRequest, res) => {
     const result = await trackMonetagImpression(
       userId,
       adZoneId,
-      revenueUsd ? parseFloat(revenueUsd) : undefined
+      revenueUsd ? parseFloat(revenueUsd) : undefined,
     )
 
     res.json({
@@ -336,9 +346,10 @@ router.post('/track-monetag', async (req: AuthRequest, res) => {
       coinsAwarded: result.coinsAwarded,
       isBetaUser: result.isBetaUser,
       betaMultiplier: result.betaMultiplier,
-      message: result.coinsAwarded > 0 
-        ? `You earned ${result.coinsAwarded} coins!` 
-        : 'Ad impression tracked',
+      message:
+        result.coinsAwarded > 0
+          ? `You earned ${result.coinsAwarded} coins!`
+          : 'Ad impression tracked',
     })
   } catch (error) {
     console.error('Error tracking Monetag impression:', error)

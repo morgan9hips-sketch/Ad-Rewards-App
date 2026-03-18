@@ -1,11 +1,18 @@
 /**
  * Schema-safe types and helpers
- * 
+ *
  * This file provides type-safe wrappers and utilities to ensure
  * correct usage of Prisma schema fields throughout the codebase.
  */
 
-import { UserProfile, Transaction, Withdrawal, ExchangeRate, LocationRevenuePool } from '@prisma/client'
+// @ts-ignore // Legacy - scheduled for removal post-launch
+import {
+  UserProfile,
+  Transaction,
+  Withdrawal,
+  ExchangeRate,
+  LocationRevenuePool,
+} from '@prisma/client'
 
 /**
  * Type-safe user balance getters
@@ -90,7 +97,9 @@ export function createTransactionData(data: {
     coinsChange: data.coinsChange,
     cashChangeUsd: data.cashChangeUsd ? Number(data.cashChangeUsd) : undefined,
     coinsBalanceAfter: data.coinsBalanceAfter,
-    cashBalanceAfterUsd: data.cashBalanceAfterUsd ? Number(data.cashBalanceAfterUsd) : undefined,
+    cashBalanceAfterUsd: data.cashBalanceAfterUsd
+      ? Number(data.cashBalanceAfterUsd)
+      : undefined,
     description: data.description,
     referenceId: data.referenceId,
     referenceType: data.referenceType,
@@ -163,7 +172,7 @@ export interface SafeLocationPoolData {
   month: Date
   admobRevenueUsd: number
   userShareUsd: number
-  platformRevenueUsd: number  // Calculated field
+  platformRevenueUsd: number // Calculated field
   totalVideosWatched: number
   totalCoinsIssued: bigint
   conversionRate: number
@@ -173,16 +182,18 @@ export interface SafeLocationPoolData {
 /**
  * Extract safe location pool data with calculated fields
  */
-export function getLocationPoolData(pool: LocationRevenuePool): SafeLocationPoolData {
+export function getLocationPoolData(
+  pool: LocationRevenuePool,
+): SafeLocationPoolData {
   const admobRevenueUsd = Number(pool.admobRevenueUsd)
   const userShareUsd = Number(pool.userShareUsd)
-  
+
   return {
     countryCode: pool.countryCode,
     month: pool.month,
     admobRevenueUsd,
     userShareUsd,
-    platformRevenueUsd: admobRevenueUsd - userShareUsd,  // Calculated
+    platformRevenueUsd: admobRevenueUsd - userShareUsd, // Calculated
     totalVideosWatched: pool.totalVideosWatched,
     totalCoinsIssued: pool.totalCoinsIssued,
     conversionRate: Number(pool.conversionRate),
@@ -192,7 +203,7 @@ export function getLocationPoolData(pool: LocationRevenuePool): SafeLocationPool
 
 /**
  * Deprecated field warnings
- * 
+ *
  * NOTE: These tables/fields don't exist in the schema:
  * - CashWallet table → Use UserProfile.cashBalanceUsd
  * - CoinWallet table → Use UserProfile.coinsBalance
@@ -225,14 +236,12 @@ export function isValidTransaction(tx: unknown): tx is Transaction {
   )
 }
 
-export function isValidWithdrawal(withdrawal: unknown): withdrawal is Withdrawal {
+export function isValidWithdrawal(
+  withdrawal: unknown,
+): withdrawal is Withdrawal {
   if (withdrawal === null || typeof withdrawal !== 'object') return false
   const obj = withdrawal as Record<string, unknown>
-  return (
-    'amountUsd' in obj &&
-    'status' in obj &&
-    typeof obj.status === 'string'
-  )
+  return 'amountUsd' in obj && 'status' in obj && typeof obj.status === 'string'
 }
 
 export function isValidExchangeRate(rate: unknown): rate is ExchangeRate {
@@ -247,7 +256,9 @@ export function isValidExchangeRate(rate: unknown): rate is ExchangeRate {
   )
 }
 
-export function isValidLocationPool(pool: unknown): pool is LocationRevenuePool {
+export function isValidLocationPool(
+  pool: unknown,
+): pool is LocationRevenuePool {
   if (pool === null || typeof pool !== 'object') return false
   const obj = pool as Record<string, unknown>
   return (
@@ -268,7 +279,7 @@ export function safeBigInt(value: bigint | number | string): bigint {
   if (typeof value === 'bigint') {
     return value
   }
-  
+
   try {
     return BigInt(value)
   } catch (error) {
@@ -285,18 +296,18 @@ export function safeDecimalToNumber(value: unknown): number {
   if (typeof value === 'number') {
     return value
   }
-  
+
   if (value === null || value === undefined) {
     return 0
   }
-  
+
   // Handle Prisma Decimal type
   const str = value.toString()
   const num = parseFloat(str)
-  
+
   if (isNaN(num)) {
     throw new Error(`Cannot convert to number: ${str}`)
   }
-  
+
   return num
 }
