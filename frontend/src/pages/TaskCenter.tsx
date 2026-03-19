@@ -1,134 +1,89 @@
-import { useEffect, useMemo, useState } from 'react'
-import { LayoutGrid, MoveLeft, Trophy } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { LayoutGrid, MoveLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { useCurrency } from '../contexts/CurrencyContext'
-import { API_BASE_URL } from '../config/api'
 
-interface Category {
+interface CenterTile {
   key: string
   icon: string
   label: string
   description: string
   path: string
+  status: 'LIVE' | 'COMING_SOON'
 }
 
-interface FeaturedTask {
-  id: number
-  title: string
-  rewardCoins: number
-  provider: string
-}
-
-const categories: Category[] = [
+const centerTiles: CenterTile[] = [
   {
     key: 'surveys',
     icon: '📋',
-    label: 'Surveys',
-    description:
-      'Complete partner surveys tailored to your profile and earn AD COINS.',
+    label: 'Survey Center',
+    description: 'Complete surveys and earn AD COINS from top providers.',
     path: '/task-center/surveys',
+    status: 'LIVE',
+  },
+  {
+    key: 'offer-wall',
+    icon: '🎁',
+    label: 'Offer Wall Center',
+    description: 'Browse rewarded offers and unlock more ways to earn.',
+    path: '/task-center/offer-wall',
+    status: 'LIVE',
   },
   {
     key: 'gaming',
     icon: '🎮',
-    label: 'Gaming',
-    description: 'Play games, try new titles, and get rewarded for your time.',
+    label: 'Game Center',
+    description: 'Play-to-earn experiences and game rewards are on the way.',
     path: '/task-center/gaming',
+    status: 'COMING_SOON',
   },
   {
-    key: 'offers',
-    icon: '🛍️',
-    label: 'Offers',
-    description:
-      'Complete brand offers and sign-ups from top advertisers worldwide.',
-    path: '/task-center/offers',
+    key: 'shopping',
+    icon: '🛒',
+    label: 'Shopping Center',
+    description: 'Shop partner brands and earn AD COINS cashback soon.',
+    path: '/task-center/shopping',
+    status: 'COMING_SOON',
   },
   {
-    key: 'videos',
+    key: 'ads',
     icon: '📺',
-    label: 'Videos',
-    description: 'Watch short video ads and earn AD COINS instantly.',
-    path: '/task-center/videos',
+    label: 'Ad Center',
+    description: 'A dedicated ad earning hub is coming soon.',
+    path: '/task-center/ads',
+    status: 'COMING_SOON',
   },
-  {
-    key: 'cashback',
-    icon: '💰',
-    label: 'Cashback',
-    description: 'Shop your favourite brands and earn cashback in AD COINS.',
-    path: '/task-center/cashback',
-  },
-]
-
-const progressWidthClasses = [
-  'w-0',
-  'w-[5%]',
-  'w-[10%]',
-  'w-[15%]',
-  'w-[20%]',
-  'w-[25%]',
-  'w-[30%]',
-  'w-[35%]',
-  'w-[40%]',
-  'w-[45%]',
-  'w-[50%]',
-  'w-[55%]',
-  'w-[60%]',
-  'w-[65%]',
-  'w-[70%]',
-  'w-[75%]',
-  'w-[80%]',
-  'w-[85%]',
-  'w-[90%]',
-  'w-[95%]',
-  'w-full',
 ]
 
 export default function TaskCenter() {
   const navigate = useNavigate()
-  const { session } = useAuth()
-  const { formatAmount } = useCurrency()
-  const [featuredTasks, setFeaturedTasks] = useState<FeaturedTask[]>([])
-  const [taskWinStreak, setTaskWinStreak] = useState(0)
+  const [toastMessage, setToastMessage] = useState('')
+  const toastTimeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
-    const fetchFeatured = async () => {
-      try {
-        const token = session?.access_token
-        if (!token) return
-
-        const response = await fetch(`${API_BASE_URL}/api/tasks/featured`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-
-        if (!response.ok) return
-        const data = await response.json()
-        setFeaturedTasks(data.tasks || [])
-        setTaskWinStreak(data.taskWinStreak || 0)
-      } catch (error) {
-        console.error('Error fetching featured tasks:', error)
+    return () => {
+      if (toastTimeoutRef.current) {
+        window.clearTimeout(toastTimeoutRef.current)
       }
     }
+  }, [])
 
-    fetchFeatured()
-  }, [session?.access_token])
-
-  const streakProgress = useMemo(() => {
-    const completedInCurrentCycle = taskWinStreak % 5
-    return {
-      completedInCurrentCycle,
-      remaining: 5 - completedInCurrentCycle,
-      percent: Math.round((completedInCurrentCycle / 5) * 100),
+  const showComingSoonToast = () => {
+    setToastMessage('Coming soon — stay tuned!')
+    if (toastTimeoutRef.current) {
+      window.clearTimeout(toastTimeoutRef.current)
     }
-  }, [taskWinStreak])
+    toastTimeoutRef.current = window.setTimeout(() => {
+      setToastMessage('')
+    }, 2200)
+  }
 
-  const streakProgressWidthClass = useMemo(() => {
-    const index = Math.max(
-      0,
-      Math.min(20, Math.round(streakProgress.percent / 5)),
-    )
-    return progressWidthClasses[index]
-  }, [streakProgress.percent])
+  const handleTileClick = (tile: CenterTile) => {
+    if (tile.status === 'COMING_SOON') {
+      showComingSoonToast()
+      return
+    }
+    navigate(tile.path)
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 pb-24 text-slate-100">
@@ -158,77 +113,54 @@ export default function TaskCenter() {
             Browse earning opportunities by category and start earning AD COINS.
           </p>
 
-          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div className="rounded-[12px] border border-slate-800 bg-slate-900/70 p-4">
-              <div className="flex items-center gap-2 text-emerald-300 text-sm font-semibold uppercase tracking-wide">
-                <Trophy size={16} /> Win Streak
-              </div>
-              <p className="mt-2 text-2xl font-bold text-slate-100">
-                {taskWinStreak} tasks
-              </p>
-              <p className="mt-1 text-sm text-slate-400">
-                {streakProgress.remaining === 5
-                  ? 'Complete 5 tasks to unlock +50 AD COINS bonus.'
-                  : `${streakProgress.remaining} more task(s) to unlock +50 AD COINS.`}
-              </p>
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-800">
-                <div
-                  className={`h-full bg-blue-500 transition-all duration-300 ${streakProgressWidthClass}`}
-                />
-              </div>
-            </div>
-
-            <div className="rounded-[12px] border border-slate-800 bg-slate-900/70 p-4">
-              <p className="text-sm font-semibold uppercase tracking-wide text-slate-300">
-                Featured Task
-              </p>
-              {featuredTasks[0] ? (
-                <>
-                  <p className="mt-2 text-lg font-bold text-slate-100">
-                    {featuredTasks[0].title}
-                  </p>
-                  <p className="mt-1 text-sm text-emerald-400">
-                    {featuredTasks[0].rewardCoins.toLocaleString()} AD COINS (
-                    {formatAmount(featuredTasks[0].rewardCoins / 100)})
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {featuredTasks[0].provider}
-                  </p>
-                </>
-              ) : (
-                <p className="mt-2 text-sm text-slate-400">
-                  No featured tasks available yet.
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Category grid */}
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {categories.map((cat) => (
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {centerTiles.map((tile, index) => (
               <button
-                key={cat.key}
+                key={tile.key}
                 type="button"
-                onClick={() => navigate(cat.path)}
-                className="group rounded-[16px] border border-slate-800 bg-slate-900/70 p-6 text-left shadow-sm transition duration-200 hover:-translate-y-1 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                onClick={() => handleTileClick(tile)}
+                className={`group rounded-[16px] border border-slate-800 bg-slate-900/70 p-6 text-left shadow-sm transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+                  tile.status === 'COMING_SOON'
+                    ? 'opacity-50 hover:border-slate-700'
+                    : 'hover:-translate-y-1 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10'
+                } ${index === centerTiles.length - 1 && centerTiles.length % 2 === 1 ? 'sm:col-span-2' : ''}`}
               >
                 <span className="text-4xl" aria-hidden="true">
-                  {cat.icon}
+                  {tile.icon}
                 </span>
-                <h2 className="mt-4 text-xl font-bold text-slate-100">
-                  {cat.label}
-                </h2>
+
+                <div className="mt-4 flex items-center justify-between gap-2">
+                  <h2 className="text-xl font-bold text-slate-100">{tile.label}</h2>
+                  {tile.status === 'COMING_SOON' && (
+                    <span className="rounded-full border border-amber-400/30 bg-amber-500/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-300">
+                      Coming Soon
+                    </span>
+                  )}
+                  {tile.status === 'LIVE' && (
+                    <span className="rounded-full border border-emerald-400/30 bg-emerald-500/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-300">
+                      Live
+                    </span>
+                  )}
+                </div>
+
                 <p className="mt-2 text-sm leading-relaxed text-slate-400">
-                  {cat.description}
+                  {tile.description}
                 </p>
+
                 <span className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 transition-colors group-hover:text-emerald-300">
-                  Browse {cat.label} →
+                  {tile.status === 'LIVE' ? 'Open Center →' : 'Stay Tuned'}
                 </span>
               </button>
             ))}
           </div>
         </div>
       </div>
+
+      {toastMessage && (
+        <div className="fixed bottom-28 left-1/2 z-[80] -translate-x-1/2 rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-100 shadow-lg">
+          {toastMessage}
+        </div>
+      )}
     </div>
   )
 }

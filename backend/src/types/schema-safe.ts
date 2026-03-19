@@ -5,14 +5,30 @@
  * correct usage of Prisma schema fields throughout the codebase.
  */
 
-// @ts-ignore // Legacy - scheduled for removal post-launch
-import {
-  UserProfile,
-  Transaction,
-  Withdrawal,
-  ExchangeRate,
-  LocationRevenuePool,
-} from '@prisma/client'
+import { UserProfile, Transaction } from '@prisma/client'
+
+type Withdrawal = {
+  amountUsd: number
+  status: string
+}
+
+type ExchangeRate = {
+  baseCurrency: string
+  targetCurrency: string
+  rate: unknown
+  date: Date
+}
+
+type LocationRevenuePool = {
+  countryCode: string
+  month: Date
+  admobRevenueUsd: unknown
+  userShareUsd: unknown
+  totalVideosWatched: number
+  totalCoinsIssued: bigint
+  conversionRate: unknown
+  status: string
+}
 
 /**
  * Type-safe user balance getters

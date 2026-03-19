@@ -26,7 +26,6 @@ import WatchAd from './pages/WatchAd'
 import Game from './pages/Game'
 import MiniGames from './pages/MiniGames'
 import Settings from './pages/Settings'
-import Withdrawals from './pages/Withdrawals'
 import Leaderboard from './pages/Leaderboard'
 import Badges from './pages/Badges'
 import Subscriptions from './pages/Subscriptions'
@@ -40,10 +39,12 @@ import Transactions from './pages/Transactions'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import AdCity from './pages/AdCity'
-import SurveyCenter from './pages/SurveyCenter'
 import TaskCenter from './pages/TaskCenter'
 import SurveysCategory from './pages/task-center/Surveys'
-import GamingCategory from './pages/task-center/Gaming'
+import OfferWallCategory from './pages/task-center/OfferWall'
+import GameCenter from './pages/task-center/GameCenter'
+import ShoppingCenter from './pages/task-center/ShoppingCenter'
+import AdCenter from './pages/task-center/AdCenter'
 import OffersCategory from './pages/task-center/Offers'
 import VideosCategory from './pages/task-center/Videos'
 import CashbackCategory from './pages/task-center/Cashback'
@@ -200,10 +201,34 @@ function AppContent() {
           }
         />
         <Route
+          path="/task-center/offer-wall"
+          element={
+            <ProtectedRoute>
+              <OfferWallCategory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/task-center/gaming"
           element={
             <ProtectedRoute>
-              <GamingCategory />
+              <GameCenter />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/task-center/shopping"
+          element={
+            <ProtectedRoute>
+              <ShoppingCenter />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/task-center/ads"
+          element={
+            <ProtectedRoute>
+              <AdCenter />
             </ProtectedRoute>
           }
         />
@@ -299,14 +324,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/withdrawals"
-          element={
-            <ProtectedRoute>
-              <Withdrawals />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/withdrawals" element={<Navigate to="/wallet" replace />} />
         <Route
           path="/settings"
           element={

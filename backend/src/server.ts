@@ -12,7 +12,6 @@ import { updateExchangeRates } from './services/currencyService.js'
 // Import routes
 import userRoutes from './routes/user.js'
 import adsRoutes from './routes/ads.js'
-import withdrawalRoutes from './routes/withdrawals.js'
 import leaderboardRoutes from './routes/leaderboard.js'
 import badgesRoutes from './routes/badges.js'
 import adminRoutes from './routes/admin.js'
@@ -91,8 +90,6 @@ app.use('/user', authenticate, userRoutes)
 app.use('/api/user', authenticate, userRoutes)
 app.use('/ads', authenticate, adsRoutes)
 app.use('/api/ads', authenticate, adsRoutes)
-app.use('/withdrawals', authenticate, withdrawalRoutes)
-app.use('/api/withdrawals', authenticate, withdrawalRoutes)
 app.use('/badges', authenticate, badgesRoutes)
 app.use('/api/badges', authenticate, badgesRoutes)
 app.use('/admin', authenticate, adminRoutes)

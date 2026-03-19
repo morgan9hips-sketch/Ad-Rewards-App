@@ -15,7 +15,6 @@ import { ipRateLimiter } from '../src/middleware/rateLimiter.js'
 // Import routes
 import userRoutes from '../src/routes/user.js'
 import adsRoutes from '../src/routes/ads.js'
-import withdrawalRoutes from '../src/routes/withdrawals.js'
 import leaderboardRoutes from '../src/routes/leaderboard.js'
 import badgesRoutes from '../src/routes/badges.js'
 import adminRoutes from '../src/routes/admin.js'
@@ -76,7 +75,6 @@ app.use('/api/theoremreach', theoremreachCallbackRoutes)
 // Mount routes with /api prefix (with authentication where needed)
 app.use('/api/user', authenticate, userRoutes)
 app.use('/api/ads', authenticate, adsRoutes)
-app.use('/api/withdrawals', authenticate, withdrawalRoutes)
 app.use('/api/leaderboard', leaderboardRoutes) // Public
 app.use('/api/badges', authenticate, badgesRoutes)
 app.use('/api/admin', authenticate, adminRoutes)

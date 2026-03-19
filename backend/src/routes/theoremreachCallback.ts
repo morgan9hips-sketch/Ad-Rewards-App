@@ -152,10 +152,10 @@ router.get('/callback', async (req: Request, res: Response) => {
   // ── 5. Database transaction ───────────────────────────────────────────────
   try {
     await prisma.$transaction(async (tx) => {
-      const surveyHistory = (tx as any).surveyHistory
+      const theoremreachHistory = (tx as any).theoremReachHistory
 
-      // Insert survey_history — unique tx_id prevents duplicate processing
-      await surveyHistory.create({
+      // Insert theoremreach_history — unique tx_id prevents duplicate processing
+      await theoremreachHistory.create({
         data: {
           provider: 'theoremreach',
           transId: tx_id,
@@ -169,7 +169,7 @@ router.get('/callback', async (req: Request, res: Response) => {
             req.socket?.remoteAddress ??
             '',
           processed: false,
-          notes: `currency=${currency ?? 'unknown'}, reversal=${isReversal}`,
+          notes: `currency=${currency ?? 'unknown'}, reversal=${isReversal}, hash=${hash}`,
         },
       })
 
@@ -184,7 +184,7 @@ router.get('/callback', async (req: Request, res: Response) => {
       })
 
       if (!user) {
-        await surveyHistory.update({
+        await theoremreachHistory.update({
           where: { transId: tx_id },
           data: { processed: false, notes: 'User not found' },
         })
@@ -215,7 +215,7 @@ router.get('/callback', async (req: Request, res: Response) => {
           },
         })
 
-        await surveyHistory.update({
+        await theoremreachHistory.update({
           where: { transId: tx_id },
           data: {
             processed: true,
@@ -258,7 +258,6 @@ router.get('/callback', async (req: Request, res: Response) => {
           'theoremreach_reward',
         )
 
-        const theoremreachHistory = (tx as any).theoremReachHistory
         const preferredCurrency = user.preferredCurrency || 'ZAR'
         const fxRate = await tx.fxRate.findUnique({
           where: { currency: preferredCurrency },
@@ -277,20 +276,9 @@ router.get('/callback', async (req: Request, res: Response) => {
             ? null
             : Number((coinsRaw * 0.01 * rateToZarSnapshot).toFixed(4))
 
-        await theoremreachHistory.create({
+        await theoremreachHistory.update({
+          where: { transId: tx_id },
           data: {
-            provider: 'theoremreach',
-            transId: tx_id,
-            userId: user_id,
-            amount: coinsRaw,
-            status: 1,
-            hashValid: true,
-            sourceIp:
-              (req.headers['x-forwarded-for'] as string)
-                ?.split(',')[0]
-                ?.trim() ??
-              req.socket?.remoteAddress ??
-              '',
             countryCode: user.countryCode,
             revenueUsd,
             userShareUsd,
@@ -299,15 +287,6 @@ router.get('/callback', async (req: Request, res: Response) => {
             rateToZarSnapshot,
             localValue,
             currency: preferredCurrency,
-            processed: true,
-            processedAt: new Date(),
-            notes: `Credited ${coinsRaw} coins (currency=${currency ?? 'unknown'})`,
-          },
-        })
-
-        await surveyHistory.update({
-          where: { transId: tx_id },
-          data: {
             processed: true,
             processedAt: new Date(),
             notes: `Credited ${coinsRaw} coins (currency=${currency ?? 'unknown'})`,
