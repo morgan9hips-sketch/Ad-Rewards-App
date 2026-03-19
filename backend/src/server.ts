@@ -28,6 +28,7 @@ import minigameRoutes from './routes/minigame.js'
 import v2Routes from './routes/v2/index.js'
 import cpxCallbackRoutes from './routes/cpxCallback.js'
 import cpxOfferRoutes from './routes/cpxOffer.js'
+import theoremreachLaunchRoutes from './routes/theoremreachLaunch.js'
 import bitlabsCallbackRoutes from './routes/bitlabsCallback.js'
 import theoremreachCallbackRoutes from './routes/theoremreachCallback.js'
 import tasksRoutes from './routes/tasks.js'
@@ -118,6 +119,8 @@ app.use('/minigame', authenticate, minigameRoutes)
 app.use('/api/minigame', authenticate, minigameRoutes)
 app.use('/cpx', authenticate, cpxOfferRoutes)
 app.use('/api/cpx', authenticate, cpxOfferRoutes)
+app.use('/theoremreach-launch', authenticate, theoremreachLaunchRoutes)
+app.use('/api/theoremreach-launch', authenticate, theoremreachLaunchRoutes)
 
 // V2 API namespace (with feature flag)
 app.use('/api/v2', v2Routes)

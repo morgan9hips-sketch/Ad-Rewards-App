@@ -32,6 +32,7 @@ import rewardRoutes from '../src/routes/reward.js'
 import v2Routes from '../src/routes/v2/index.js'
 import cpxCallbackRoutes from '../src/routes/cpxCallback.js'
 import cpxOfferRoutes from '../src/routes/cpxOffer.js'
+import theoremreachLaunchRoutes from '../src/routes/theoremreachLaunch.js'
 import bitlabsCallbackRoutes from '../src/routes/bitlabsCallback.js'
 import theoremreachCallbackRoutes from '../src/routes/theoremreachCallback.js'
 import tasksRoutes from '../src/routes/tasks.js'
@@ -93,6 +94,7 @@ app.use('/api/migrate', migrateRoutes) // One-time migration endpoint
 app.use('/api/reward', authenticate, rewardRoutes)
 app.use('/api/v2', v2Routes) // V2 API namespace (feature-flagged)
 app.use('/api/cpx', authenticate, cpxOfferRoutes)
+app.use('/api/theoremreach-launch', authenticate, theoremreachLaunchRoutes)
 
 // Error handling middleware (must be last)
 app.use(errorLogger)

@@ -1,26 +1,17 @@
 import { ExternalLink, LayoutGrid, MoveLeft } from 'lucide-react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { API_BASE_URL } from '../../config/api'
 
 interface SurveyProvider {
-  key:
-    | 'cpx-research'
-    | 'theoremreach'
-    | 'bitlabs'
-    | 'provider-4'
-    | 'provider-5'
+  key: 'cpx-research' | 'theoremreach' | 'bitlabs' | 'provider-4' | 'provider-5'
   logoText: string
   name: string
   description: string
   earnRateHint: string
   comingSoon: boolean
 }
-
-const CPX_APP_ID = import.meta.env.VITE_CPX_APP_ID?.trim() || '31893'
-
-const THEOREMREACH_LAUNCH_URL =
-  import.meta.env.VITE_THEOREMREACH_LAUNCH_URL?.trim() ||
-  'https://www.theoremreach.com/respondent_entry/direct?user_id={userId}'
 
 const providers: SurveyProvider[] = [
   {
@@ -67,41 +58,86 @@ const providers: SurveyProvider[] = [
 
 export default function SurveysCategory() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { session } = useAuth()
+  const [launching, setLaunching] = useState<string | null>(null)
 
-  const openCpx = () => {
-    const userId = user?.id
-    if (!userId) {
+  const handleCpxLaunch = async () => {
+    const token = session?.access_token
+    if (!token) {
       navigate('/login')
       return
     }
 
-    const cpxUrl = `https://offers.cpx-research.com/index.php?app_id=${encodeURIComponent(CPX_APP_ID)}&ext_user_id=${encodeURIComponent(userId)}`
-    window.open(cpxUrl, '_blank', 'noopener,noreferrer')
+    setLaunching('cpx-research')
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cpx/offer-url`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch CPX survey URL: ${response.status}`)
+      }
+
+      const data = (await response.json()) as { offerUrl?: string }
+      if (!data.offerUrl) {
+        throw new Error('CPX survey URL missing from response')
+      }
+
+      window.open(data.offerUrl, '_blank', 'noopener,noreferrer')
+    } catch (error) {
+      console.error('Failed to launch CPX surveys:', error)
+      window.alert('Unable to open CPX Research right now. Please try again.')
+    } finally {
+      setLaunching(null)
+    }
   }
 
-  const openTheoremReach = () => {
-    const userId = user?.id
-    if (!userId) {
+  const handleTheoremReachLaunch = async () => {
+    const token = session?.access_token
+    if (!token) {
       navigate('/login')
       return
     }
 
-    const theoremUrl = THEOREMREACH_LAUNCH_URL.includes('{userId}')
-      ? THEOREMREACH_LAUNCH_URL.replace('{userId}', encodeURIComponent(userId))
-      : `${THEOREMREACH_LAUNCH_URL}${THEOREMREACH_LAUNCH_URL.includes('?') ? '&' : '?'}user_id=${encodeURIComponent(userId)}`
+    setLaunching('theoremreach')
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/theoremreach-launch/launch-url`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      )
 
-    window.open(theoremUrl, '_blank', 'noopener,noreferrer')
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch TheoremReach launch URL: ${response.status}`,
+        )
+      }
+
+      const data = (await response.json()) as { launchUrl?: string }
+      if (!data.launchUrl) {
+        throw new Error('TheoremReach launch URL missing from response')
+      }
+
+      window.open(data.launchUrl, '_blank', 'noopener,noreferrer')
+    } catch (error) {
+      console.error('Failed to launch TheoremReach:', error)
+      window.alert('Unable to open TheoremReach right now. Please try again.')
+    } finally {
+      setLaunching(null)
+    }
   }
 
   const handleClick = (provider: SurveyProvider) => {
     if (provider.comingSoon) return
     if (provider.key === 'cpx-research') {
-      openCpx()
+      void handleCpxLaunch()
       return
     }
     if (provider.key === 'theoremreach') {
-      openTheoremReach()
+      void handleTheoremReachLaunch()
     }
   }
 
@@ -126,7 +162,9 @@ export default function SurveysCategory() {
             </div>
           </div>
 
-          <h1 className="mt-4 text-2xl font-bold text-slate-100 sm:text-3xl">📋 Survey Center</h1>
+          <h1 className="mt-4 text-2xl font-bold text-slate-100 sm:text-3xl">
+            📋 Survey Center
+          </h1>
           <p className="mt-2 text-sm text-slate-400 sm:text-base">
             Complete partner surveys and earn AD COINS with trusted providers.
           </p>
@@ -166,9 +204,12 @@ export default function SurveysCategory() {
                   <button
                     type="button"
                     onClick={() => handleClick(provider)}
-                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:bg-blue-400"
+                    disabled={launching === provider.key}
+                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-blue-500 px-6 py-2 text-sm font-semibold text-white transition duration-200 hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Start Earning
+                    {launching === provider.key
+                      ? 'Opening...'
+                      : 'Start Earning'}
                     <ExternalLink size={18} />
                   </button>
                 )}
