@@ -223,6 +223,20 @@ export default function Dashboard() {
       )}
 
       <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-center justify-between">
+          <img
+            src="/images/branding/logo-full.png"
+            alt="Adify"
+            className="h-8 w-auto"
+          />
+          <div className="text-right">
+            <p className="text-sm font-bold text-emerald-400">
+              {formatCoins(userStats.pointsBalance)} AD COINS
+            </p>
+            <p className="text-xs text-slate-400">{getDisplayName()}</p>
+          </div>
+        </div>
+
         <section className="mt-5 rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm sm:p-5">
           <div className="grid gap-4 lg:grid-cols-1 lg:items-center">
             <div>
@@ -244,20 +258,6 @@ export default function Dashboard() {
             </div>
           </div>
         </section>
-
-        <div className="mb-6 mt-6 flex items-center justify-between">
-          <img
-            src="/images/branding/logo-full.png"
-            alt="Adify"
-            className="h-8 w-auto"
-          />
-          <div className="text-right">
-            <p className="text-sm font-bold text-emerald-400">
-              {formatCoins(userStats.pointsBalance)} AD COINS
-            </p>
-            <p className="text-xs text-slate-400">{getDisplayName()}</p>
-          </div>
-        </div>
 
         <main className="space-y-6">
           <section className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm sm:p-5">
