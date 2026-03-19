@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import Card from '../components/Card'
 import { useNavigate } from 'react-router-dom'
-import { useCurrency } from '../contexts/CurrencyContext'
 
 interface RedemptionItem {
   id: string
@@ -111,7 +110,6 @@ export default function ShopNew() {
     'all' | 'airtime' | 'giftcard' | 'voucher'
   >('all')
   const navigate = useNavigate()
-  const { formatAmount } = useCurrency()
 
   const minimumShopCoins = 10000
   const minimumShopValue = 'R10'
@@ -126,7 +124,7 @@ export default function ShopNew() {
     <div className="container mx-auto px-4 py-6 pb-24">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-2">🛒 Shop</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">🛒 Store</h1>
         <p className="text-gray-400">
           Redeem your coins for airtime, gift cards & vouchers
         </p>
@@ -137,14 +135,20 @@ export default function ShopNew() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-yellow-400 font-semibold text-sm">
-              Minimum shop item
+              Minimum item price
             </p>
             <p className="text-white text-2xl font-bold">
-              {minimumShopCoins.toLocaleString()} coins = {minimumShopValue}
+              {minimumShopValue} = {minimumShopCoins.toLocaleString()} coins
             </p>
-            <p className="text-xs text-gray-300 mt-1">
-              Withdrawal unlocks only after {formatAmount(minimumWithdrawalUsd)}{' '}
-              ({minimumWithdrawalUsd.toFixed(2)} USD equivalent).
+            <p className="text-xs text-gray-300 mt-2">
+              Example: R10 Airtime = 10,000 coins
+            </p>
+            <p className="text-xs text-gray-300 mt-3">
+              <span className="text-yellow-400 font-semibold">
+                Redemption unlock threshold:{' '}
+              </span>
+              Redemption requires a minimum balance of $10.00 USD or equivalent
+              in your local currency
             </p>
           </div>
           <div className="text-5xl">🪙</div>

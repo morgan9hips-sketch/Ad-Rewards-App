@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { API_BASE_URL } from '../config/api'
 
 interface BottomNavItem {
   path: string
@@ -59,8 +60,9 @@ const drawerLegalItems: DrawerItem[] = [
 export default function BottomNavigation() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, signOut } = useAuth()
+  const { user, session, signOut } = useAuth()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [balanceData, setBalanceData] = useState<{ coins: string } | null>(null)
 
   const pathname = location.pathname
   const drawerRoutePaths = useMemo(
@@ -76,13 +78,32 @@ export default function BottomNavigation() {
     user?.email?.split('@')[0] ||
     'Member'
 
-  const coinBalanceRaw =
-    (user as { coinsBalance?: number } | null)?.coinsBalance ??
-    (user?.user_metadata?.coinsBalance as number | undefined) ??
-    0
-  const coinBalance = Number.isFinite(Number(coinBalanceRaw))
-    ? Number(coinBalanceRaw)
-    : 0
+  // Fetch balance from API
+  useMemo(() => {
+    const fetchBalance = async () => {
+      try {
+        const token = session?.access_token
+        if (!token) return
+
+        const response = await fetch(`${API_BASE_URL}/api/user/balance`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        if (response.ok) {
+          const balance = await response.json()
+          setBalanceData(balance)
+        }
+      } catch (error) {
+        console.error('Error fetching balance:', error)
+      }
+    }
+
+    if (session?.access_token && isDrawerOpen) {
+      fetchBalance()
+    }
+  }, [session?.access_token, isDrawerOpen])
+
+  const coinBalance = balanceData ? Number(balanceData.coins) : 0
 
   const handleDrawerNavigation = (path: string) => {
     setIsDrawerOpen(false)
@@ -152,7 +173,7 @@ export default function BottomNavigation() {
         className={`fixed bottom-0 right-0 top-0 z-[70] w-80 max-w-[85vw] transform border-l border-slate-800 bg-slate-950 transition-transform duration-200 ${
           isDrawerOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
-        aria-hidden={!isDrawerOpen}
+        aria-hidden={isDrawerOpen ? 'false' : 'true'}
       >
         <div className="flex h-full flex-col">
           <div className="border-b border-slate-800 px-5 py-4">

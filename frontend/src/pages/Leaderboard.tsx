@@ -40,6 +40,9 @@ export default function Leaderboard() {
   const { session, user } = useAuth()
   const { formatAmount } = useCurrency()
   const [loading, setLoading] = useState(true)
+  const [profile, setProfile] = useState<{
+    countryCode?: string | null
+  } | null>(null)
   const [data, setData] = useState<LeaderboardResponse>({
     leaderboard: [],
     currentUser: null,
@@ -61,16 +64,20 @@ export default function Leaderboard() {
         return
       }
 
-      const res = await fetch(`${API_BASE_URL}/api/leaderboard`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      const monthlyRes = await fetch(
-        `${API_BASE_URL}/api/leaderboard/monthly?userId=${encodeURIComponent(user?.id || '')}`,
-        {
+      const [res, monthlyRes, profileRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/leaderboard`, {
           headers: { Authorization: `Bearer ${token}` },
-        },
-      )
+        }),
+        fetch(
+          `${API_BASE_URL}/api/leaderboard/monthly?userId=${encodeURIComponent(user?.id || '')}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        ),
+        fetch(`${API_BASE_URL}/api/user/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ])
 
       if (res.ok) {
         const leaderboardData = await res.json()
@@ -81,6 +88,11 @@ export default function Leaderboard() {
         const monthlyData = await monthlyRes.json()
         setMonthly(monthlyData)
         setCountdownMs(monthlyData.countdownMs || 0)
+      }
+
+      if (profileRes.ok) {
+        const profileData = await profileRes.json()
+        setProfile(profileData)
       }
     } catch (error) {
       console.error('Error fetching leaderboard:', error)
@@ -142,7 +154,11 @@ export default function Leaderboard() {
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">
-      <h1 className="text-3xl font-bold text-white mb-6">🏆 TOP EARNERS</h1>
+      <h1 className="text-3xl font-bold text-white mb-2">Leaderboard</h1>
+      <p className="text-sm text-gray-400 mb-6">
+        Showing rankings for your region:{' '}
+        {profile?.countryCode ? profile.countryCode : 'Global'}
+      </p>
 
       {monthly && (
         <Card className="mb-6">

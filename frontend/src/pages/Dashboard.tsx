@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, Clock3, Lock, ShoppingBag } from 'lucide-react'
+import { CheckCircle2, Clock3, Lock } from 'lucide-react'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ProfileSetup from '../components/ProfileSetup'
 import TermsAcceptanceModal from '../components/TermsAcceptanceModal'
@@ -224,11 +224,13 @@ export default function Dashboard() {
 
       <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-center justify-between">
-          <img
-            src="/images/branding/logo-full.png"
-            alt="Adify"
-            className="h-8 w-auto"
-          />
+          <div className="flex items-center">
+            <img
+              src="/images/branding/logo-full.png"
+              alt="Adify"
+              className="h-10 w-auto object-contain"
+            />
+          </div>
           <div className="text-right">
             <p className="text-sm font-bold text-emerald-400">
               {formatCoins(userStats.pointsBalance)} AD COINS
@@ -320,44 +322,6 @@ export default function Dashboard() {
                       Locked
                     </span>
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-4 shadow-sm backdrop-blur-sm sm:p-5">
-            <h2 className="text-lg font-bold text-slate-100">Shop & Earn</h2>
-            <p className="text-sm text-slate-400">
-              Stores shown are based on your region
-              {profile?.countryCode ? ` (${profile.countryCode})` : ''}
-            </p>
-
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {[0, 1].map((index) => (
-                <div
-                  key={`partner-store-${index}`}
-                  className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-3 text-center shadow-sm backdrop-blur-sm"
-                >
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
-                    <ShoppingBag size={18} />
-                  </div>
-                  <p className="mt-2 text-sm font-semibold text-slate-200">
-                    Partner Store
-                  </p>
-                </div>
-              ))}
-
-              {[0, 1, 2, 3].map((index) => (
-                <div
-                  key={`coming-soon-store-${index}`}
-                  className="rounded-[12px] border border-slate-800 bg-slate-900/50 p-3 text-center shadow-sm backdrop-blur-sm"
-                >
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-800 text-slate-500">
-                    <Lock size={18} />
-                  </div>
-                  <p className="mt-2 text-sm font-semibold text-slate-400">
-                    Coming Soon
-                  </p>
                 </div>
               ))}
             </div>
