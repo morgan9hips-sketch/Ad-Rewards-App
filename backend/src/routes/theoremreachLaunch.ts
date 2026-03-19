@@ -5,7 +5,7 @@ const router = Router()
 
 function buildTheoremReachUrl(userId: string): string {
   const appId = process.env.THEOREMREACH_APP_ID || '24755'
-  return `https://theoremreach.com/respondent_entry/${appId}?user_id=${encodeURIComponent(userId)}`
+  return `https://theoremreach.com/respondent_entry/index/${appId}?user_id=${encodeURIComponent(userId)}`
 }
 
 router.get('/launch-url', async (req: AuthRequest, res) => {
