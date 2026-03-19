@@ -411,7 +411,7 @@ function AppContent() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {isAuthenticated && !isMemberHomeDashboard && <BottomNavigation />}
+      {isAuthenticated && <BottomNavigation />}
       {!isMemberHomeDashboard && <Footer />}
     </div>
   )
