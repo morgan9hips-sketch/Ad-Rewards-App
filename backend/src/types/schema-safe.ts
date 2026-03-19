@@ -7,19 +7,19 @@
 
 import { UserProfile, Transaction } from '@prisma/client'
 
-type Withdrawal = {
+type WithdrawalInput = {
   amountUsd: number
   status: string
 }
 
-type ExchangeRate = {
+type ExchangeRateInput = {
   baseCurrency: string
   targetCurrency: string
   rate: unknown
   date: Date
 }
 
-type LocationRevenuePool = {
+type LocationPoolInput = {
   countryCode: string
   month: Date
   admobRevenueUsd: unknown
@@ -171,7 +171,9 @@ export interface SafeExchangeRateData {
 /**
  * Extract safe exchange rate data
  */
-export function getExchangeRateData(rate: ExchangeRate): SafeExchangeRateData {
+export function getExchangeRateData(
+  rate: ExchangeRateInput,
+): SafeExchangeRateData {
   return {
     baseCurrency: rate.baseCurrency,
     targetCurrency: rate.targetCurrency,
@@ -199,7 +201,7 @@ export interface SafeLocationPoolData {
  * Extract safe location pool data with calculated fields
  */
 export function getLocationPoolData(
-  pool: LocationRevenuePool,
+  pool: LocationPoolInput,
 ): SafeLocationPoolData {
   const admobRevenueUsd = Number(pool.admobRevenueUsd)
   const userShareUsd = Number(pool.userShareUsd)
@@ -254,13 +256,13 @@ export function isValidTransaction(tx: unknown): tx is Transaction {
 
 export function isValidWithdrawal(
   withdrawal: unknown,
-): withdrawal is Withdrawal {
+): withdrawal is WithdrawalInput {
   if (withdrawal === null || typeof withdrawal !== 'object') return false
   const obj = withdrawal as Record<string, unknown>
   return 'amountUsd' in obj && 'status' in obj && typeof obj.status === 'string'
 }
 
-export function isValidExchangeRate(rate: unknown): rate is ExchangeRate {
+export function isValidExchangeRate(rate: unknown): rate is ExchangeRateInput {
   if (rate === null || typeof rate !== 'object') return false
   const obj = rate as Record<string, unknown>
   return (
@@ -272,9 +274,7 @@ export function isValidExchangeRate(rate: unknown): rate is ExchangeRate {
   )
 }
 
-export function isValidLocationPool(
-  pool: unknown,
-): pool is LocationRevenuePool {
+export function isValidLocationPool(pool: unknown): pool is LocationPoolInput {
   if (pool === null || typeof pool !== 'object') return false
   const obj = pool as Record<string, unknown>
   return (

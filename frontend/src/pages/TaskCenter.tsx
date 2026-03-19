@@ -130,7 +130,9 @@ export default function TaskCenter() {
                 </span>
 
                 <div className="mt-4 flex items-center justify-between gap-2">
-                  <h2 className="text-xl font-bold text-slate-100">{tile.label}</h2>
+                  <h2 className="text-xl font-bold text-slate-100">
+                    {tile.label}
+                  </h2>
                   {tile.status === 'COMING_SOON' && (
                     <span className="rounded-full border border-amber-400/30 bg-amber-500/20 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-300">
                       Coming Soon

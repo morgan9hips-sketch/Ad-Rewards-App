@@ -324,7 +324,10 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        <Route path="/withdrawals" element={<Navigate to="/wallet" replace />} />
+        <Route
+          path="/withdrawals"
+          element={<Navigate to="/wallet" replace />}
+        />
         <Route
           path="/settings"
           element={

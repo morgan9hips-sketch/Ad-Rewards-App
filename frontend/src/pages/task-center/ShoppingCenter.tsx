@@ -19,7 +19,9 @@ export default function ShoppingCenter() {
         <div className="mt-16 text-6xl" aria-hidden="true">
           🚧
         </div>
-        <h1 className="mt-6 text-3xl font-bold text-slate-100">Shopping Center</h1>
+        <h1 className="mt-6 text-3xl font-bold text-slate-100">
+          Shopping Center
+        </h1>
         <p className="mt-3 text-base text-slate-400">
           Coming Soon — We&apos;re working on something great
         </p>
