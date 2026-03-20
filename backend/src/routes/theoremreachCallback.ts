@@ -162,7 +162,6 @@ router.get('/callback', async (req: Request, res: Response) => {
           userId: user_id,
           amount: coinsRaw,
           status: isReversal ? 2 : 1,
-          hash: hash,
           hashValid: true,
           sourceIp:
             (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??
