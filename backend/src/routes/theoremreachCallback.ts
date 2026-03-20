@@ -55,15 +55,13 @@ function computeExpectedHash(req: Request): string {
     req.get('host') ??
     ''
 
-  // Rebuild query string without the hash parameter
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(req.query)) {
-    if (key === 'hash') continue
-    params.append(key, String(value ?? ''))
-  }
-
+  const [rawPath = req.baseUrl + req.path, rawQuery = ''] = (
+    req.originalUrl || ''
+  ).split('?', 2)
+  const params = new URLSearchParams(rawQuery)
+  params.delete('hash')
   const qs = params.toString()
-  const fullUrl = `${protocol}://${host}${req.path}${qs ? '?' + qs : ''}`
+  const fullUrl = `${protocol}://${host}${rawPath}${qs ? '?' + qs : ''}`
 
   return createHmac('sha1', getSecret())
     .update(fullUrl)
