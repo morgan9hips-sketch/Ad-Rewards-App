@@ -1,6 +1,7 @@
 import { Router, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { authenticate, AuthRequest } from '../../middleware/auth.js'
+import { getCanonicalUserContext } from '../../services/userContextService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -39,12 +40,7 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   const userId = req.user!.id
 
   try {
-    const user = await prisma.userProfile.findUnique({
-      where: { userId },
-      select: { countryCode: true },
-    })
-
-    const userCountry = user?.countryCode || 'US'
+    const { countryCode: userCountry } = await getCanonicalUserContext(userId)
 
     const tasks = await prisma.$queryRaw<SafeTaskRow[]>`
       SELECT
@@ -77,13 +73,9 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     console.error('Error fetching tasks:', err)
-    res.status(200).json({
-      success: true,
-      tasks: [],
-      userCountry: 'US',
-      warning: 'Tasks temporarily unavailable',
-      detail: message,
-    })
+    res
+      .status(500)
+      .json({ success: false, error: 'Failed to fetch tasks', detail: message })
   }
 })
 

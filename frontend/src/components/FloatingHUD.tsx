@@ -45,6 +45,10 @@ export default function FloatingHUD() {
         })
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : ''
+      if (message === 'UNAUTHORIZED') {
+        return
+      }
       console.error('FloatingHUD fetch error:', error)
     }
   }, [session])

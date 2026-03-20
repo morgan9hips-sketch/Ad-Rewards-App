@@ -86,7 +86,7 @@ export async function creditLedger(params: CreditParams) {
       data: {
         userId,
         type,
-        amountCoins,       // positive
+        amountCoins, // positive
         idempotencyKey,
         referenceId,
         referenceType,
@@ -106,7 +106,10 @@ export async function creditLedger(params: CreditParams) {
  */
 export async function debitLedger(
   params: DebitParams,
-  tx?: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>,
+  tx?: Omit<
+    PrismaClient,
+    '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+  >,
 ) {
   const {
     userId,
@@ -126,7 +129,7 @@ export async function debitLedger(
     data: {
       userId,
       type: V2LedgerEntryType.REDEEM,
-      amountCoins: -amountCoins,  // stored as negative
+      amountCoins: -amountCoins, // stored as negative
       claimId: claimId ?? null,
       referenceId: referenceId ?? null,
       referenceType: referenceType ?? null,
@@ -145,6 +148,23 @@ export async function debitLedger(
 export async function getV2Balance(userId: string): Promise<bigint> {
   const result = await prisma.v2LedgerEntry.aggregate({
     where: { userId },
+    _sum: { amountCoins: true },
+  })
+
+  return result._sum.amountCoins ?? 0n
+}
+
+/**
+ * Compute a user's total earned coins from V2 ledger credits only.
+ */
+export async function getV2TotalEarned(userId: string): Promise<bigint> {
+  const result = await prisma.v2LedgerEntry.aggregate({
+    where: {
+      userId,
+      amountCoins: {
+        gt: 0,
+      },
+    },
     _sum: { amountCoins: true },
   })
 

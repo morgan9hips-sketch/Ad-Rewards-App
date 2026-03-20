@@ -1,9 +1,20 @@
 import { Router } from 'express'
 import { PrismaClient, V2LedgerEntryType } from '@prisma/client'
 import { AuthRequest } from '../middleware/auth.js'
+import { getCanonicalUserContext } from '../services/userContextService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
+
+type LeaderboardAggregateRow = {
+  userId: string
+  displayName: string | null
+  email: string
+  avatarEmoji: string | null
+  countryBadge: string | null
+  hideCountry: boolean
+  coins: bigint
+}
 
 const MONTHLY_PRIZES = [
   { rank: 1, coins: 5000 },
@@ -34,65 +45,38 @@ function getMonthBounds(month?: string): {
 async function getMonthlyLeaderboard(month?: string) {
   const { monthKey, startOfMonth, endOfMonth } = getMonthBounds(month)
 
-  const grouped = await prisma.transaction.groupBy({
-    by: ['userId'],
-    where: {
-      createdAt: {
-        gte: startOfMonth,
-        lt: endOfMonth,
-      },
-      coinsChange: {
-        gt: BigInt(0),
-      },
-    },
-    _sum: {
-      coinsChange: true,
-    },
-    orderBy: {
-      _sum: {
-        coinsChange: 'desc',
-      },
-    },
-    take: 300,
-  })
+  const rows = await prisma.$queryRaw<LeaderboardAggregateRow[]>`
+    SELECT
+      up.user_id AS "userId",
+      up.display_name AS "displayName",
+      up.email,
+      up.avatar_emoji AS "avatarEmoji",
+      up.country_badge AS "countryBadge",
+      up.hide_country AS "hideCountry",
+      COALESCE(SUM(CASE WHEN le.amount_coins > 0 THEN le.amount_coins ELSE 0 END), 0) AS coins
+    FROM user_profiles up
+    LEFT JOIN v2_ledger_entries le
+      ON le.user_id = up.user_id
+      AND le.created_at >= ${startOfMonth}
+      AND le.created_at < ${endOfMonth}
+    WHERE up.show_on_leaderboard = true
+    GROUP BY up.user_id, up.display_name, up.email, up.avatar_emoji, up.country_badge, up.hide_country
+    ORDER BY coins DESC
+    LIMIT 100
+  `
 
-  const userIds = grouped.map((entry) => entry.userId)
-
-  const profiles = userIds.length
-    ? await prisma.userProfile.findMany({
-        where: {
-          userId: { in: userIds },
-          showOnLeaderboard: true,
-        },
-        select: {
-          userId: true,
-          displayName: true,
-          email: true,
-          avatarEmoji: true,
-          countryBadge: true,
-          hideCountry: true,
-        },
-      })
-    : []
-
-  const profileMap = new Map(
-    profiles.map((profile) => [profile.userId, profile]),
-  )
-
-  const leaderboard = grouped
-    .filter((entry) => profileMap.has(entry.userId))
-    .slice(0, 100)
+  const leaderboard = rows
+    .filter((entry) => entry.coins > 0n)
     .map((entry, index) => {
-      const profile = profileMap.get(entry.userId)!
       const displayName =
-        profile.displayName || profile.email.split('@')[0] || 'Member'
+        entry.displayName || entry.email.split('@')[0] || 'Member'
       return {
         rank: index + 1,
         userId: entry.userId,
         displayName,
-        avatarEmoji: profile.avatarEmoji || '👤',
-        countryBadge: profile.hideCountry ? '🌍' : profile.countryBadge || null,
-        coins: (entry._sum.coinsChange || BigInt(0)).toString(),
+        avatarEmoji: entry.avatarEmoji || '👤',
+        countryBadge: entry.hideCountry ? '🌍' : entry.countryBadge || null,
+        coins: entry.coins.toString(),
       }
     })
 
@@ -107,72 +91,55 @@ async function getMonthlyLeaderboard(month?: string) {
 // Get leaderboard
 router.get('/', async (req: AuthRequest, res) => {
   try {
-    const userId = req.user?.id
+    const userId = req.user!.id
+    const { countryCode } = await getCanonicalUserContext(userId)
 
-    // Fetch top users ranked by coins
-    const leaderboard = await prisma.userProfile.findMany({
-      where: {
-        showOnLeaderboard: true,
-      },
-      select: {
-        userId: true,
-        displayName: true,
-        email: true,
-        avatarEmoji: true,
-        avatarUrl: true,
-        countryBadge: true,
-        hideCountry: true,
-        coinsBalance: true,
-        totalCoinsEarned: true,
-      },
-      orderBy: {
-        totalCoinsEarned: 'desc',
-      },
-      take: 100,
-    })
+    const leaderboard = await prisma.$queryRaw<LeaderboardAggregateRow[]>`
+      SELECT
+        up.user_id AS "userId",
+        up.display_name AS "displayName",
+        up.email,
+        up.avatar_emoji AS "avatarEmoji",
+        up.country_badge AS "countryBadge",
+        up.hide_country AS "hideCountry",
+        COALESCE(SUM(CASE WHEN le.amount_coins > 0 THEN le.amount_coins ELSE 0 END), 0) AS coins
+      FROM user_profiles up
+      LEFT JOIN v2_ledger_entries le
+        ON le.user_id = up.user_id
+      WHERE up.show_on_leaderboard = true
+        AND COALESCE(up.revenue_country, up.country_code, up.display_country, up.last_detected_country, 'US') = ${countryCode}
+      GROUP BY up.user_id, up.display_name, up.email, up.avatar_emoji, up.country_badge, up.hide_country
+      ORDER BY coins DESC
+      LIMIT 100
+    `
 
-    // Format leaderboard with rank
-    const formattedLeaderboard = leaderboard.map((profile, index) => ({
-      rank: index + 1,
-      userId: profile.userId,
-      displayName: profile.displayName || profile.email.split('@')[0],
-      avatarEmoji: profile.avatarEmoji || '👤',
-      countryBadge: profile.hideCountry ? '🌍' : profile.countryBadge || null,
-      coins: profile.totalCoinsEarned.toString(),
-    }))
+    const formattedLeaderboard = leaderboard
+      .filter((profile) => profile.coins > 0n)
+      .map((profile, index) => ({
+        rank: index + 1,
+        userId: profile.userId,
+        displayName: profile.displayName || profile.email.split('@')[0],
+        avatarEmoji: profile.avatarEmoji || '👤',
+        countryBadge: profile.hideCountry ? '🌍' : profile.countryBadge || null,
+        coins: profile.coins.toString(),
+      }))
 
     // Get current user's rank if authenticated
     let currentUserRank = null
-    if (userId) {
-      const currentUser = await prisma.userProfile.findUnique({
-        where: { userId },
-        select: {
-          totalCoinsEarned: true,
-          showOnLeaderboard: true,
-        },
-      })
-
-      if (currentUser && currentUser.showOnLeaderboard) {
-        // Count users with more coins
-        const rank = await prisma.userProfile.count({
-          where: {
-            showOnLeaderboard: true,
-            totalCoinsEarned: {
-              gt: currentUser.totalCoinsEarned,
-            },
-          },
-        })
-
-        currentUserRank = {
-          rank: rank + 1,
-          coins: currentUser.totalCoinsEarned.toString(),
-        }
+    const currentIndex = formattedLeaderboard.findIndex(
+      (entry) => entry.userId === userId,
+    )
+    if (currentIndex >= 0) {
+      currentUserRank = {
+        rank: currentIndex + 1,
+        coins: formattedLeaderboard[currentIndex].coins,
       }
     }
 
     res.json({
       leaderboard: formattedLeaderboard,
       currentUser: currentUserRank,
+      region: countryCode,
     })
   } catch (error) {
     console.error('Error fetching leaderboard:', error)

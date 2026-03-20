@@ -7,8 +7,9 @@ import {
   getUserCurrencyInfo,
   getCurrencyForCountry,
 } from '../services/currencyService.js'
-import { getV2Balance } from '../services/v2/ledger.js'
+import { getV2Balance, getV2TotalEarned } from '../services/v2/ledger.js'
 import { getUserTransactions } from '../services/transactionService.js'
+import { getCanonicalUserContext } from '../services/userContextService.js'
 import {
   getClientIP,
   detectCountryFromIP,
@@ -122,14 +123,27 @@ router.get('/profile', async (req: AuthRequest, res) => {
       })
     }
 
+    const canonicalContext = await getCanonicalUserContext(userId)
+
     // Convert BigInt and Decimal fields to strings before sending
     const v2CoinsBalance = await getV2Balance(userId)
+    const v2TotalEarned = await getV2TotalEarned(userId)
+    const safeLegacyNumericBalance =
+      v2CoinsBalance <= BigInt(Number.MAX_SAFE_INTEGER)
+        ? Number(v2CoinsBalance)
+        : Number.MAX_SAFE_INTEGER
+    const safeLegacyNumericEarned =
+      v2TotalEarned <= BigInt(Number.MAX_SAFE_INTEGER)
+        ? Number(v2TotalEarned)
+        : Number.MAX_SAFE_INTEGER
 
     const profileData = {
       ...profile,
+      countryCode: canonicalContext.countryCode,
+      preferredCurrency: canonicalContext.preferredCurrency,
       // BigInt fields
       coinsBalance: v2CoinsBalance.toString(),
-      totalCoinsEarned: profile.totalCoinsEarned.toString(),
+      totalCoinsEarned: v2TotalEarned.toString(),
       // Decimal fields
       cashBalanceUsd: profile.cashBalanceUsd.toString(),
       totalCashEarnedUsd: profile.totalCashEarnedUsd.toString(),
@@ -139,9 +153,9 @@ router.get('/profile', async (req: AuthRequest, res) => {
       retryAdEarningsUsd: profile.retryAdEarningsUsd.toString(),
       signUpBonusUsd: profile.signUpBonusUsd.toString(),
       cashWalletUsd: profile.cashWalletUsd.toString(),
-      // Legacy fields (keep as is for backwards compatibility)
-      walletBalance: profile.walletBalance,
-      totalEarned: profile.totalEarned,
+      // Legacy-compatible fields mapped to V2 source of truth
+      walletBalance: safeLegacyNumericBalance,
+      totalEarned: safeLegacyNumericEarned,
     }
 
     res.json(profileData)
