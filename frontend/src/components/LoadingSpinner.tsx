@@ -27,6 +27,8 @@ export default function LoadingSpinner({
     large: 'w-32 h-32',
   }
 
+  const progressValue = Math.min(100, Math.max(0, progress ?? 0))
+
   const spinner = withLogo ? (
     <div className="flex flex-col justify-center items-center gap-4">
       <img
@@ -36,12 +38,11 @@ export default function LoadingSpinner({
       />
       <p className="text-gray-400 text-sm">{text || 'Loading...'}</p>
       {progress !== undefined && (
-        <div className="w-32 h-1 bg-gray-700 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-blue-500 rounded-full transition-all duration-300"
-            style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
-          />
-        </div>
+        <progress
+          className="h-1 w-32 overflow-hidden rounded-full [&::-webkit-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:bg-blue-500 [&::-moz-progress-bar]:bg-blue-500"
+          max={100}
+          value={progressValue}
+        />
       )}
     </div>
   ) : (
@@ -51,12 +52,11 @@ export default function LoadingSpinner({
       />
       {text && <p className="text-gray-400 text-sm">{text}</p>}
       {progress !== undefined && (
-        <div className="w-32 h-1 bg-gray-700 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-blue-500 rounded-full transition-all duration-300"
-            style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
-          />
-        </div>
+        <progress
+          className="h-1 w-32 overflow-hidden rounded-full [&::-webkit-progress-bar]:bg-gray-700 [&::-webkit-progress-value]:bg-blue-500 [&::-moz-progress-bar]:bg-blue-500"
+          max={100}
+          value={progressValue}
+        />
       )}
     </div>
   )

@@ -47,12 +47,10 @@ router.post(
           !rev.admobRevenueUsd ||
           rev.admobRevenueUsd <= 0
         ) {
-          return res
-            .status(400)
-            .json({
-              error:
-                'Each revenue must have countryCode and valid admobRevenueUsd',
-            })
+          return res.status(400).json({
+            error:
+              'Each revenue must have countryCode and valid admobRevenueUsd',
+          })
         }
       }
 
@@ -847,24 +845,33 @@ router.get(
 
       // Calculate this month's stats
       const thisMonthCoins = thisMonthExpired.filter(
-        (e) => e.expiryType === 'coins',
+        (e: any) => e.expiryType === 'coins',
       )
       const thisMonthCash = thisMonthExpired.filter(
-        (e) => e.expiryType === 'cash',
+        (e: any) => e.expiryType === 'cash',
       )
 
       const thisMonthStats = {
         expiredCoins: {
-          amount: thisMonthCoins.reduce((sum, e) => sum + Number(e.amount), 0),
+          amount: thisMonthCoins.reduce(
+            (sum: number, e: any) => sum + Number(e.amount),
+            0,
+          ),
           value: thisMonthCoins.reduce(
-            (sum, e) => sum + Number(e.cashValue),
+            (sum: number, e: any) => sum + Number(e.cashValue),
             0,
           ),
           count: thisMonthCoins.length,
         },
         expiredCash: {
-          amount: thisMonthCash.reduce((sum, e) => sum + Number(e.amount), 0),
-          value: thisMonthCash.reduce((sum, e) => sum + Number(e.cashValue), 0),
+          amount: thisMonthCash.reduce(
+            (sum: number, e: any) => sum + Number(e.amount),
+            0,
+          ),
+          value: thisMonthCash.reduce(
+            (sum: number, e: any) => sum + Number(e.cashValue),
+            0,
+          ),
           count: thisMonthCash.length,
         },
         total: 0,
@@ -878,12 +885,12 @@ router.get(
       const allTimeExpired = await prisma.expiredBalance.findMany()
 
       const allTimeTotal = allTimeExpired.reduce(
-        (sum, e) => sum + Number(e.cashValue),
+        (sum: number, e: any) => sum + Number(e.cashValue),
         0,
       )
 
       // Get unique users affected this month
-      const uniqueUsers = new Set(thisMonthExpired.map((e) => e.userId))
+      const uniqueUsers = new Set(thisMonthExpired.map((e: any) => e.userId))
 
       res.json({
         thisMonth: {
@@ -936,7 +943,7 @@ router.get(
       const total = await prisma.expiredBalance.count({ where })
 
       res.json({
-        balances: expiredBalances.map((b) => ({
+        balances: expiredBalances.map((b: any) => ({
           id: b.id,
           userId: b.userId,
           userEmail: b.user.email,

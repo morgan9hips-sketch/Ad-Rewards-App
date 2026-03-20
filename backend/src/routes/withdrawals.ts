@@ -184,7 +184,7 @@ router.get('/recent-public', async (req, res) => {
     })
 
     // Anonymize and format withdrawals
-    const publicWithdrawals = withdrawals.map((w) => {
+    const publicWithdrawals = withdrawals.map((w: any) => {
       // Anonymize user ID - show only last 4 chars
       const userId = `User${w.user.id.slice(-4)}`
 

@@ -36,13 +36,9 @@ export default function SplashScreen({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center transition-opacity duration-500 overflow-hidden ${
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-[linear-gradient(135deg,_#0a0a0a_0%,_#1a1a2e_50%,_#0a0a0a_100%)] transition-opacity duration-500 ${
         phase === 'out' ? 'opacity-0' : 'opacity-100'
       }`}
-      style={{
-        background:
-          'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%)',
-      }}
       aria-label="Loading Adify"
       role="status"
     >
@@ -63,12 +59,7 @@ export default function SplashScreen({
       >
         {/* Logo with glow */}
         <div className={`relative ${phase === 'hold' ? 'animate-pulse' : ''}`}>
-          <div
-            className="absolute inset-0 rounded-full blur-2xl opacity-40"
-            style={{
-              background: 'radial-gradient(circle, #3b82f6, transparent 70%)',
-            }}
-          />
+          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,_#3b82f6,_transparent_70%)] blur-2xl opacity-40" />
           <img
             src="/images/branding/Adcoin large 512x512.png"
             alt="Adify"
@@ -103,14 +94,13 @@ export default function SplashScreen({
         {/* Progress indicator */}
         <div className="w-48 h-1 bg-gray-800 rounded-full overflow-hidden mt-4 relative z-10">
           <div
-            className="h-full bg-blue-500 rounded-full transition-all"
-            style={{
-              width: phase === 'in' ? '20%' : phase === 'hold' ? '80%' : '100%',
-              transition:
-                phase === 'in'
-                  ? 'width 0.8s ease-out'
-                  : 'width 1.2s ease-in-out',
-            }}
+            className={`h-full rounded-full bg-blue-500 ${
+              phase === 'in'
+                ? 'w-1/5 transition-[width] duration-[800ms] ease-out'
+                : phase === 'hold'
+                  ? 'w-4/5 transition-[width] duration-[1200ms] ease-in-out'
+                  : 'w-full transition-[width] duration-[1200ms] ease-in-out'
+            }`}
           />
         </div>
       </div>

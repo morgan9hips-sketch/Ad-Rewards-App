@@ -15,7 +15,9 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [autoDetectedCountry, setAutoDetectedCountry] = useState<string | null>(null)
+  const [autoDetectedCountry, setAutoDetectedCountry] = useState<string | null>(
+    null,
+  )
 
   // Form state
   const [displayName, setDisplayName] = useState('')
@@ -23,6 +25,8 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
   const [countryBadge, setCountryBadge] = useState<string | null>(null)
   const [hideCountry, setHideCountry] = useState(false)
   const [showOnLeaderboard, setShowOnLeaderboard] = useState(true)
+
+  const stepWidthClass = step === 1 ? 'w-1/3' : step === 2 ? 'w-2/3' : 'w-full'
 
   useEffect(() => {
     // Set default display name from email
@@ -129,12 +133,15 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
       const profileRes = await fetch(`${API_BASE_URL}/api/user/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      
+
       if (profileRes.ok) {
         const profileData = await profileRes.json()
         console.log('Profile saved and verified:', profileData)
       } else {
-        console.error('Failed to verify profile persistence:', profileRes.status)
+        console.error(
+          'Failed to verify profile persistence:',
+          profileRes.status,
+        )
       }
 
       onComplete()
@@ -162,8 +169,7 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
               {/* Progress bar */}
               <div className="mt-3 h-2 bg-gray-800 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-blue-500 transition-all duration-300"
-                  style={{ width: `${(step / 3) * 100}%` }}
+                  className={`h-full bg-blue-500 transition-all duration-300 ${stepWidthClass}`}
                 />
               </div>
             </div>
@@ -196,7 +202,8 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
 
                 <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
                   <p className="text-sm text-blue-300">
-                    💡 This is how you'll appear on the leaderboard and throughout the app
+                    💡 This is how you'll appear on the leaderboard and
+                    throughout the app
                   </p>
                 </div>
               </div>
@@ -205,7 +212,10 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
             {/* Step 2: Avatar */}
             {step === 2 && (
               <div>
-                <AvatarSelector selected={avatarEmoji} onSelect={setAvatarEmoji} />
+                <AvatarSelector
+                  selected={avatarEmoji}
+                  onSelect={setAvatarEmoji}
+                />
                 {!avatarEmoji && (
                   <p className="text-gray-500 text-sm mt-3">
                     Select an avatar to represent you
@@ -232,7 +242,9 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
                       className="w-5 h-5 mt-1"
                     />
                     <div>
-                      <span className="text-gray-300 block font-medium">Hide my country</span>
+                      <span className="text-gray-300 block font-medium">
+                        Hide my country
+                      </span>
                       <span className="text-sm text-gray-500">
                         Show 🌍 instead of your country flag for privacy
                       </span>
@@ -264,7 +276,11 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
             {/* Action Buttons */}
             <div className="flex gap-3 mt-6">
               {step > 1 && (
-                <Button variant="secondary" onClick={handleBack} disabled={loading}>
+                <Button
+                  variant="secondary"
+                  onClick={handleBack}
+                  disabled={loading}
+                >
                   Back
                 </Button>
               )}
@@ -283,7 +299,11 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
                   <Button onClick={handleSave} fullWidth disabled={loading}>
                     {loading ? 'Saving...' : 'Save Profile'}
                   </Button>
-                  <Button variant="secondary" onClick={handleSkip} disabled={loading}>
+                  <Button
+                    variant="secondary"
+                    onClick={handleSkip}
+                    disabled={loading}
+                  >
                     Skip
                   </Button>
                 </>

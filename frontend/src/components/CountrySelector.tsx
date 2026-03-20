@@ -58,25 +58,35 @@ interface CountrySelectorProps {
   autoDetected?: string | null
 }
 
-export default function CountrySelector({ selected, onSelect, autoDetected }: CountrySelectorProps) {
+export default function CountrySelector({
+  selected,
+  onSelect,
+  autoDetected,
+}: CountrySelectorProps) {
   const selectedCountry = countries.find((c) => c.code === selected)
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-300 mb-2">
+      <label
+        htmlFor="country-badge-select"
+        className="block text-sm font-medium text-gray-300 mb-2"
+      >
         Country Badge
       </label>
       {autoDetected && (
         <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 mb-3">
           <p className="text-sm text-blue-300">
-            🌍 Auto-detected: {countries.find((c) => c.code === autoDetected)?.flag}{' '}
+            🌍 Auto-detected:{' '}
+            {countries.find((c) => c.code === autoDetected)?.flag}{' '}
             {countries.find((c) => c.code === autoDetected)?.name}
           </p>
         </div>
       )}
       <select
+        id="country-badge-select"
         value={selected || ''}
         onChange={(e) => onSelect(e.target.value)}
+        title="Country badge"
         className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
       >
         <option value="">Select a country</option>

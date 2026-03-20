@@ -236,11 +236,14 @@ async function processCallback(
     )
 
     const preferredCurrency = user.preferredCurrency || 'ZAR'
-    const fxRate = await tx.fxRate.findUnique({
-      where: { currency: preferredCurrency },
-      select: { rateToZar: true },
-    })
-    const rateToZarSnapshot = fxRate ? Number(fxRate.rateToZar) : null
+    const fxRateRows = await tx.$queryRaw<
+      Array<{ rate_to_zar: Prisma.Decimal }>
+    >(
+      Prisma.sql`SELECT rate_to_zar FROM fx_rates WHERE currency = ${preferredCurrency} LIMIT 1`,
+    )
+    const rateToZarSnapshot = fxRateRows[0]
+      ? Number(fxRateRows[0].rate_to_zar)
+      : null
     const localValue =
       rateToZarSnapshot === null
         ? null

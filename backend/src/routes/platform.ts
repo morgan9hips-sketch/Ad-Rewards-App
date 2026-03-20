@@ -39,7 +39,7 @@ router.get('/stats/24h', async (req: AuthRequest, res) => {
 
     // Sum in USD (single source of truth), then convert to viewer's geo currency
     const totalPaidOutUsd = withdrawals.reduce(
-      (sum, w) => sum + parseFloat(w.amountUsd.toString()),
+      (sum: number, w: any) => sum + parseFloat(w.amountUsd.toString()),
       0,
     )
 

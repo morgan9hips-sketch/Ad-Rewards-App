@@ -110,7 +110,6 @@ export default function LegalPage({ endpoint, title }: LegalPageProps) {
                   {...props}
                 />
               ),
-              li: ({ ...props }) => <li className="mb-2" {...props} />,
               a: ({ ...props }) => (
                 <a
                   className="text-blue-400 hover:text-blue-300 underline"

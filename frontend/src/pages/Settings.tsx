@@ -242,13 +242,18 @@ export default function Settings() {
         </h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              htmlFor="settings-email"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
               Email
             </label>
             <input
+              id="settings-email"
               type="email"
               value={user?.email || ''}
               disabled
+              title="Account email"
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-gray-400"
             />
           </div>
@@ -272,12 +277,17 @@ export default function Settings() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              htmlFor="settings-country"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
               Country
             </label>
             <select
+              id="settings-country"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
+              title="Country"
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
             >
               <option value="US">United States</option>
@@ -320,12 +330,17 @@ export default function Settings() {
 
           {!autoDetectCurrency && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label
+                htmlFor="settings-preferred-currency"
+                className="block text-sm font-medium text-gray-300 mb-2"
+              >
                 Preferred Display Currency
               </label>
               <select
+                id="settings-preferred-currency"
                 value={preferredCurrency}
                 onChange={(e) => setPreferredCurrency(e.target.value)}
+                title="Preferred display currency"
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
               >
                 <option value="USD">🇺🇸 US Dollar (USD)</option>

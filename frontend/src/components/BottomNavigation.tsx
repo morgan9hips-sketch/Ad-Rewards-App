@@ -173,7 +173,6 @@ export default function BottomNavigation() {
         className={`fixed bottom-0 right-0 top-0 z-[70] w-80 max-w-[85vw] transform border-l border-slate-800 bg-slate-950 transition-transform duration-200 ${
           isDrawerOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
-        aria-hidden={isDrawerOpen ? 'false' : 'true'}
       >
         <div className="flex h-full flex-col">
           <div className="border-b border-slate-800 px-5 py-4">
