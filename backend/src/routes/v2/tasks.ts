@@ -5,6 +5,20 @@ import { authenticate, AuthRequest } from '../../middleware/auth.js'
 const router = Router()
 const prisma = new PrismaClient()
 
+type SafeTaskRow = {
+  id: number
+  title: string
+  description: string | null
+  type: string
+  provider: string
+  geoCountries: string[]
+  rewardCoins: number
+  isActive: boolean
+  expiresAt: Date | null
+  createdAt: Date
+  updatedAt: Date
+}
+
 function normalizeGeoCountries(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return []
@@ -32,14 +46,24 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
 
     const userCountry = user?.countryCode || 'US'
 
-    const now = new Date()
-    const tasks = await prisma.v2Task.findMany({
-      where: {
-        isActive: true,
-        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+    const tasks = await prisma.$queryRaw<SafeTaskRow[]>`
+      SELECT
+        id,
+        title,
+        description,
+        type,
+        provider,
+        COALESCE(geo_countries, ARRAY[]::text[]) AS "geoCountries",
+        reward_coins AS "rewardCoins",
+        is_active AS "isActive",
+        expires_at AS "expiresAt",
+        created_at AS "createdAt",
+        updated_at AS "updatedAt"
+      FROM v2_tasks
+      WHERE is_active = true
+        AND (expires_at IS NULL OR expires_at > NOW())
+      ORDER BY created_at DESC
+    `
 
     // Filter by geo in application layer (Prisma array contains + isEmpty combo)
     const filteredTasks = tasks.filter((t) => {
@@ -53,9 +77,13 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     console.error('Error fetching tasks:', err)
-    res
-      .status(500)
-      .json({ success: false, error: 'Failed to fetch tasks', detail: message })
+    res.status(200).json({
+      success: true,
+      tasks: [],
+      userCountry: 'US',
+      warning: 'Tasks temporarily unavailable',
+      detail: message,
+    })
   }
 })
 
@@ -123,13 +151,11 @@ router.post(
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error'
       console.error('Error completing task:', err)
-      res
-        .status(500)
-        .json({
-          success: false,
-          error: 'Failed to complete task',
-          detail: message,
-        })
+      res.status(500).json({
+        success: false,
+        error: 'Failed to complete task',
+        detail: message,
+      })
     }
   },
 )
