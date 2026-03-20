@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import { API_BASE_URL } from '../config/api'
+import { fetchV2Wallet, parseV2CoinBalance } from '../services/v2Wallet'
 import Card from './Card'
 
 // Expiry configuration constants (must match backend)
@@ -34,6 +35,9 @@ export default function ExpiryWarning() {
       const token = session?.access_token
       if (!token) return
 
+      const wallet = await fetchV2Wallet(token)
+      const coinsBalance = parseV2CoinBalance(wallet)
+
       const res = await fetch(`${API_BASE_URL}/api/user/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -46,7 +50,6 @@ export default function ExpiryWarning() {
           (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60 * 24),
         )
 
-        const coinsBalance = Number(profile.coinsBalance || 0)
         const cashBalance = Number(profile.cashBalanceUsd || 0)
 
         // Check coin expiry

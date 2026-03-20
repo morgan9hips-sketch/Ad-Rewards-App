@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, V2LedgerEntryType } from '@prisma/client'
 import cron from 'node-cron'
 
 const prisma = new PrismaClient()
@@ -13,22 +13,19 @@ const CASH_EXPIRY_DAYS = 90
 async function expireCoins() {
   const expiryDate = new Date()
   expiryDate.setDate(expiryDate.getDate() - COIN_EXPIRY_DAYS)
+  const expiryKeyDate = expiryDate.toISOString().slice(0, 10)
 
   try {
-    // Find users with coins and inactive for 30+ days
+    // Find inactive users; coin balances are derived from V2 ledger
     const inactiveUsers = await prisma.userProfile.findMany({
       where: {
         lastLogin: {
           lt: expiryDate,
         },
-        coinsBalance: {
-          gt: 0,
-        },
       },
       select: {
         userId: true,
         email: true,
-        coinsBalance: true,
       },
     })
 
@@ -36,7 +33,17 @@ async function expireCoins() {
     let totalValue = 0
 
     for (const user of inactiveUsers) {
-      const coins = Number(user.coinsBalance)
+      const balanceResult = await prisma.v2LedgerEntry.aggregate({
+        where: { userId: user.userId },
+        _sum: { amountCoins: true },
+      })
+
+      const currentCoins = balanceResult._sum.amountCoins ?? 0n
+      if (currentCoins <= 0n) {
+        continue
+      }
+
+      const coins = Number(currentCoins)
       // Coins that expire before conversion have no cash value (not yet converted)
       const cashValue = 0
 
@@ -52,10 +59,18 @@ async function expireCoins() {
         },
       })
 
-      // Reset coin balance
-      await prisma.userProfile.update({
-        where: { userId: user.userId },
-        data: { coinsBalance: 0 },
+      await prisma.v2LedgerEntry.create({
+        data: {
+          userId: user.userId,
+          type: V2LedgerEntryType.REDEEM,
+          amountCoins: -currentCoins,
+          idempotencyKey: `coin_expiry:${expiryKeyDate}:${user.userId}`,
+          referenceType: 'coin_inactivity',
+          description: `Coin expiry after ${COIN_EXPIRY_DAYS} days inactivity`,
+          metadata: {
+            expiredCoins: coins,
+          },
+        },
       })
 
       totalExpired += coins

@@ -1,47 +1,49 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { API_BASE_URL } from '../config/api'
 import Card from '../components/Card'
 import LoadingSpinner from '../components/LoadingSpinner'
-
-interface LedgerEntry {
-  id: number
-  type: string
-  amountCoins: string
-  description: string | null
-  createdAt: string
-}
+import {
+  fetchV2Wallet,
+  parseV2CoinBalance,
+  type V2WalletEntry,
+} from '../services/v2Wallet'
 
 export default function WalletV2() {
-  const { session } = useAuth()
+  const { session, signOut } = useAuth()
   const [balance, setBalance] = useState(0)
-  const [entries, setEntries] = useState<LedgerEntry[]>([])
+  const [entries, setEntries] = useState<V2WalletEntry[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchWallet()
-  }, [])
-
-  const fetchWallet = async () => {
+  const fetchWallet = useCallback(async () => {
     try {
       const token = session?.access_token
       if (!token) return
 
-      const res = await fetch(`${API_BASE_URL}/api/v2/wallet`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const data = await fetchV2Wallet(token)
 
-      const data = await res.json()
       if (data.success || data.ok) {
-        setBalance(data.balance ?? Number(data.balanceCoins ?? 0))
+        setBalance(parseV2CoinBalance(data))
         setEntries(data.recentEntries ?? [])
       }
     } catch (error) {
+      if (error instanceof Error && error.message === 'UNAUTHORIZED') {
+        await signOut()
+        return
+      }
       console.error('Error fetching wallet:', error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [session?.access_token, signOut])
+
+  useEffect(() => {
+    if (!session?.access_token) {
+      setLoading(false)
+      return
+    }
+
+    fetchWallet()
+  }, [session?.access_token, fetchWallet])
 
   if (loading) {
     return (
@@ -58,7 +60,9 @@ export default function WalletV2() {
       <Card className="mb-6">
         <div className="text-center py-8">
           <p className="text-gray-400 mb-2">Available Balance</p>
-          <p className="text-5xl font-bold text-yellow-400">{balance.toLocaleString()}</p>
+          <p className="text-5xl font-bold text-yellow-400">
+            {balance.toLocaleString()}
+          </p>
           <p className="text-gray-400 mt-1">coins</p>
         </div>
       </Card>
@@ -75,14 +79,18 @@ export default function WalletV2() {
                 className="flex justify-between items-center py-3 border-b border-gray-700 last:border-0"
               >
                 <div>
-                  <p className="text-white font-medium">{entry.description || entry.type}</p>
+                  <p className="text-white font-medium">
+                    {entry.description || entry.type}
+                  </p>
                   <p className="text-xs text-gray-400">
                     {new Date(entry.createdAt).toLocaleString()}
                   </p>
                 </div>
                 <div
                   className={`font-bold ${
-                    Number(entry.amountCoins) >= 0 ? 'text-green-400' : 'text-red-400'
+                    Number(entry.amountCoins) >= 0
+                      ? 'text-green-400'
+                      : 'text-red-400'
                   }`}
                 >
                   {Number(entry.amountCoins) >= 0 ? '+' : ''}

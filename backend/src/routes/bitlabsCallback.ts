@@ -16,8 +16,7 @@
 
 import { Router, Request, Response } from 'express'
 import { createHmac } from 'node:crypto'
-import { Prisma, PrismaClient } from '@prisma/client'
-import { applyTaskWinStreakAndReferralShare } from '../services/retentionService.js'
+import { Prisma, PrismaClient, V2LedgerEntryType } from '@prisma/client'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -155,37 +154,24 @@ router.get('/callback', async (req: Request, res: Response) => {
         throw new Error(`BitLabs: user not found for uid=${uid}`)
       }
 
-      // ── 7. Credit coins ──────────────────────────────────────────────────
-      const updatedUser = await tx.userProfile.update({
-        where: { userId: uid },
-        data: {
-          coinsBalance: { increment: BigInt(coinsToAward) },
-          totalCoinsEarned: { increment: BigInt(coinsToAward) },
-        },
-        select: { coinsBalance: true, cashBalanceUsd: true },
-      })
-
-      await tx.transaction.create({
+      // ── 7. Credit coins in V2 ledger ────────────────────────────────────
+      await tx.v2LedgerEntry.create({
         data: {
           userId: uid,
-          type: 'coin_earned',
-          coinsChange: BigInt(coinsToAward),
-          cashChangeUsd: 0,
-          coinsBalanceAfter: updatedUser.coinsBalance,
-          cashBalanceAfterUsd: updatedUser.cashBalanceUsd,
-          description: `BitLabs reward (${transaction_id})`,
+          type: V2LedgerEntryType.EARN,
+          amountCoins: BigInt(coinsToAward),
+          idempotencyKey: `bitlabs:${transaction_id}:reward`,
+          referenceId: transaction_id,
           referenceType: 'bitlabs_reward',
+          description: `BitLabs reward (${transaction_id})`,
+          metadata: {
+            provider: 'bitlabs',
+            amountCents,
+            userShare: USER_SHARE,
+          },
         },
       })
 
-      await applyTaskWinStreakAndReferralShare(
-        tx,
-        uid,
-        coinsToAward,
-        'bitlabs_reward',
-      )
-
-      // ── 8. Mark processed ────────────────────────────────────────────────
       await surveyHistory.update({
         where: { transId: transaction_id },
         data: {

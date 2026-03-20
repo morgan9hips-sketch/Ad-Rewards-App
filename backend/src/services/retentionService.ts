@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient, V2LedgerEntryType } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -30,8 +30,6 @@ export async function applyDailyLoginStreak(userId: string): Promise<void> {
       select: {
         loginStreak: true,
         lastLoginDate: true,
-        coinsBalance: true,
-        cashBalanceUsd: true,
       },
     })
 
@@ -64,25 +62,21 @@ export async function applyDailyLoginStreak(userId: string): Promise<void> {
         lastLoginDate: today,
         lastLogin: now,
         lastLoginAt: now,
-        coinsBalance: { increment: BigInt(DAILY_LOGIN_BONUS_COINS) },
-        totalCoinsEarned: { increment: BigInt(DAILY_LOGIN_BONUS_COINS) },
-      },
-      select: {
-        coinsBalance: true,
-        cashBalanceUsd: true,
       },
     })
 
-    await tx.transaction.create({
+    await tx.v2LedgerEntry.create({
       data: {
         userId,
-        type: 'daily_streak',
-        coinsChange: BigInt(DAILY_LOGIN_BONUS_COINS),
-        cashChangeUsd: 0,
-        coinsBalanceAfter: updatedUser.coinsBalance,
-        cashBalanceAfterUsd: updatedUser.cashBalanceUsd,
-        description: `Daily login streak reward (Day ${loginStreak})`,
+        type: V2LedgerEntryType.EARN,
+        amountCoins: BigInt(DAILY_LOGIN_BONUS_COINS),
+        idempotencyKey: `daily_streak:${userId}:${today.toISOString().slice(0, 10)}`,
         referenceType: 'daily_streak',
+        description: `Daily login streak reward (Day ${loginStreak})`,
+        metadata: {
+          loginStreak,
+          source: 'retention',
+        },
       },
     })
   })
@@ -114,30 +108,27 @@ export async function applyTaskWinStreakAndReferralShare(
     updatedUser.taskWinStreak % WIN_STREAK_INTERVAL === 0
 
   if (shouldApplyWinBonus) {
-    const withBonus = await tx.userProfile.update({
-      where: { userId },
-      data: {
-        coinsBalance: { increment: BigInt(WIN_STREAK_BONUS_COINS) },
-        totalCoinsEarned: { increment: BigInt(WIN_STREAK_BONUS_COINS) },
-      },
-      select: {
-        coinsBalance: true,
-        cashBalanceUsd: true,
-      },
+    const winBonusIdempotencyKey = `win_streak:${userId}:${updatedUser.taskWinStreak}`
+    const existingWinBonus = await tx.v2LedgerEntry.findUnique({
+      where: { idempotencyKey: winBonusIdempotencyKey },
     })
 
-    await tx.transaction.create({
-      data: {
-        userId,
-        type: 'task_win_streak_bonus',
-        coinsChange: BigInt(WIN_STREAK_BONUS_COINS),
-        cashChangeUsd: 0,
-        coinsBalanceAfter: withBonus.coinsBalance,
-        cashBalanceAfterUsd: withBonus.cashBalanceUsd,
-        description: `Win streak bonus for ${WIN_STREAK_INTERVAL} completed tasks`,
-        referenceType: sourceLabel,
-      },
-    })
+    if (!existingWinBonus) {
+      await tx.v2LedgerEntry.create({
+        data: {
+          userId,
+          type: V2LedgerEntryType.EARN,
+          amountCoins: BigInt(WIN_STREAK_BONUS_COINS),
+          idempotencyKey: winBonusIdempotencyKey,
+          referenceType: sourceLabel,
+          description: `Win streak bonus for ${WIN_STREAK_INTERVAL} completed tasks`,
+          metadata: {
+            taskWinStreak: updatedUser.taskWinStreak,
+            source: 'retention',
+          },
+        },
+      })
+    }
   }
 
   const referral = await tx.referral.findFirst({
@@ -182,8 +173,6 @@ export async function applyTaskWinStreakAndReferralShare(
     },
     select: {
       referralEarnRate: true,
-      coinsBalance: true,
-      cashBalanceUsd: true,
     },
   })
 
@@ -194,35 +183,35 @@ export async function applyTaskWinStreakAndReferralShare(
     return
   }
 
-  const creditedReferrer = await tx.userProfile.update({
-    where: { userId: referral.referrerId },
-    data: {
-      coinsBalance: { increment: BigInt(referralShareCoins) },
-      totalCoinsEarned: { increment: BigInt(referralShareCoins) },
-    },
-    select: {
-      coinsBalance: true,
-      cashBalanceUsd: true,
-    },
-  })
-
   const earnerName =
     updatedUser.displayName ||
     updatedUser.email.split('@')[0] ||
     'your referral'
 
-  await tx.transaction.create({
-    data: {
-      userId: referral.referrerId,
-      type: 'referral_share',
-      coinsChange: BigInt(referralShareCoins),
-      cashChangeUsd: 0,
-      coinsBalanceAfter: creditedReferrer.coinsBalance,
-      cashBalanceAfterUsd: creditedReferrer.cashBalanceUsd,
-      description: `Referral share from ${earnerName} at ${(effectiveRate * 100).toFixed(0)}%`,
-      referenceType: sourceLabel,
-    },
+  const referralIdempotencyKey = `referral_share:${referral.referrerId}:${userId}:${sourceLabel}:${updatedUser.taskWinStreak}`
+  const existingReferralShare = await tx.v2LedgerEntry.findUnique({
+    where: { idempotencyKey: referralIdempotencyKey },
   })
+
+  if (!existingReferralShare) {
+    await tx.v2LedgerEntry.create({
+      data: {
+        userId,
+        type: V2LedgerEntryType.EARN,
+        amountCoins: BigInt(referralShareCoins),
+        idempotencyKey: referralIdempotencyKey,
+        referenceId: userId,
+        referenceType: sourceLabel,
+        description: `Referral share from ${earnerName} at ${(effectiveRate * 100).toFixed(0)}%`,
+        metadata: {
+          baseCoinsEarned,
+          effectiveRate,
+          referralShareCoins,
+          source: 'retention',
+        },
+      },
+    })
+  }
 }
 
 export const retentionConfig = {

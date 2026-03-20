@@ -7,11 +7,7 @@ import TermsAcceptanceModal from '../components/TermsAcceptanceModal'
 import { useAuth } from '../contexts/AuthContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import { API_BASE_URL } from '../config/api'
-
-interface UserBalance {
-  coins: string
-  minWithdrawal: number
-}
+import { fetchV2Wallet, parseV2CoinBalance } from '../services/v2Wallet'
 
 interface UserProfile {
   walletBalance: number
@@ -47,7 +43,7 @@ export default function Dashboard() {
   const { formatAmount } = useCurrency()
 
   const [loading, setLoading] = useState(true)
-  const [balance, setBalance] = useState<UserBalance | null>(null)
+  const [v2Balance, setV2Balance] = useState(0)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [tasks, setTasks] = useState<V2Task[]>([])
 
@@ -85,10 +81,8 @@ export default function Dashboard() {
       const token = session?.access_token
       if (!token) return
 
-      const [balanceRes, profileRes, txRes, tasksRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/user/balance`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+      const [walletRes, profileRes, txRes, tasksRes] = await Promise.all([
+        fetchV2Wallet(token),
         fetch(`${API_BASE_URL}/api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
@@ -100,10 +94,7 @@ export default function Dashboard() {
         }),
       ])
 
-      if (balanceRes.ok) {
-        const balanceData = await balanceRes.json()
-        setBalance(balanceData)
-      }
+      setV2Balance(parseV2CoinBalance(walletRes))
 
       if (profileRes.ok) {
         const profileData = await profileRes.json()
@@ -156,14 +147,14 @@ export default function Dashboard() {
   }
 
   const userStats: UserStats = useMemo(() => {
-    const pointsBalance = Number(balance?.coins || 0)
+    const pointsBalance = Number(v2Balance || 0)
 
     return {
       pointsBalance,
       dailyGoal: 30,
       dailyProgress: Math.max(0, Math.min(30, pointsBalance)),
     }
-  }, [balance?.coins])
+  }, [v2Balance])
 
   const recommendedTasks = useMemo(() => tasks.slice(0, 3), [tasks])
 

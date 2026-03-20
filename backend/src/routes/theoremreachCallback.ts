@@ -19,8 +19,7 @@
 
 import { Router, Request, Response } from 'express'
 import { createHmac } from 'node:crypto'
-import { Prisma, PrismaClient } from '@prisma/client'
-import { applyTaskWinStreakAndReferralShare } from '../services/retentionService.js'
+import { Prisma, PrismaClient, V2LedgerEntryType } from '@prisma/client'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -189,26 +188,21 @@ router.get('/callback', async (req: Request, res: Response) => {
       }
 
       if (isReversal) {
-        // ── Reversal: deduct coins ─────────────────────────────────────────
-        const updatedUser = await tx.userProfile.update({
-          where: { userId: user_id },
-          data: {
-            coinsBalance: { decrement: BigInt(coinsRaw) },
-            totalCoinsEarned: { decrement: BigInt(coinsRaw) },
-          },
-          select: { coinsBalance: true, cashBalanceUsd: true },
-        })
-
-        await tx.transaction.create({
+        // ── Reversal: write V2 debit ledger entry ─────────────────────────
+        await tx.v2LedgerEntry.create({
           data: {
             userId: user_id,
-            type: 'coin_earned',
-            coinsChange: BigInt(-coinsRaw),
-            cashChangeUsd: 0,
-            coinsBalanceAfter: updatedUser.coinsBalance,
-            cashBalanceAfterUsd: updatedUser.cashBalanceUsd,
-            description: `TheoremReach reversal (${tx_id})`,
+            type: V2LedgerEntryType.ADJUSTMENT,
+            amountCoins: BigInt(-coinsRaw),
+            idempotencyKey: `theoremreach:${tx_id}:reversal`,
+            referenceId: tx_id,
             referenceType: 'theoremreach_reversal',
+            description: `TheoremReach reversal (${tx_id})`,
+            metadata: {
+              provider: 'theoremreach',
+              currency: currency ?? 'unknown',
+              reversal: true,
+            },
           },
         })
 
@@ -225,35 +219,23 @@ router.get('/callback', async (req: Request, res: Response) => {
           `[TheoremReach] ↩️  Reversed ${coinsRaw} coins from user ${user_id} (txn: ${tx_id})`,
         )
       } else {
-        // ── Normal: credit coins ───────────────────────────────────────────
-        const updatedUser = await tx.userProfile.update({
-          where: { userId: user_id },
-          data: {
-            coinsBalance: { increment: BigInt(coinsRaw) },
-            totalCoinsEarned: { increment: BigInt(coinsRaw) },
-          },
-          select: { coinsBalance: true, cashBalanceUsd: true },
-        })
-
-        await tx.transaction.create({
+        // ── Normal: write V2 credit ledger entry ──────────────────────────
+        await tx.v2LedgerEntry.create({
           data: {
             userId: user_id,
-            type: 'coin_earned',
-            coinsChange: BigInt(coinsRaw),
-            cashChangeUsd: 0,
-            coinsBalanceAfter: updatedUser.coinsBalance,
-            cashBalanceAfterUsd: updatedUser.cashBalanceUsd,
-            description: `TheoremReach reward (${tx_id})`,
+            type: V2LedgerEntryType.EARN,
+            amountCoins: BigInt(coinsRaw),
+            idempotencyKey: `theoremreach:${tx_id}:reward`,
+            referenceId: tx_id,
             referenceType: 'theoremreach_reward',
+            description: `TheoremReach reward (${tx_id})`,
+            metadata: {
+              provider: 'theoremreach',
+              currency: currency ?? 'unknown',
+              reversal: false,
+            },
           },
         })
-
-        await applyTaskWinStreakAndReferralShare(
-          tx,
-          user_id,
-          coinsRaw,
-          'theoremreach_reward',
-        )
 
         const preferredCurrency = user.preferredCurrency || 'ZAR'
         const fxRateRows = await tx.$queryRaw<

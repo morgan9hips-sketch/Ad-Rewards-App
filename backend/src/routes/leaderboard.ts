@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, V2LedgerEntryType } from '@prisma/client'
 import { AuthRequest } from '../middleware/auth.js'
 
 const router = Router()
@@ -267,15 +267,15 @@ router.post('/monthly/distribute', async (req, res) => {
           return false
         }
 
-        const updatedUser = await tx.userProfile.update({
-          where: { userId: winner.user.userId },
+        await tx.v2LedgerEntry.create({
           data: {
-            coinsBalance: { increment: BigInt(winner.coins) },
-            totalCoinsEarned: { increment: BigInt(winner.coins) },
-          },
-          select: {
-            coinsBalance: true,
-            cashBalanceUsd: true,
+            userId: winner.user.userId,
+            type: V2LedgerEntryType.EARN,
+            amountCoins: BigInt(winner.coins),
+            idempotencyKey: `monthly_leaderboard:${monthKey}:${winner.user.userId}`,
+            referenceId: winner.rank.toString(),
+            referenceType: 'monthly_leaderboard',
+            description: `Monthly leaderboard prize - Rank #${winner.rank} (${monthKey})`,
           },
         })
 
@@ -285,19 +285,6 @@ router.post('/monthly/distribute', async (req, res) => {
             userId: winner.user.userId,
             rank: winner.rank,
             coinsAwarded: winner.coins,
-          },
-        })
-
-        await tx.transaction.create({
-          data: {
-            userId: winner.user.userId,
-            type: 'monthly_leaderboard_prize',
-            coinsChange: BigInt(winner.coins),
-            cashChangeUsd: 0,
-            coinsBalanceAfter: updatedUser.coinsBalance,
-            cashBalanceAfterUsd: updatedUser.cashBalanceUsd,
-            description: `Monthly leaderboard prize - Rank #${winner.rank} (${monthKey})`,
-            referenceType: 'monthly_leaderboard',
           },
         })
 

@@ -1,14 +1,31 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Card from '../components/Card'
+import { fetchV2Wallet, parseV2CoinBalance } from '../services/v2Wallet'
 
 export default function WatchAd() {
   const navigate = useNavigate()
-  const { user, session } = useAuth()
+  const { session } = useAuth()
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
   const [isWaiting, setIsWaiting] = useState(false)
+  const [currentBalance, setCurrentBalance] = useState(0)
+
+  useEffect(() => {
+    const loadBalance = async () => {
+      try {
+        const token = session?.access_token
+        if (!token) return
+        const wallet = await fetchV2Wallet(token)
+        setCurrentBalance(parseV2CoinBalance(wallet))
+      } catch (err) {
+        console.error('Failed to load V2 balance:', err)
+      }
+    }
+
+    loadBalance()
+  }, [session?.access_token])
 
   const handleOptIn = async () => {
     const token = session?.access_token
@@ -43,8 +60,6 @@ export default function WatchAd() {
   const handleMaybeLater = () => {
     navigate('/ads')
   }
-
-  const currentBalance = (user as { coinsBalance?: number })?.coinsBalance || 0
 
   return (
     <div className="container mx-auto px-4 py-6 pb-24">

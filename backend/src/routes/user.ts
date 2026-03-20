@@ -7,6 +7,7 @@ import {
   getUserCurrencyInfo,
   getCurrencyForCountry,
 } from '../services/currencyService.js'
+import { getV2Balance } from '../services/v2/ledger.js'
 import { getUserTransactions } from '../services/transactionService.js'
 import {
   getClientIP,
@@ -122,10 +123,12 @@ router.get('/profile', async (req: AuthRequest, res) => {
     }
 
     // Convert BigInt and Decimal fields to strings before sending
+    const v2CoinsBalance = await getV2Balance(userId)
+
     const profileData = {
       ...profile,
       // BigInt fields
-      coinsBalance: profile.coinsBalance.toString(),
+      coinsBalance: v2CoinsBalance.toString(),
       totalCoinsEarned: profile.totalCoinsEarned.toString(),
       // Decimal fields
       cashBalanceUsd: profile.cashBalanceUsd.toString(),
@@ -242,6 +245,8 @@ router.get('/balance', async (req: AuthRequest, res) => {
       return res.status(404).json({ error: 'Profile not found' })
     }
 
+    const v2CoinsBalance = await getV2Balance(userId)
+
     const cashUSD = parseFloat(profile.cashBalanceUsd.toString())
 
     // Get user's currency info
@@ -257,7 +262,7 @@ router.get('/balance', async (req: AuthRequest, res) => {
     const cashLocalFormatted = `${currencyInfo.formatting.symbol}${cashLocal.toFixed(currencyInfo.formatting.decimals)}`
 
     res.json({
-      coins: profile.coinsBalance.toString(),
+      coins: v2CoinsBalance.toString(),
       cashUsd: cashUSD.toFixed(4),
       cashLocal: cashLocal.toFixed(2),
       cashLocalFormatted,

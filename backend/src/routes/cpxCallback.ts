@@ -1,7 +1,6 @@
 import { Router, Request, Response } from 'express'
-import { Prisma, PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient, V2LedgerEntryType } from '@prisma/client'
 import { createHash } from 'node:crypto'
-import { applyTaskWinStreakAndReferralShare } from '../services/retentionService.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -206,34 +205,21 @@ async function processCallback(
       }
     }
 
-    const updatedUser = await tx.userProfile.update({
-      where: { userId: payload.userId },
-      data: {
-        coinsBalance: { increment: BigInt(payload.amount) },
-        totalCoinsEarned: { increment: BigInt(payload.amount) },
-      },
-      select: { coinsBalance: true, cashBalanceUsd: true },
-    })
-
-    await tx.transaction.create({
+    await tx.v2LedgerEntry.create({
       data: {
         userId: payload.userId,
-        type: 'coin_earned',
-        coinsChange: BigInt(payload.amount),
-        cashChangeUsd: 0,
-        coinsBalanceAfter: updatedUser.coinsBalance,
-        cashBalanceAfterUsd: updatedUser.cashBalanceUsd,
-        description: `CPX Research survey completion (${payload.transId})`,
+        type: V2LedgerEntryType.EARN,
+        amountCoins: BigInt(payload.amount),
+        idempotencyKey: `cpx:${payload.transId}:reward`,
+        referenceId: payload.transId,
         referenceType: 'cpx_survey',
+        description: `CPX Research survey completion (${payload.transId})`,
+        metadata: {
+          provider: 'cpx_research',
+          revenueUsd: payload.revenueUsd ?? null,
+        },
       },
     })
-
-    await applyTaskWinStreakAndReferralShare(
-      tx,
-      payload.userId,
-      payload.amount,
-      'cpx_survey',
-    )
 
     const preferredCurrency = user.preferredCurrency || 'ZAR'
     const fxRateRows = await tx.$queryRaw<

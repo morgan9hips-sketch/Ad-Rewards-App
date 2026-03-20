@@ -35,12 +35,10 @@ router.get('/', async (req: AuthRequest, res) => {
       '❌ Error fetching ads:',
       error instanceof Error ? error.message : error,
     )
-    res
-      .status(500)
-      .json({
-        error: 'Failed to fetch ads',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      })
+    res.status(500).json({
+      error: 'Failed to fetch ads',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    })
   }
 })
 
@@ -232,16 +230,15 @@ router.post('/complete', async (req: AuthRequest, res) => {
     // 9. Update user's last known IP location
     await updateUserLocation(userId, ipAddress)
 
-    // Get updated user profile to return current balance
-    const userProfile = await prisma.userProfile.findUnique({
+    const v2Balance = await prisma.v2LedgerEntry.aggregate({
       where: { userId },
-      select: { coinsBalance: true },
+      _sum: { amountCoins: true },
     })
 
     res.json({
       success: true,
       coinsEarned: COINS_PER_AD,
-      totalCoins: userProfile?.coinsBalance.toString() || '0',
+      totalCoins: (v2Balance._sum.amountCoins ?? 0n).toString(),
       message: `You earned ${COINS_PER_AD} coins!`,
       remaining: dailyLimit.remaining - 1,
     })

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
+import { fetchV2Wallet, parseV2CoinBalance } from '../services/v2Wallet'
 
 interface HUDData {
   rank: number | null
@@ -12,27 +13,34 @@ interface HUDData {
 export default function FloatingHUD() {
   const { session, isAuthenticated } = useAuth()
   const navigate = useNavigate()
-  const [hud, setHud] = useState<HUDData>({ rank: null, coins: 0, avatarEmoji: '👤' })
+  const [hud, setHud] = useState<HUDData>({
+    rank: null,
+    coins: 0,
+    avatarEmoji: '👤',
+  })
 
   const fetchHUDData = useCallback(async () => {
     try {
       const token = session?.access_token
       if (!token) return
 
-      // Fetch leaderboard for rank + coins
-      const res = await fetch(`${API_BASE_URL}/api/leaderboard`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const [leaderboardRes, walletData] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/leaderboard`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetchV2Wallet(token),
+      ])
 
-      if (res.ok) {
-        const data = await res.json()
+      if (leaderboardRes.ok) {
+        const data = await leaderboardRes.json()
         const currentUser = data.currentUser
-        const myEntry = data.leaderboard?.find((e: { userId: string; avatarEmoji: string }) =>
-          e.userId === session?.user?.id
+        const myEntry = data.leaderboard?.find(
+          (e: { userId: string; avatarEmoji: string }) =>
+            e.userId === session?.user?.id,
         )
         setHud({
           rank: currentUser?.rank ?? null,
-          coins: currentUser ? parseInt(currentUser.coins) : 0,
+          coins: parseV2CoinBalance(walletData),
           avatarEmoji: myEntry?.avatarEmoji ?? '👤',
         })
       }
@@ -69,7 +77,10 @@ export default function FloatingHUD() {
           src="/images/branding/Adcoin small 128x128.png"
           alt="coins"
           className="w-4 h-4"
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+          onError={(e) => {
+            const image = e.target as HTMLImageElement
+            image.style.display = 'none'
+          }}
         />
       </button>
 

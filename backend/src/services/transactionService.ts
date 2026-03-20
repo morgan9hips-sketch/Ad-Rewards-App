@@ -1,8 +1,8 @@
-import { PrismaClient, Prisma } from '@prisma/client'
+import { PrismaClient, Prisma, V2LedgerEntryType } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-export type TransactionType = 
+export type TransactionType =
   | 'coin_earned'
   | 'coin_conversion'
   | 'withdrawal'
@@ -25,7 +25,7 @@ interface CreateTransactionParams {
  */
 export async function createTransaction(
   params: CreateTransactionParams,
-  tx?: Prisma.TransactionClient
+  tx?: Prisma.TransactionClient,
 ): Promise<void> {
   const client = tx || prisma
 
@@ -33,9 +33,9 @@ export async function createTransaction(
     // Get current user balances
     const user = await client.userProfile.findUnique({
       where: { userId: params.userId },
-      select: { 
-        coinsBalance: true, 
-        cashBalanceUsd: true 
+      select: {
+        coinsBalance: true,
+        cashBalanceUsd: true,
       },
     })
 
@@ -72,32 +72,34 @@ export async function awardCoins(
   coins: number,
   description: string,
   referenceId?: number,
-  referenceType?: string
+  referenceType?: string,
 ): Promise<any> {
   return await prisma.$transaction(async (tx) => {
-    // Update user balance
-    const user = await tx.userProfile.update({
-      where: { userId },
+    const idempotencyKey =
+      referenceType && referenceId !== undefined
+        ? `award:${referenceType}:${referenceId}`
+        : null
+
+    if (idempotencyKey) {
+      const existing = await tx.v2LedgerEntry.findUnique({
+        where: { idempotencyKey },
+      })
+      if (existing) {
+        return existing
+      }
+    }
+
+    return tx.v2LedgerEntry.create({
       data: {
-        coinsBalance: { increment: BigInt(coins) },
-        totalCoinsEarned: { increment: BigInt(coins) },
+        userId,
+        type: V2LedgerEntryType.EARN,
+        amountCoins: BigInt(coins),
+        idempotencyKey: idempotencyKey ?? undefined,
+        referenceId: referenceId?.toString(),
+        referenceType: referenceType ?? 'generic_award',
+        description,
       },
     })
-
-    // Create transaction record
-    await createTransaction(
-      {
-        userId,
-        type: 'coin_earned',
-        coinsChange: BigInt(coins),
-        description,
-        referenceId,
-        referenceType,
-      },
-      tx
-    )
-
-    return user
   })
 }
 
@@ -110,21 +112,31 @@ export async function convertCoinsToUSD(
   coins: bigint,
   cashUsd: number,
   conversionId: number,
-  tx: Prisma.TransactionClient
+  tx: Prisma.TransactionClient,
 ): Promise<void> {
-  // Update user balances
+  await tx.v2LedgerEntry.create({
+    data: {
+      userId,
+      type: V2LedgerEntryType.REDEEM,
+      amountCoins: -coins,
+      idempotencyKey: `coin_conversion:${conversionId}:${userId}`,
+      referenceId: conversionId.toString(),
+      referenceType: 'coin_conversion',
+      description: `Monthly coin conversion (${conversionId})`,
+    },
+  })
+
+  // Update cash balances only
   await tx.userProfile.update({
     where: { userId },
     data: {
-      coinsBalance: { decrement: coins },
       cashBalanceUsd: { increment: cashUsd },
       totalCashEarnedUsd: { increment: cashUsd },
     },
   })
 
-  // Create transaction record
-  await createTransaction(
-    {
+  await tx.transaction.create({
+    data: {
       userId,
       type: 'coin_conversion',
       coinsChange: -coins,
@@ -133,8 +145,7 @@ export async function convertCoinsToUSD(
       referenceId: conversionId,
       referenceType: 'coin_conversion',
     },
-    tx
-  )
+  })
 }
 
 /**
@@ -144,7 +155,7 @@ export async function processWithdrawal(
   userId: string,
   amountUsd: number,
   withdrawalId: string,
-  tx: Prisma.TransactionClient
+  tx: Prisma.TransactionClient,
 ): Promise<void> {
   // Update user balances
   await tx.userProfile.update({
@@ -164,7 +175,7 @@ export async function processWithdrawal(
       description: `Withdrawal via PayPal`,
       referenceType: 'withdrawal',
     },
-    tx
+    tx,
   )
 }
 
@@ -175,7 +186,7 @@ export async function getUserTransactions(
   userId: string,
   page: number = 1,
   perPage: number = 20,
-  type?: string
+  type?: string,
 ): Promise<{ transactions: any[]; total: number; pages: number }> {
   const skip = (page - 1) * perPage
 

@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, V2LedgerEntryType } from '@prisma/client'
 import { AuthRequest } from '../middleware/auth.js'
 
 const router = Router()
@@ -79,21 +79,14 @@ router.post('/end', async (req: AuthRequest, res) => {
       updateData.completedAt = new Date()
       updateData.coinsEarned = GAME_COMPLETION_COINS
 
-      // Award coins to user
-      await prisma.userProfile.update({
-        where: { userId },
-        data: {
-          coinsBalance: { increment: GAME_COMPLETION_COINS },
-          totalCoinsEarned: { increment: GAME_COMPLETION_COINS },
-        },
-      })
-
-      // Create transaction record
-      await prisma.transaction.create({
+      await prisma.v2LedgerEntry.create({
         data: {
           userId,
-          type: 'game_completion',
-          coinsChange: GAME_COMPLETION_COINS,
+          type: V2LedgerEntryType.EARN,
+          amountCoins: BigInt(GAME_COMPLETION_COINS),
+          idempotencyKey: `game_completion:${sessionId}`,
+          referenceId: sessionId,
+          referenceType: 'game_completion',
           description: `Session reward - Game completed (Score: ${score})`,
         },
       })
@@ -153,7 +146,9 @@ router.get('/can-retry/:sessionId', async (req: AuthRequest, res) => {
       canRetryWithWait = now >= cooldownEnd
 
       if (!canRetryWithWait) {
-        waitTimeRemaining = Math.ceil((cooldownEnd.getTime() - now.getTime()) / 1000)
+        waitTimeRemaining = Math.ceil(
+          (cooldownEnd.getTime() - now.getTime()) / 1000,
+        )
       }
     }
 
@@ -209,21 +204,14 @@ router.post('/retry-video', async (req: AuthRequest, res) => {
       },
     })
 
-    // Award retry coins
-    await prisma.userProfile.update({
-      where: { userId },
-      data: {
-        coinsBalance: { increment: RETRY_VIDEO_COINS },
-        totalCoinsEarned: { increment: RETRY_VIDEO_COINS },
-      },
-    })
-
-    // Create transaction record
-    await prisma.transaction.create({
+    await prisma.v2LedgerEntry.create({
       data: {
         userId,
-        type: 'retry_video',
-        coinsChange: RETRY_VIDEO_COINS,
+        type: V2LedgerEntryType.EARN,
+        amountCoins: BigInt(RETRY_VIDEO_COINS),
+        idempotencyKey: `game_retry_video:${sessionId}:${admobImpressionId}`,
+        referenceId: sessionId,
+        referenceType: 'retry_video',
         description: 'Retry reward - Session continuation',
       },
     })
@@ -324,7 +312,7 @@ router.get('/stats', async (req: AuthRequest, res) => {
     const highScore = Math.max(...sessions.map((s) => s.score), 0)
     const totalRetries = sessions.reduce(
       (sum, s) => sum + s.retriesWithVideo + s.retriesWithWait,
-      0
+      0,
     )
 
     res.json({

@@ -1,5 +1,5 @@
 import { Router, Response } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, V2LedgerEntryType } from '@prisma/client'
 import { authenticate, AuthRequest } from '../../middleware/auth.js'
 import { getV2Balance } from '../../services/v2/ledger.js'
 
@@ -16,7 +16,40 @@ const prisma = new PrismaClient()
 router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   const userId = req.user!.id
   try {
-    const balanceCoins = await getV2Balance(userId)
+    let balanceCoins = await getV2Balance(userId)
+
+    if (balanceCoins <= 0n) {
+      const existingBootstrap = await prisma.v2LedgerEntry.findUnique({
+        where: { idempotencyKey: `legacy_bootstrap:${userId}` },
+      })
+
+      if (!existingBootstrap) {
+        const profile = await prisma.userProfile.findUnique({
+          where: { userId },
+          select: { coinsBalance: true },
+        })
+
+        const legacyCoins = profile?.coinsBalance ?? 0n
+        if (legacyCoins > 0n) {
+          await prisma.v2LedgerEntry.create({
+            data: {
+              userId,
+              type: V2LedgerEntryType.ADJUSTMENT,
+              amountCoins: legacyCoins,
+              idempotencyKey: `legacy_bootstrap:${userId}`,
+              referenceType: 'legacy_bootstrap',
+              description: 'One-time legacy balance migration to V2',
+              metadata: {
+                source: 'user_profiles.coins_balance',
+              },
+            },
+          })
+
+          balanceCoins = await getV2Balance(userId)
+        }
+      }
+    }
+
     const balance = Number(balanceCoins)
 
     const recentEntries = await prisma.v2LedgerEntry.findMany({
@@ -41,9 +74,10 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    res.status(500).json({ error: 'Failed to compute balance', detail: message })
+    res
+      .status(500)
+      .json({ error: 'Failed to compute balance', detail: message })
   }
 })
 
 export default router
-

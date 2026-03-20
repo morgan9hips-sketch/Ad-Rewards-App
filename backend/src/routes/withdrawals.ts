@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { AuthRequest } from '../middleware/auth.js'
 import { getExchangeRate, convertFromUSD } from '../services/currencyService.js'
 import { processWithdrawal } from '../services/transactionService.js'
+import { getV2Balance } from '../services/v2/ledger.js'
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -22,7 +23,6 @@ router.post('/request', async (req: AuthRequest, res) => {
     const profile = await prisma.userProfile.findUnique({
       where: { userId: userId },
       select: {
-        coinsBalance: true,
         cashBalanceUsd: true,
         preferredCurrency: true,
       },
@@ -33,7 +33,7 @@ router.post('/request', async (req: AuthRequest, res) => {
     }
 
     // Check minimum coins (20,000)
-    const coinsBalance = Number(profile.coinsBalance)
+    const coinsBalance = Number(await getV2Balance(userId))
     const MIN_COINS = 20000
 
     if (coinsBalance < MIN_COINS) {

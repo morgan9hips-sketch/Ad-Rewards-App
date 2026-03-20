@@ -136,11 +136,22 @@ async function convertCoinsToUSD(
   cashUsd: number,
   poolId: number,
 ): Promise<void> {
-  // Deduct coins from user balance
+  await prisma.v2LedgerEntry.create({
+    data: {
+      userId,
+      type: 'REDEEM',
+      amountCoins: -coins,
+      idempotencyKey: `revenue_pool:${poolId}:${userId}`,
+      referenceId: poolId.toString(),
+      referenceType: 'revenue_pool',
+      description: `Revenue pool conversion (${poolId})`,
+    },
+  })
+
+  // Update cash balances only
   await prisma.userProfile.update({
     where: { userId },
     data: {
-      coinsBalance: { decrement: coins },
       cashBalanceUsd: { increment: cashUsd },
       totalCashEarnedUsd: { increment: cashUsd },
     },

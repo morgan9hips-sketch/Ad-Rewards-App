@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { API_BASE_URL } from '../config/api'
+import { fetchV2Wallet, parseV2CoinBalance } from '../services/v2Wallet'
 
 interface BottomNavItem {
   path: string
@@ -79,20 +79,14 @@ export default function BottomNavigation() {
     'Member'
 
   // Fetch balance from API
-  useMemo(() => {
+  useEffect(() => {
     const fetchBalance = async () => {
       try {
         const token = session?.access_token
         if (!token) return
 
-        const response = await fetch(`${API_BASE_URL}/api/user/balance`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-
-        if (response.ok) {
-          const balance = await response.json()
-          setBalanceData(balance)
-        }
+        const wallet = await fetchV2Wallet(token)
+        setBalanceData({ coins: String(parseV2CoinBalance(wallet)) })
       } catch (error) {
         console.error('Error fetching balance:', error)
       }

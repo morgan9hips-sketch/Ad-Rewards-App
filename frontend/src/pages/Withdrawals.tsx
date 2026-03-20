@@ -7,6 +7,7 @@ import EmptyState from '../components/EmptyState'
 import WithdrawalSuccessModal from '../components/WithdrawalSuccessModal'
 import { useAuth } from '../contexts/AuthContext'
 import { API_BASE_URL } from '../config/api'
+import { fetchV2Wallet, parseV2CoinBalance } from '../services/v2Wallet'
 
 interface Withdrawal {
   id: string
@@ -72,13 +73,19 @@ export default function Withdrawals() {
       const token = session?.access_token
       if (!token) return
 
+      const walletData = await fetchV2Wallet(token)
+      const v2Coins = parseV2CoinBalance(walletData)
+
       // Fetch balance
       const balanceRes = await fetch(`${API_BASE_URL}/api/user/balance`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (balanceRes.ok) {
         const balanceData = await balanceRes.json()
-        setBalance(balanceData)
+        setBalance({
+          ...balanceData,
+          coins: String(v2Coins),
+        })
       }
 
       // Fetch coin valuation
